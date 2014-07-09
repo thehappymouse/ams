@@ -1,0 +1,260 @@
+			<style>
+		   		.TableCss table  td{text-align:center}
+		   </style>
+
+			<script type="text/javascript">
+				$(document).ready(function(){
+					$("#time").val(CurrentTime);
+					var G = new AjaxFun();//获取ajax方法
+
+					var BuildUrl = "/ams/Customer/update"
+					$("#Arrears table tr:odd").addClass("InfoTr");
+					
+					$("#Arrears").on("click","[name=select]",function(v){
+						var ID = v.currentTarget.defaultValue;
+						$("[name=ID]").val(ID);
+						$("button:eq(1)").removeAttr("disabled")
+					})
+
+					$("button:eq(0)").click(function(){
+						var updateUrl = "/ams/Customer/update"
+						var data = $("form:eq(0)").serialize();
+						G.GetAjax('post',BuildUrl,data);
+					})
+
+					$("iframe").load(function(v){
+						var Vdata =window.frames["fr_dealer"].document.documentElement.innerText;
+					
+						if (Vdata) {
+						
+							var JsonData = eval("("+Vdata+")");
+							if (JsonData.success) {
+								location.reload();
+							} 
+						}
+						
+						 
+						
+					})
+				})
+			</script>
+			<link rel="stylesheet" href="/ams/css/jquery-ui.css">
+			<script src="/ams/js/jquery-ui.js"></script>
+			<script src="/ams/js/jquery-ui-timepicker-addon.js"></script>
+			<link rel="stylesheet" type="text/css" href="/ams/css/jquery-ui-timepicker-addon.css">
+			<script src="/ams/js/jquery-ui-date.js"></script>
+		    <br />
+		
+		    <div class="TableCss" >
+
+		    	<div   class="line ClientInfo" >用户详细信息</div>
+		    	<form>
+		    		<input name="ID" type="hidden" value="<?php echo $customer->ID;?>"/>
+			    <table style="width:919px;table-layout:fixed">
+				        <tr >
+				            <td  style="text-align:right;width:90px;">管理班组：</td>
+				            <td style="width:90px;text-align:left">
+				            	<?php echo $customer->Team;?>
+				            </td>
+				            <td  style="text-align:right;width:90px;">抄表员：</td>
+				            <td style="width:90px;text-align:left">
+				            <?php echo $customer->SegUser;?>
+				            </td>
+
+				            
+				            <td style="text-align:right;width:90px;">用户编号：</td>
+				            <td style="text-align:left;width:80px;"><?php echo $customer->Number;?></td>
+				            <td style="text-align:right;width:90px;">用户名称：</td>
+				            <td style="width:80px;"><input type="text" name="Name" style="width:100px;padding-top:4px" value="<?php echo $customer->Name;?>"/></td>
+
+				        </tr>
+			       
+			        
+				        <tr>
+				            <td  style="text-align:right">用电地址：</td>
+				            <td colspan="3"><input name="Address" style="width:350px;padding-top:2px;height:25px" type="text" value="<?php echo $customer->Address;?>"></td>
+				            <td style="text-align:right"> 抄表段编号：</td>
+				            <td style="text-align:left"><?php echo $customer->Segment;?></td>
+				            <td style="text-align:right">电表资产号：</td>
+				            <td><input type="text" name="AssetNumber" style="width:100px;height:27px" value="<?php echo $customer->AssetNumber;?>"/></td>
+				        </tr>
+				        <tr >
+				            <td   style="text-align:right">累计欠费次数：</td>
+				            <td style="width:100px">
+				            	<?php echo $customer->ArrearsCount;?>
+				            </td>
+				            <td style="text-align:right">特殊客户：</td>
+				            <td style="width:100px">
+				            	<select name="IsSpecial" style="width:116px;">
+				            		<option value="1" <?php if ($customer->IsSpecial == 1) {echo "selected";}?>>是</option>
+				            		<option value="0" <?php if ($customer->IsSpecial == 0) {echo "selected";}?>>否</option>
+				            	</select>
+				            	
+				            </td>
+				            <td style="text-align:right">停电标志：</td>
+				            <td class="Warn" style="width:100px;text-align:left"><?php echo $a = $customer->IsCut ? "已停电": "未停电" ?>
+				            	
+				            </td>
+				            <td style="text-align:right">停电方式：</td>
+				            <td class="Warn" style="width:100px;text-align:left"><?php echo $customer->CutStyle;?>
+				            	
+				            </td>
+				        </tr>
+				        <tr >
+				            <td  style="text-align:right">费控标志：</td>
+				            <td style="width:100px">
+				            	<select name="IsControl" style="width:116px;height:27px">
+				            	 	<option value="2" <?php if ($customer->IsControl == 2) {echo "selected";}?>>全部</option>
+				            		<option value="1" <?php if ($customer->IsControl == 1) {echo "selected";}?>>是</option>
+				            		<option value="0" <?php if ($customer->IsControl == 0) {echo "selected";}?>>否</option>
+				            	</select>
+				            </td>
+				            <td style="text-align:right">租房客户：</td>
+				            <td style="width:100px">
+				            	<select name="IsRent"  style="width:116px;height:27px">
+				            	 	<option value="2" <?php if ($customer->IsRent == 2) {echo "selected";}?>>全部</option>
+				            		<option value="1" <?php if ($customer->IsRent == 1) {echo "selected";}?>>是</option>
+				            		<option value="0" <?php if ($customer->IsRent == 0) {echo "selected";}?>>否</option>
+				            	</select>
+				            </td>
+				            <td style="text-align:right">房东电话：</td>
+				            <td >
+				            	<input name="LandlordPhone" type="text" style="width:100px;padding-top:2px" value="<?php echo $customer->LandlordPhone;?>" />
+				            </td>
+				            <td style="text-align:right">房客电话：</td>
+				            <td >
+				            	<input name="RenterPhone" type="text" style="width:100px;padding-top:2px" value="<?php echo $customer->RenterPhone;?>" />
+				            </td>
+				        </tr>
+				        <tr>
+				        	<td style="text-align:right">欠费原因：</td>
+				        	<td >
+				            	<input name="Cause" type="text" style="width:113px;height:23px;padding-top:2px" value="<?php echo $customer->Cause;?>" />
+				            </td>
+				            <td style="text-align:right">
+				            	备注：
+				            </td>
+				            <td colspan="3">
+				            	<input name="Desc" type="text" style="width:337px;height:23px;padding-top:2px" value="<?php echo $customer->Desc;?>" />
+				            </td>
+				          
+				            <td colspan="2">
+				            	<button type="button" class="btn btn-success">更新档案</button>
+				            </td>
+				        </tr>
+			    </table>
+				</form>
+		    </div>
+
+		 
+		    <div id="Arrears" class="TableCss">
+		    	
+		   
+		    	<div class="line ClientInfo">欠费用户信息</div>
+		    		<table id="info">
+		    			<thead>
+		    				<tr style="height:20px;width:30px">
+		    					<th ></th>
+		    					<th style="width:138px">电费年月</th>
+		    					<th style="width:138px">电费金额</th>
+		    					<th style="width:138px">结清标志</th>
+		    					<th style="width:138px">停电标志</th>
+		    					<th style="width:138px">催费次数</th>
+		    					<th style="width:138px">停电次数</th>
+		    				</tr>
+		    			</thead>
+		    				
+		    			<tbody>
+		    				<?php $sum = 0; foreach ($arrears as $s) { ?>
+				       		 <tr style="height:20px">
+				    			<td ><input value="<?php echo $s->ID; 	?>" type="radio" name="select" style="vertical-align:text-bottom; *margin-bottom:-4px;" /> </td>
+				    			<td >
+				    				<?php echo $s->YearMonth; 	?>
+				    			</td>
+				    			<td >
+				    				<?php echo $s->Money;  	$sum += $s->Money ?>
+				    			</td>
+				    			<td >
+				    				<?php   $a = $s->IsClean; if( $a == 1) { echo "已结清";} elseif ($a == 0) { echo "未结清"; } else {echo "预收转逾期";} ?>
+				    			</td>
+				    			<td >
+				    				<?php echo $a = $s->IsCut ? "已停电": "未停电"  ?>
+				    			</td>
+				    			<td id="PressCount" title="<?php echo $s->ID; ?>/<?php echo $s->CustomerNumber;	?>/<?php echo $s->YearMonth;	?>" style="text-decoration:underline;cursor:pointer">
+				    				<?php echo $s->PressCount; 	?>
+				    			</td>
+				    			<td  id="CutCount" title="<?php echo $s->ID; ?>/<?php echo $s->CustomerNumber;?>/<?php echo $s->YearMonth;	?>" style="text-decoration:underline;cursor:pointer">
+				    				<?php echo $s->CutCount;	?>
+				    			</td>
+			    			</tr>
+			    			<?php }?>
+		    				
+		    				<tr><td colspan="7" style="text-align:left;cursor:pointer">&nbsp;&nbsp;&nbsp;&nbsp;共计：欠费 <?php echo count($arrears); ?> 笔，欠费金额 <?php echo $sum;?> 元</td></tr>
+		    			</tbody>
+		    		</table>
+		    	
+		    </div>
+		   
+		    <iframe name="fr_dealer" style="display:none"  ></iframe>
+		    <br />
+		    <form action="/ams/ReminderFee/Press" method="post" target="fr_dealer" enctype="multipart/form-data">
+		    <div id="Entry">
+		    <div class="line ClientInfo" >催费信息录入</div>
+		    <div style="border:1px solid #009966;height:150px">
+		    <div style="margin-top:15px;">
+			    <div  style="width:100%;">
+
+					<!--<div class=" star" style="float:left;padding-left:2px;" >*</div>-->
+			    	<ul style="height: 30px;  line-height: 30px; vertical-align:middle;margin:0  ">&nbsp;&nbsp;&nbsp;通知单催费：
+			
+				     	 &nbsp;<input name="Photo" type="file" style="height: 25px;  line-height: 25px; vertical-align:middle; "  >
+
+				   	</ul>
+			
+			    </div>
+			 	<div class="mt_20" >
+			 		<ul style="height: 30px;  line-height: 30px; vertical-align:middle;margin:0 ">&nbsp;&nbsp;&nbsp;&nbsp;电话催费&nbsp;：
+			 			&nbsp;催费电话：
+						<select name="PhoneType"  style="height: 25px;  line-height: 25px; vertical-align:middle;width:118px ">
+			            	 	<option value="1">房东电话</option>
+			            		<option value="0">房客电话</option>
+		            	</select>
+		            	<!--<input name="NewPhone" type="text" style="height: 20px;  line-height: 20px; vertical-align:middle;width:120px;margin-left:10px "/>-->
+				   	</ul>
+				   	<ul style="height: 30px;  line-height: 30px; vertical-align:middle;margin:0;" class="time">催费时间：
+						 <input name="PressTime"  style="height: 25px;  line-height: 25px; vertical-align:middle;width:115px " type="text" id="time">
+				     	 
+				   	</ul>
+					
+			    	
+				    <button style="margin-top:4px" type="submit" class="btn subm" disabled="true">催费</button>
+					
+				
+				</div>
+			</div>
+			</div>
+ 			</div>
+ 			</form>
+ 			<style>
+ 				.time{
+ 					padding-left:118px;
+ 					padding-left:98px\0;/*IE8、9、10支持*/
+ 					*padding-left:100px ;/*IE7仅支持*/
+ 				}
+ 				:root .time{padding-left:94px\9;}; /*IE9仅支持*/
+
+ 				
+ 				@media screen and (-webkit-min-device-pixel-ratio:0){ .subm {margin-left:118px;} }
+ 				.subm{
+ 					margin-left:118px;
+ 					margin-left:98px\0;/*IE8、9、10支持*/
+ 					*margin-left:100px ;/*IE7仅支持*/
+ 					
+ 					
+ 				}
+ 				
+ 				:root .subm{margin-left:94px\0;}; /*IE9仅支持*/
+
+
+ 			
+ 			</style>

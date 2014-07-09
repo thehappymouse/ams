@@ -1,0 +1,190 @@
+		<style>
+			.fontColor{background:white;color:black;}
+		</style>
+
+		<script type="text/javascript" src="/ams/js/jquery.jqprint-0.3.js" ></script>
+
+		<script type="text/javascript">
+		$(document).ready(function(){
+			var G = new AjaxFun();
+			var SearchUrl = "/ams/Systemlog/list";
+			var clickpage = new ClickPage(G,ShowTable);//分页
+			//SetTable('', '', headmodel, headarray);
+			
+			
+			$("button:eq(0)").click(function(){
+				
+				
+				data = $("form:eq(0)").serialize();
+			
+				clickpage.Data = data;
+				var SearchData = data+"&Page=1&PageSize="+PageSize;
+				
+				G.GetAjax('get',SearchUrl,SearchData,ShowTable);
+				
+			})
+
+			$("body").keydown(function() {
+					var msg;
+          				if (event.keyCode == "13") {
+          					if ($("[name=Num]").focus()) {
+          						Page = $("[name=Num]").val();
+
+          						if (Page>PageNumber || Page<1) {
+          							msg = "总共只有"+PageNumber+"页。没有第"+Page+"页！";
+									popupDiv('pop-div',msg);
+									Page =1;
+									
+          						}
+          				
+								var SearchData = data+"&Page="+Page+"&PageSize="+PageSize;
+								clickpage.Page = Page;
+
+								G.GetAjax('get',SearchUrl,SearchData,ShowTable);
+          					}
+          					
+          				}
+              	})
+			
+			
+				
+			clickpage.SearchUrl = SearchUrl;
+			Page = clickpage.ReturnPage();
+		 	clickpage.PageClick();
+			
+				
+			function ShowTable(value, total)//value, total
+			{
+				Page = clickpage.ReturnPage();
+				var title = '操作日志';
+				var headarray = Array( "操作员", "动作", "明细", "结果", "IP地址", "操作时间");
+				var model = Array(  "UserName", "Action", "Data", "Result", "IP", "Time");
+
+				var modelcss = Array("text-align:center;width:70px;", "text-align:center;width:96px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis", "text-align:left;width:300px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis",  "text-align:center;width:96px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis", "text-align:center;width:143px;", "text-align:center;width:163px;");
+	
+				var number = value[0]['CustomerNumber'];
+				
+				SetArrearsTable(number,value,headarray,title,model,modelcss,total);
+				//SetArrearsTable('', '',value,headarray,title,model,modelcss);
+			}
+			//代表number用户编号，s数据是填充表格的数据，headarray是表头,title是表格上的标题 modelcss是model的css样式
+			function SetArrearsTable(number,s,headarray,title,model,modelcss,total)
+			{
+				PageNumber = Math.ceil(total/PageSize);
+				var bodyTpl = "";
+				var headmodel = "";
+				var money = 0;
+				var PTpl;
+				var text;
+				$("#Arrears div").remove();
+				
+				if (s) {
+					for (var i in s) {
+						var number = parseInt(i)+1;
+						var source = ReplaceArray(s[i]);
+						bodyTpl += '<tr>'+
+							'<td  style="width:60px;height:20px;text-align:center">'+number+'</td>';
+							for (var n in model) {
+								if (model[n] == "CutCount" || model[n] == "PressCount" || model[n] == "CustomerNumber") {
+									bodyTpl +='<td id="'+model[n]+'" title="'+source.ID+'/'+number+'/'+source.YearMonth+'" style="text-decoration:underline;cursor:pointer;'+modelcss[n]+'">'+source[model[n]]+'</td>';
+								} else {
+									if (model[n] == "Data" || model[n] == "Result" || model[n] == "Action") {
+										text = '<div title="'+source[model[n]]+'" style="'+modelcss[n]+'">'+source[model[n]]+'</div>';
+									} else {
+										text = source[model[n]];
+									}
+									bodyTpl += '<td style="'+modelcss[n]+'">'+text+'</td>';
+								}
+								
+							}
+				        bodyTpl +='</tr>';
+				        if (source.IsClean == "未结清") {
+				        	money += parseInt(source.Money);
+				        }
+				        
+					}
+					$("[name=Money]").val(money);
+				}
+				
+
+
+				var headTpl = '<div><div class="line ClientInfo" >'+title+'</div><table id="info" class=" table-bordered" >'+
+				    		'<thead>'+
+					    	'<tr >'+
+					    	'<th >序号</th>';
+
+		    	for (var i in headarray) {
+		    		headmodel +='<th style="'+modelcss[i]+';text-align:center">'+headarray[i]+'</th>';
+		    	}
+				            
+		    	if (PageNumber == 1) {
+					PTpl="";
+				} else {
+					if ( Page == 1 ) {
+
+						PTpl = "<span id='next' style='cursor:pointer'>下一页</span>&nbsp;&nbsp;<span id='end' style='cursor:pointer'>末页</span>";
+					} else if (Page < PageNumber && Page!= 1 ) {
+						PTpl = "<span id='prev' style='cursor:pointer'>上一页</span>&nbsp;&nbsp;<span id='next' style='cursor:pointer'>下一页</span>&nbsp;&nbsp;<span id='end' style='cursor:pointer'>末页</span>";
+					} else if (Page == PageNumber) {
+						PTpl = "<span id='start' style='cursor:pointer'>首页</span>&nbsp;&nbsp;<span id='prev' style='cursor:pointer'>上一页</span>";
+					} 
+				}
+			 	var CurrentNum = s.length; 
+			    var pageTpl = '</tr><tr >'+
+			    ''+
+			    '<td id="PageNum" colspan="8" style="text-align:left">&nbsp;&nbsp;&nbsp;&nbsp;当前第<input name="Num" type="text" value="'+Page+'" style="width:12px;padding:0 8px"  />页，总共'+PageNumber+'页&nbsp;&nbsp;'+PTpl+
+			    '&nbsp;&nbsp;<span >本页'+CurrentNum+'条数据，总共'+total+'条数据</span></td></tr>';
+			    var footTpl = '</tbody></table></div>';
+			    var tpl = headTpl+headmodel+'</thead><tbody>'+bodyTpl+pageTpl+footTpl;
+
+			    
+
+			    $("#Arrears").append(tpl);
+		
+				$("#Arrears table tr:odd").addClass("InfoTr");
+		
+
+			}
+
+	
+		$("[name=FromData]").val(AgoTime);
+		$("[name=ToData]").val(CurrentTime);
+		
+	})
+	</script>
+	
+
+<link rel="stylesheet" href="/ams/css/jquery-ui.css">
+<script src="/ams/js/jquery-ui.js"></script>
+<script src="/ams/js/jquery-ui-timepicker-addon.js"></script>
+<link rel="stylesheet" type="text/css" href="/ams/css/jquery-ui-timepicker-addon.css">
+<script src="/ams/js/jquery-ui-date.js"></script>
+
+
+		<br />
+		    <div class="line ClientInfo" >查询条件</div>
+			<div style="border:1px solid #009966;height:90px">
+			    <form>
+
+					<div class=" mt_20" style="width:100%;height:20px;margin-top:15px">
+
+				    	<div class=" InputStyle" style="margin-left:10px;float:left;margin-top:3px">操作时间：</div>
+					    <div  style="margin-left:5px;">
+					        <input name="FromData" type="text" id="time" style="width:120px" />&nbsp;&nbsp;至&nbsp;&nbsp;<input name="ToData" type="text" id="Totime" style="width:120px"/>
+					    </div>
+					
+						<button type="button"   class="btn btn-success" style="background-color:#009966;margin-left:90px;margin-top:10px">查询</button>
+						
+					</div>
+				</form>
+			</div>
+		    <br />
+		    <div  id="Arrears" class="TableCss">
+		    	
+		    
+		    	<div>
+		    	
+				</div>
+
+		    </div>
+<br/><br/><br/><br/>

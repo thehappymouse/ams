@@ -1,0 +1,43 @@
+		   <style>
+		   		.TableCss table  td{text-align:center}
+		   </style>
+		    <br />
+		    	
+		    <div class="TableCss">
+			    <table id="info" >
+				    <thead>
+				    	 <tr >
+				            <th >序号</th>
+				            <th>催费时间</th>
+				            <th>抄表员</th>
+				            <th>催费方式</th>
+				            <th>催费电话</th>
+				            <th>催费照片</th>
+				        </tr>
+			       	</thead>
+			       	<tbody>
+
+			       		<?php  $i =1;foreach ($ps as $s) { ?>
+				       		 <tr>
+					           
+					        	<td><?php echo $i				?></td>
+				    			<td><?php echo $s->PressTime;	?></td>
+				    			<td><?php echo $s->UserName; 	?></td>
+				    			<td><?php echo $s->PressStyle;  ?></td>
+				    			<td><?php echo $s->Phone; 		?></td>
+				    			<td>
+				    			<?php if (!empty($s->Photo)) { ?>
+				    				<a href="<?php echo '/ams'.$s->Photo;;?>" target="_blank">查看</a>
+				    			<?php }		?>
+				    			</td>
+			    			</tr>
+			    		<?php $i++; } ?>
+				  
+				    </tbody>
+			    </table>
+		    </div>
+		     <script type="text/javascript">
+	
+		    	$(".TableCss table tr:odd").addClass("InfoTr");
+
+		    </script>

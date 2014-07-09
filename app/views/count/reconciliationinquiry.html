@@ -1,0 +1,218 @@
+<script type="text/javascript">
+$(document).ready(function(){
+	var G = new AjaxFun();
+	$("#time").val(CurrentTime);
+	var DrownBox = new DropDownBox();//获取三级下拉框
+
+	var excel = new ExportExcel();
+	excel.url = "/ams/export/AccountCheck";
+	excel.exportTo();
+
+	DrownBox.select = {"Team":"#team", "Name":"#name"};
+
+	var Getdata = {ID:"1",Type:"2"};
+	var url = "/ams/Info/TeamList";
+	G.GetAjax('get', url, Getdata, DrownBox.SetAllSelect, true);
+
+	$("#team").on("change","select:eq(0)",function(v){
+		
+		var id = $("select:eq(0)").val();
+		var data = {ID:id,Type:"Name"};
+		var url = "/ams/Info/UserList";
+		G.GetAjax('get', url, data, DrownBox.SetAllSelect, true);
+
+	})
+
+	$("button:eq(0)").click(function(){
+		data = $("form:eq(0)").serialize();
+
+		excel.Todata = data;
+		var url = "/ams/CountSearch/ReconciliationInquiry";
+		G.GetAjax('post', url, data, SetTable,true);
+		
+	})
+
+
+	//添加表格
+	function SetTable(value) 
+	{
+
+		var v =  ReplaceArray(value.charges,true);
+	
+		if (v.length == 0){
+		
+			$("#Arrears div").remove();
+			$("#total div").remove();
+			$("#tip").css("display","block");
+			//SetInfoTable();
+			//SetArrearsTable('','',array,title,model,modelcss);
+		
+			return; 
+
+		}
+	
+		var title = '收费明细';
+		var array = Array("收费时间", "用户编号", "用户名称", "电费年月", "电费金额", "收费人", "交费登记电话", "登记租房户信息", "签订费控");
+		var model = Array("Time", "CustomerNumber", "CustomerName", "YearMonth", "Money", "UserName", "LandlordPhone", "IsRent", "IsControl");
+		var modelcss = Array("text-align:center;width:140px", "text-align:center;width:80px", "text-align:center;width:70px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis",  "text-align:center;width:60px;", "text-align:center;width:60px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis", "text-align:center;width:60px", "text-align:center;width:95px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis", "text-align:center;width:105px", "text-align:center;width:60px");
+		SetArrearsTable('Arrears',v,array,title,model,false,modelcss);
+
+		var t =  ReplaceArray(value.Total,true);
+		var title = '汇总信息';
+		var array = Array("电费年份", "管理班组", "收费笔数", "收费金额", "签订费控数", "登记电话");
+		var model = Array("Year", "Team", "ChargeCount", "Money", "ControlCount", "Phone");
+		var modelcss = Array("text-align:center;width:155px", "text-align:center;width:155px", "text-align:center;width:155px",  "text-align:center;width:155px;", "text-align:center;width:155px", "text-align:center;width:155px", "text-align:center;width:155px");
+		SetArrearsTable('total',t,array,title,model,true,modelcss);
+
+		//$("form").css("display","block");
+
+	}
+
+	//欠费信息表格
+	//代表 select是选择器，number用户编号，s数据是填充表格的数据，headarray是表头,title是表格上的标题
+	function SetArrearsTable(select,s,headarray,title,model,th,modelcss)
+	{	
+		
+		var bodyTpl = "";
+		var headmodel = "";
+		var tr = "";
+		var money = 0;
+		var text = "";
+		var d = 1;
+		if (s) {
+			for (var i in s) {
+				var number = s[i].CustomerNumber;
+				bodyTpl += '<tr style="height:20px">';
+					if (select == "Arrears") {
+						bodyTpl += '<td style="text-align:center">'+d+'</td>';
+					}
+					
+					for (var n in model) {
+						if (model[n] == "CutCount" || model[n] == "PressCount" || model[n] == "CustomerNumber") {
+							bodyTpl +='<td id="'+model[n]+'" title="'+s[i].ID+'/'+number+'/'+s[i].YearMonth+'" style="text-decoration:underline;cursor:pointer;'+modelcss[n]+'">'+s[i][model[n]]+'</td>';
+						} else  {
+							if (model[n] == "IsRent" || model[n] == "IsControl") {
+
+								if (s[i][model[n]] == "0") {
+									text = "否";
+								} else if(s[i][model[n]] == 1) {
+									text = "是";
+								} else if(s[i][model[n]] == 2){
+									text = "全部";
+								}
+							
+							} else if (model[n] == "CustomerName" || model[n] == "UserName"){
+								text = '<div title="'+text+'" style="'+modelcss[n]+'">'+s[i][model[n]]+'</div>';
+							} else {
+								text = s[i][model[n]];
+							}
+							bodyTpl += '<td style="'+modelcss[n]+'"  >'+text+'</td>';
+						}
+						
+					}
+		        bodyTpl +='</tr>';
+		         //money += parseInt(s[i].Money);
+		        d++;
+			}
+
+			//$("[name=Money]").val(money);
+		}
+		
+
+
+		var headTpl = '<div><div class="line ClientInfo" >'+title+'</div><table id="info" " >'+
+		    		'<thead>'+
+			    	'<tr style="height:20px">';
+    	if (select == "Arrears") {
+			headTpl +='<th style="width:60px">序号</th>';
+		}
+			    	
+
+    	for (var i in headarray) {
+    		headmodel +='<th style="'+modelcss[i]+';text-align:center">'+headarray[i]+'</th>';
+    	}
+		
+		
+		if (!th){
+			 tr = '<tr>'+
+			        '<td colspan="10" style="text-align:left" ><form name="excelform" id="excelform" action="/ams/export/AccountCheck" method="post" target="put_excel" >&nbsp;&nbsp;&nbsp;&nbsp;导出文件：&nbsp;&nbsp;<span  id="excel" style="cursor:pointer"><img  src="/ams/public/images/Excel.png" style="height:25px;width:25px"/></span>&nbsp;&nbsp;</form></td>'+
+			     '</tr>';
+		}   
+    	
+	    var footTpl = tr + '</tr></thead><tbody></tbody></table></div>';
+
+	    var tpl = headTpl+headmodel+bodyTpl+footTpl;
+	    
+	    var selected = "#"+select;
+	    $(selected+" div").remove();
+
+	    $(selected).append(tpl);
+	  
+		$(selected+" table tr:even").addClass("InfoTr");
+		$("#tip").css("display","none");
+		$(selected+" table tr:eq(0)").removeClass("InfoTr");
+	}
+
+	
+	/*$("#Arrears").on("click","#excel",function(){
+		var url = "/ams/export/AccountCheck?"+data;
+		document.forms["excelform"].action = url;
+		document.forms["excelform"].submit(); 
+	})*/
+})
+
+
+</script>
+
+
+<link rel="stylesheet" href="/ams/css/jquery-ui.css">
+<script src="/ams/js/jquery-ui.js"></script>
+<script src="/ams/js/jquery-ui-timepicker-addon.js"></script>
+<link rel="stylesheet" type="text/css" href="/ams/css/jquery-ui-timepicker-addon.css">
+<script src="/ams/js/jquery-ui-date.js"></script>
+<div>
+	<br />
+	<div   class="line ClientInfo" >查询条件</div>
+	<div style="border:1px solid #009966;height:130px;*height:140px">
+
+		<div style="margin-left:12px;margin-top:15px">
+			<form>
+				<div>
+
+						<span >营<div class="full"></div>业<div class="full"></div>班<div class="full"></div>组：</span>
+						<span id="team">
+							
+						</span>
+						&nbsp;&nbsp;&nbsp;
+						<span >营业员：</span>
+						<span id="name">
+
+						</span>
+				</div>
+				
+				<div style="margin-top:15px">
+						<div style="display:inline">收费时间至：</div>
+					
+						<input  name="FromData" style="width:120px;margin-top:3px;margin-left:-2px;*margin-left:3px;*margin-bottom:2px" type="text" id="time"  />
+						
+						
+				</div>
+			</form>
+			<button  type="button" class="btn btn-success LeftButton" style="background-color:#009966;margin-top:-10px" >查询</button>
+		</div>
+	</div>
+
+</div>
+<div id="tip" style="color:red;margin-left:12px;display:none;margin-top:4px">
+				当前查询没有数据
+	</div>
+<br />
+<div id="Arrears" class="TableCss">
+	<div></div>
+</div>
+<iframe name="put_excel" style="display:none"></iframe>
+<style> .TableCss table td{text-align:center;}</style>
+<br />
+<div id="total" class="TableCss">
+		<div></div>
+</div><br /><br /><br /><br />

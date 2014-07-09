@@ -1,0 +1,163 @@
+<script type="text/javascript">
+$(document).ready(function(){
+	var G = new AjaxFun();
+	$("#time").val(CurrentTime);
+	var excel = new ExportExcel();
+	excel.url = "/ams/export/reconciliation";
+	excel.exportTo();
+
+	var DrownBox = new DropDownBox();//获取三级下拉框
+	DrownBox.select = {"Team":"#team"};
+
+	var Getdata = {ID:"1",Type:"2"};
+	var url = "/ams/Info/TeamList";
+	G.GetAjax('get',url,Getdata,DrownBox.SetAllSelect,true);
+
+	$("button:eq(0)").click(function(){
+		var data = $("form:eq(0)").serialize();
+		excel.Todata = data;
+		
+		var url = "/ams/CountSearch/Reconciliation";
+		G.GetAjax('post', url, data, SetTable,true);
+	
+	})
+
+
+	//添加表格
+	function SetTable(value) 
+	{
+		var v =  ReplaceArray(value,true);
+		if (v == null){
+		
+			$("#Arrears div").remove();
+			$("#tip").css("display","block");
+			//SetInfoTable();
+			//SetArrearsTable('','',array,title,model,modelcss);
+		
+			return; 
+
+		}
+		
+		
+		var title = '汇总信息';
+		var headarray = Array("收费班组", "管理班组", "电费年份", "收费笔数", "收费金额");
+		//var number = v.Number;
+		var model = Array("ChargeTeam", "Team", "Year", "ChargeCount", "Money");
+		SetArrearsTable('Arrears',v,headarray,title,model);
+
+
+	}
+
+	//欠费信息表格
+	//代表 select是选择器，number用户编号，s数据是填充表格的数据，headarray是表头,title是表格上的标题
+	function SetArrearsTable(select, s, headarray, title, model, th)
+	{	
+		var bodyTpl = "";
+		var headmodel = "";
+		var tr = "";
+		var money = 0;
+		var d = 1;
+		if (s) {
+			for (var i in s) {
+				bodyTpl += '<tr>'+
+					'<td style="text-align:center">'+d+'</td>';
+					for (var n in model) {
+						if (model[n] == "CutCount" || model[n] == "PressCount" || model[n] == "Number") {
+							bodyTpl +='<td id="'+model[n]+'" title="'+number+'/'+s[i].YearMonth+'" style="text-decoration:underline;cursor:pointer;text-align:center">'+s[i][model[n]]+'</td>';
+						} else {
+							bodyTpl += '<td style="text-align:center">'+s[i][model[n]]+'</td>';
+						}
+						
+					}
+		        bodyTpl +='</tr>';
+		        money += parseInt(s[i].Money);
+		        d++;
+			}
+			$("[name=Money]").val(money);
+		}
+		
+
+
+		var headTpl = '<div><div class="line ClientInfo" >'+title+'</div><table id="info"  >'+
+		    		'<thead>'+
+			    	'<tr >'+
+			    	'<th style="width:60px">序号</th>';
+
+    	for (var i in headarray) {
+    		headmodel +='<th style="text-align:center">'+headarray[i]+'</th>';
+    	}
+		
+		d = parseInt(d)-1;
+		if (!th){
+			 tr = '<tr>'+
+			        '<td colspan="6" style="text-align:left" ><form name="excelform" id="excelform" method="post" target="put_excel" >&nbsp;&nbsp;&nbsp;&nbsp;导出文件：&nbsp;&nbsp;<span  id="excel" style="cursor:pointer"><img  src="/ams/public/images/Excel.png" style="height:25px;width:25px"/></span>&nbsp;&nbsp;</form></td>'+
+			     '</tr>'+
+			     '<td colspan="6" style="text-align:left" >&nbsp;&nbsp;&nbsp;&nbsp;共计：'+d+'条，金额'+money+'元。</td>'+
+				            '</tr>';
+		}   
+    	
+	    var footTpl = tr + '</tr></thead><tbody></tbody></table></div>';
+
+	    var tpl = headTpl+headmodel+bodyTpl+footTpl;
+
+	    var selected = "#"+select;
+	    $(selected+" div").remove();
+
+	    $(selected).append(tpl);
+
+		$(selected+" table tr:even").addClass("InfoTr");
+
+		$(selected+" table tr:eq(0)").removeClass("InfoTr");
+		$("#tip").css("display","none");
+	}
+	$("#time").val(CurrentTime);
+})
+
+
+</script>
+
+
+<link rel="stylesheet" href="/ams/css/jquery-ui.css">
+<script src="/ams/js/jquery-ui.js"></script>
+<script src="/ams/js/jquery-ui-timepicker-addon.js"></script>
+<link rel="stylesheet" type="text/css" href="/ams/css/jquery-ui-timepicker-addon.css">
+<script src="/ams/js/jquery-ui-date.js"></script>
+<div>
+	<br />
+	<div   class="line ClientInfo" >查询条件</div>
+	<div style="border:1px solid #009966;height:130px;*height:140px">
+	
+		<div style="margin-left:12px;margin-top:15px">
+			<form>
+				<div>
+						<span>营<div class="full"></div>业<div class="full"></div>班<div class="full"></div>组：</span>
+						<span id="team">
+							
+						</span>
+					
+				</div>
+				<div style="margin-top:15px">
+						<span >收费时间至：</span>
+						<input  name="FromData"style="width:120px;" type="text" id="time" />
+						
+						
+				</div>
+			</form>
+
+			<button   type="button" class="btn btn-success LeftButton" style="background-color:#009966;margin-top:-10px">查询</button>
+		</div>
+
+	</div>
+
+</div>
+<div id="tip" style="color:red;margin-left:12px;display:none;margin-top:4px">
+				当前查询没有数据
+	</div>
+<br />
+<div id="Arrears" class="TableCss">
+	<div></div>
+</div>
+
+<div id="total" class="TableCss">
+	<div></div>
+</div><br/><br/><br/><br/>

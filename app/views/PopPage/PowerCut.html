@@ -1,0 +1,39 @@
+		   	<style>
+		   		.TableCss table  td{text-align:center}
+		   </style>
+		    <br />
+		    
+		    <div class="TableCss">
+			    <table id="info">
+				    <thead>
+				    	 <tr >
+				            <th >序号</th>
+				            <th>停电时间</th>
+				            <th>抄表员</th>
+				            <th>停电方式</th>
+				            <th>复电时间</th>
+				            <th>复电电话</th>
+				        </tr>
+			       	</thead>
+			       	<tbody>
+			       		<?php  $i =1;foreach ($cs as $s) { ?>
+				       		 <tr>
+					           
+					        	<td><?php echo $i				?></td>
+				    			<td><?php echo $s->CutTime;	?></td>
+				    			<td><?php echo $s->CutUserName; 	?></td>
+				    			<td><?php echo $s->CutStyle;  ?></td>
+				    			<td><?php echo $s->ResetTime; ?></td>
+				    			<td><?php echo $s->ResetPhone;?></td>
+			    			</tr>
+			    		<?php $i++; } ?>
+
+				      
+				    </tbody>
+			    </table>
+		    </div>
+		     <script type="text/javascript">
+	
+		    	$(".TableCss table tr:odd").addClass("InfoTr");
+
+		    </script>

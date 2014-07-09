@@ -1,0 +1,262 @@
+<script type="text/javascript">
+    $(document).ready(function () {
+        var G = new AjaxFun();//获取ajax方法
+        var data = {ID: "1"};
+        var Url = "/ams/manager/UserList";
+        G.GetAjax('post', Url, data, ShowTable);
+        //ShowTable();
+
+        $("#Arrears").on("click", "#modify", function (v) {
+
+            var id = v.currentTarget.name;
+
+            window.open("/ams/PopPage/ModifyUser/" + id, "ModifyUser", "height=" + height + ", width=" + width);
+        })
+
+        $("#Arrears").on("click", "#delete", function (v) {
+            var id = v.currentTarget.name;
+
+            var data = {ID: id};
+
+            var delUrl = "/ams/manager/userdel";
+            G.GetAjax('post', delUrl, data,"",true);
+            G.GetAjax('post', Url, data, ShowTable);
+        })
+        function ShowTable(value) {
+
+            var headarray = Array("序号", "用户名", "班组", "职责", "操作");
+            var model = Array("#", "Name", "TeamName", "Role", "Manager");
+
+            var modelcss = Array("text-align:center", "text-align:center", "text-align:center", "text-align:center", "text-align:center;");
+
+            SetArrearsTable(value, headarray, model, modelcss);
+            //SetArrearsTable(value,headarray,model,modelcss);
+
+        }
+
+        //，s数据是填充表格的数据，headarray是表头, modelcss是model的css样式
+        function SetArrearsTable(s, headarray, model, modelcss) {
+            var bodyTpl = "";
+            var headmodel = "";
+            var money = 0;
+
+            var t = 1;
+            if (s) {
+                for (var i in s) {
+                    var source = ReplaceArray(s[i]);
+                    
+                    bodyTpl += '<tr>';
+                    for (var n in model) {
+                        if (model[n] == "#") {
+                            bodyTpl += '<td style="' + modelcss[n] + '">' + t + '</td>';
+                        } else if (model[n] == "Manager") {
+                            bodyTpl += '<td  style="' + modelcss[n] + '"><button  id="modify" name="' + source.ID + '" class="btn btn-success" style="background-color:#009966">修改</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button id="delete" name="' + source.ID + '" class="btn btn-success" style="background-color:#009966">删除</button></td>';
+                        } else if (model[n] == "Role") {
+                            bodyTpl += '<td style="' + modelcss[n] + '">' + UserDuty[source[model[n]]] + '</td>';
+                        } else {
+                            bodyTpl += '<td style="' + modelcss[n] + '">' + source[model[n]] + '</td>';
+                        }
+
+
+                    }
+                    t++;
+                    bodyTpl += '</tr>';
+
+                }
+            }
+
+
+            var headTpl = '<div><table id="info" >' +
+                    '<thead>' +
+                    '<tr >';
+
+            for (var i in headarray) {
+                headmodel += '<th>' + headarray[i] + '</th>';
+            }
+
+
+            var footTpl = '</tr></tbody></table></div>';
+            var tpl = headTpl + headmodel + '</tr></thead><tbody>' + bodyTpl + footTpl;
+            $("#Arrears div").remove();
+
+            $("#Arrears").append(tpl);
+
+            $("#Arrears table tr:odd").addClass("InfoTr");
+            $("#Entry").css("display", "block");
+
+        }
+    })
+</script>
+<br/>
+<div class="line ClientInfo">用户管理</div>
+<div id="Arrears" class="TableCss">
+    <div></div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        var G = new AjaxFun();
+        var SelectUrl = "/ams/manager/GetGroup";
+        var data = {Duty: "1"};
+
+        G.GetAjax('post', SelectUrl, data, showselect);
+ 
+
+        $("[name=Duty]").change(function (v) {
+            var value = v.currentTarget.value;
+            if (value == 5 || value == 6) {
+                $("#Group div").remove();
+            } else {
+                if (value == 1 || value == 2) {
+
+                    value = 1;
+                } else {
+                    value = 2;
+                }
+                var data = {Duty: value};
+                G.GetAjax('post', SelectUrl, data, showselect);
+            }
+
+        })
+
+        $("[name=AgainPassword]").keyup(function(){
+           
+                var pass = $("[name=Password]").val();
+                var againpass = $("[name=AgainPassword]").val();
+                $("#pw span").remove();
+                $("#again span").remove();
+                if(againpass == ""){
+                    tpl = "密码不能为空";
+                    $("#SubmitButton").attr("disabled","true");
+                 } else {
+                    if (pass == againpass) {
+                        $("#SubmitButton").removeAttr("disabled");
+                        return
+                    } else {
+                        tpl = "两次输入密码不一致";
+                        $("#SubmitButton").attr("disabled","true");
+                    }
+                 }
+                
+                tpl = "<span style='color:red'>"+tpl+"</span>";
+
+                $("#again").append(tpl);
+                $("#pw").append(tpl);
+                
+            
+        })
+
+        $("[name=Password]").keyup(function(){
+  
+            var tpl;
+            var pass = $("[name=Password]").val();
+            var againpass = $("[name=AgainPassword]").val();
+            
+            $("#pw span").remove();
+            $("#again span").remove();
+            if(pass == ""){
+             
+                tpl = "密码不能为空";
+                $("#SubmitButton").attr("disabled","true");
+            } else {
+                if (pass == againpass) {
+                                         
+                    $("#SubmitButton").removeAttr("disabled");
+                    return;
+                } else {
+                  tpl = "两次输入密码不一致";
+                  $("#SubmitButton").attr("disabled","true");
+                }
+            }
+              
+            tpl = "<span style='color:red'>"+tpl+"</span>";console.log(tpl)
+           
+            $("#pw").append(tpl);
+            $("#again").append(tpl);
+                
+        })
+
+
+        $("#SubmitButton").click(function(){
+           if ($("#UserName").val() == "") {
+                var UserTpl = "账户没有填写";
+                UserTpl = "<span tyle='color:red'>"+UserTpl+"</span>";
+                $("#user span").remove();
+                $("#user").append(UserTpl);
+                return;
+           }
+
+
+
+          
+           var BuildUrl = "/ams/manager/BuildAjax"
+            var data = $("form").serialize();
+            G.GetAjax('post', BuildUrl, data, reload);
+        })
+
+
+    })
+</script>
+<br/>
+
+<div class="line ClientInfo">用户创建</div>
+<div style="border:1px solid #009966;height:240px">
+    <br/>
+    <form class="form-horizontal" style="margin-left:-80px">
+        <div class="control-group" >
+            <label class="control-label" for="UserName" style="margin-bottom:-5px">用户名：</label>
+
+            <div id="user" class="controls">
+                <input name="UserName" style="width:218px;height:21px;" type="text" id="UserName" >
+                <span></span>
+            </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label" for="inputPassword">密码：</label>
+
+            <div id="pw" class="controls">
+                <input name="Password" style="width:206px;height:13px;" type="password" id="inputPassword" >
+                <span></span>
+            </div>
+        </div>
+
+        <div class="control-group">
+            <label class="control-label" for="AgainPassword">确认密码：</label>
+            <div id="again" class="controls">
+              <input name="AgainPassword" type="password" id="AgainPassword" style="width:206px;height:13px;"> 
+              <span></span>
+            </div>
+
+        </div>
+
+        <div class="control-group">
+
+            <label class="control-label" for="inputPassword">职责：</label>
+
+            <div class="controls">
+                <select name="Duty" style="width:220px">
+                    <option value="1">抄表员</option>
+                    <option value="2">抄表员班长</option>
+                    <option value="3">收费员</option>
+                    <option value="4">收费员班长</option>
+                    <option value="5">对账</option>
+                    <option value="6">管理人员</option>
+                </select>
+            </div>
+
+        </div>
+        <div id="Group" class="control-group">
+
+        </div>
+        <div class="control-group">
+            <div class="controls">
+                <button id="SubmitButton" type="button"  class="btn btn-success" style="background-color:#009966" disabled>创建帐户</button>
+            </div>
+        </div>
+    </form>
+</div>
+<br/><br/><br/><br/>
+<style>
+    button[id="modify"]{height:20px;padding:1px 12px 2px 12px;}
+    button[id="delete"]{height:20px;padding:1px 12px 2px 12px;}
+</style>

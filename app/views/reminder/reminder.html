@@ -1,0 +1,468 @@
+
+
+
+<script type="text/javascript">
+$(document).ready(function(){
+				var pic = true;
+				$("#time").val(CurrentTime);
+				var G = new AjaxFun();//获取ajax方法
+
+				var DrownBox = new DropDownBox()//获取三级下拉框
+
+				var clickpage = new ClickPage(G,ShowTable);//分页
+
+				DrownBox.select = {"Team":"td:eq(1)", "Name":"td:eq(3)", "Number":"td:eq(5)"};
+				var Getdata = {ID:"1",Type:"1"};
+				var url = "/ams/Info/TeamList";
+				G.GetAjax('get',url,Getdata,DrownBox.SetAllSelect,true);
+				
+				var SearchUrl = "/ams/reminder/SearchFee";
+				
+				$("button:eq(0)").click(function(){
+					
+					data = $("form:eq(0)").serialize();
+					clickpage.Data = data;
+					var SearchData = data+"&Page=1&PageSize="+PageSize;
+
+					G.GetAjax('post',SearchUrl,SearchData,ShowTable,"true");
+					
+				})
+
+				
+				$("#Condition").on("change","select:eq(0)",function(v){
+					var id = $("select:eq(0)").val();
+					var selectdata = {ID:id,Type:"Name"};
+					var url = "/ams/Info/UserList";
+					G.GetAjax('get',url,selectdata,DrownBox.SetAllSelect,true);
+
+				})
+
+				$("#Condition").on("change","select:eq(1)",function(v){
+					var id = $("select:eq(1)").val();
+					var selectdata = {ID:id,Type:"Number"};
+					var url = "/ams/Info/SegmentList";
+					G.GetAjax('get',url,selectdata,DrownBox.SetAllSelect,true);
+
+				})
+
+				$("#Condition").on("submit","#page",function(){
+
+					
+				})
+				$("#Arrears").on("click","[name=select]",function(v){
+					var ID = v.currentTarget.defaultValue;
+					$("[name=ID]").val(ID);
+					if (pic) {
+						$("button:eq(1)").removeAttr("disabled");
+					}
+					
+				})
+
+				$("body").keydown(function() {
+					var msg;
+          				if (event.keyCode == "13") {
+          					
+          					if ($("[name=Num]").focus()) {
+          						Page = $("[name=Num]").val();
+
+          						if (Page>PageNumber || Page<1) {
+          							msg = "总共只有"+PageNumber+"页。没有第"+Page+"页！";
+									popupDiv('pop-div',msg);
+									Page =1;
+									
+          						}
+
+								var SearchData = data+"&Page="+Page+"&PageSize="+PageSize;
+								clickpage.Page = Page;
+							
+								G.GetAjax('post',SearchUrl,SearchData,ShowTable);
+          					}
+          					
+          				}
+              	})
+
+			 	
+			 
+			 
+				
+				$("iframe").load(function(v){
+					var Vdata = window.frames["frm_dealer"].document.documentElement.innerText;
+					
+					if (Vdata) {
+					
+						var JsonData = eval("("+Vdata+")");
+						if (JsonData.success) {
+							var data = $("form:eq(0)").serialize();
+							data = data+"&Page=1&PageSize="+PageSize;
+						
+							G.GetAjax('post',SearchUrl,data,ShowTable);
+						} else {
+							
+							popupDiv('pop-div',JsonData.msg);
+						}
+						Page =1;
+						clickpage.Page = Page;
+					}
+					$("button:eq(1)").attr("disabled","true");
+					
+				})
+
+		
+			
+				clickpage.SearchUrl = SearchUrl;
+				Page = clickpage.ReturnPage();
+			 	clickpage.PageClick();
+			
+				
+			
+				function ShowTable(value, total)
+				{	
+					if (value == null){
+						$("#info div").remove();
+						$("#Arrears div").remove();
+						$("#Entry").css("display","none");
+						$("#tip").css("display","block");
+						//SetInfoTable();
+						//SetArrearsTable('','',array,title,model,modelcss);
+
+						return ; 
+
+					}
+
+					Page = clickpage.ReturnPage();
+					var title = '欠费用户信息';
+					var headarray = Array("抄表段编号", "用户编号", "用户名称", "用电地址", "电费年月", "电费金额", "结清标志", "停电标志", "催费次数", "停电次数");
+					var model = Array("Segment", "CustomerNumber", "CustomerName", "Address", "YearMonth", "Money", "IsClean", "IsCut", "PressCount", "CutCount");
+
+					var modelcss = Array("text-align:center;width:80px", "text-align:center;width:80px", "text-align:center;width:80px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis",  "text-align:left;width:130px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis", "text-align:center;width:80px", "text-align:center;width:80px", "text-align:center;width:70px", "text-align:center;width:80px", "text-align:center;width:80px", "text-align:center;width:81px");
+		
+					
+					SetArrearsTable(total,value,headarray,title,model,modelcss);
+					
+				}
+				
+
+
+				
+				//代表number用户编号，s数据是填充表格的数据，headarray是表头,title是表格上的标题 modelcss是model的css样式
+				function SetArrearsTable(total,s,headarray,title,model,modelcss)
+				{	PageNumber = Math.ceil(total/PageSize);
+					var bodyTpl = "";
+					var headmodel = "";
+					var money = 0;
+					var PTpl;
+					var text;
+					var CleanRedCss = "";
+					var CutRedCss = "";
+					
+					if (s) {
+						for (var i in s) {
+							
+							var source = ReplaceArray(s[i]);
+							var number = s[i].CustomerNumber;
+							bodyTpl += '<tr>'+
+								'<td style="width:32px;height:20px;text-align:center"><input value="'+source.ID+'" type="radio" style="vertical-align:text-bottom; *margin-bottom:-4px;" name="select"/ ></td>';
+								for (var n in model) {
+									if (model[n] == "CutCount" || model[n] == "PressCount" || model[n] == "CustomerNumber") {
+										bodyTpl +='<td id="'+model[n]+'"  title="'+source.ID+'/'+number+'/'+source.YearMonth+'"  style="text-decoration:underline;cursor:pointer;'+modelcss[n]+'">'+source[model[n]]+'</td>';
+									} else {
+										if (model[n] == "IsClean") {
+											if (source[model[n]] == 2) {
+												text = text = '<div style="'+modelcss[n]+'" title="预收转逾期">预收转逾期</div>';
+											} else if (source[model[n]] == 1){
+												text = text = '<div style="'+modelcss[n]+'" title="已结清">已结清</div>';
+											} else {
+												text = text = '<div style="'+modelcss[n]+'" title="未结清">未结清</div>';
+											}
+										} else if(model[n] == "IsCut"){
+											if (source[model[n]] == 2) {
+												text = text = '<div style="'+modelcss[n]+'" title="全部">全部</div>';
+											} else if (source[model[n]] == 1){
+												text = text = '<div style="'+modelcss[n]+'" title="已停电">已停电</div>';
+											} else {
+												text = '<div style="'+modelcss[n]+'" title="未停电">未停电</div>';
+											}
+										} else if(model[n] == "CustomerName"){
+											var tmp_color = "#333";
+											tmp_color = color(0,source['IsClean'], "#CC6600", tmp_color);
+											tmp_color = color(1,source['IsCut'], "#003366", tmp_color);
+											tmp_color = color(1,source['IsSpecial'], "red", tmp_color);
+											text = '<div style="'+modelcss[n]+';color:'+tmp_color+'" title="'+source[model[n]]+'">'+source[model[n]]+'</div>';
+										} else {
+											text = '<div style="'+modelcss[n]+'" title="'+source[model[n]]+'">'+source[model[n]]+'</div>';
+										}
+										bodyTpl += '<td style="'+modelcss[n]+'">'+text+'</div></td>';
+									}
+									
+									
+									
+								}
+					        bodyTpl +='</tr>';
+					      
+					        money += parseInt(source.Money);
+					        
+					        
+						}
+						$("[name=Money]").val(money);
+					}
+					
+					if (PageNumber == 1) {
+						PTpl="";
+					} else {
+						if ( Page == 1 ) {
+
+							PTpl = "<span id='next' style='cursor:pointer'>下一页</span>&nbsp;&nbsp;<span id='end' style='cursor:pointer'>末页</span>";
+						} else if (Page < PageNumber && Page!= 1 ) {
+							PTpl = "<span id='start' style='cursor:pointer'>首页</span>&nbsp;&nbsp;<span id='prev' style='cursor:pointer'>上一页</span>&nbsp;&nbsp;<span id='next' style='cursor:pointer'>下一页</span>&nbsp;&nbsp;<span id='end' style='cursor:pointer'>末页</span>";
+						} else if (Page == PageNumber) {
+							PTpl = "<span id='start' style='cursor:pointer'>首页</span>&nbsp;&nbsp;<span id='prev' style='cursor:pointer'>上一页</span>";
+						} 
+					}
+
+					var headTpl = '<div><div class="line ClientInfo" >'+title+'</div><table id="info" >'+
+					    		'<thead>'+
+						    	'<tr >'+
+						    	'<th style="20px"></th>';
+
+			    	for (var i in headarray) {
+			    		headmodel +='<th style="'+modelcss[i]+';text-align:center;">'+headarray[i]+'</th>';
+			    	}
+					var CurrentNum = s.length;   
+			    	
+				    var pageTpl = '</tr><tr >'+
+				    '<td id="PageNum" colspan="11" style="text-align:left">&nbsp;&nbsp;&nbsp;&nbsp;当前第<input name="Num" type="text" value="'+Page+'" style="padding:0px 8; width:12px" />页，总共'+PageNumber+'页&nbsp;&nbsp;'+PTpl+
+				    '&nbsp;&nbsp;<span>本页'+CurrentNum+'条数据，总共'+total+'条数据</span></td></tr>';
+				    var footTpl = '</tbody></table></div>';
+				    var tpl = headTpl+headmodel+'</thead><tbody>'+bodyTpl+pageTpl+footTpl;
+
+				    $("#Arrears div").remove();
+				    $("#Arrears").append(tpl);
+				    $("#tip").css("display","none");
+					$("#Arrears table tr:odd").addClass("InfoTr");
+					$("#Entry").css("display","block");
+
+				}
+
+			
+
+				$("[name=Photo]").change(function(v){
+					var filename = v.currentTarget.value;
+					if (filename) {
+						var length = filename.lastIndexOf(".");
+						var extension= filename.substr(length);
+						extension = extension.toLowerCase();
+
+						if (extension != ".jpg" && extension != ".png" && extension != ".jpeg") {
+							popupDiv('pop-div',"你所上传的图片格式不正确，请上传jpg、png格式图片!");
+							$("button:eq(1)").attr("disabled","true");
+							pic = false;
+						} else {
+							$("button:eq(1)").removeAttr("disabled");
+						}
+					} else {
+						var ID = $("[name=ID]").val();
+						if (ID) {
+							$("button:eq(1)").removeAttr("disabled");
+						}
+						pic = true;
+						popupDiv('pop-div',"你没有上传图片");
+					}
+					
+				})
+})
+</script>
+ 
+<link rel="stylesheet" href="/ams/css/jquery-ui.css">
+<script src="/ams/js/jquery-ui.js"></script>
+<script src="/ams/js/jquery-ui-timepicker-addon.js"></script>
+<link rel="stylesheet" type="text/css" href="/ams/css/jquery-ui-timepicker-addon.css">
+<script src="/ams/js/jquery-ui-date.js"></script>
+
+<br />
+		    <div id="Condition" class="TableCss" >
+		    	<div   class="line ClientInfo" >查询条件</div>
+		    	<form >
+		    	<table style="table-layout:fixed"> 
+				        <tr > 
+				            <td class="RightHabitat" name="one">管理班组：</td> 
+				            <td style="width:110px">
+				            </td> 
+				            <td class="RightHabitat" name="one">抄表员：</td> 
+				            <td style="width:110px"> 
+				     
+				            </td> 
+				            <td class="RightHabitat"  name="one">抄表段编号：</td> 
+				            <td style="width:110px"> 
+
+				            </td> 
+				            <td class="RightHabitat" name="one">用户编号：</td> 
+				            <td style="width:104px"><input name="CustomerNumber" type="text" style="width:112px;float: left;"/></td> 
+				        </tr> 
+				        <tr> 
+				            <td class="RightHabitat">电费年月：</td> 
+				            <td colspan="3" style="text-align:left">
+				            	<input name="FromData" style="width:120px" type="text" id="from">&nbsp;&nbsp;<div style="display:inline;margin-left:20px;*margin-left:25px;margin-left:25px\0"></div>至&nbsp;&nbsp;<input name="ToData" style="width:120px;margin-left:8px;*margin-left:12px;margin-left:11px\0" type="text" id="to">
+				            </td> 
+				            <td class="RightHabitat">欠费金额：</td> 
+				            <td> 
+				           		<select  name="Arrears" style="width:40px;float:left"> 
+				            	 	<option value="1"> ≥ </option> 
+				            		<option  value="0">< </option> 
+				            	</select><input name="ArrearsValue" type="text" style="width:78px;float: left" /></td> 
+				            <td class="RightHabitat">催费次数：</td> 
+				            <td ><select name="ReminderFee" style="width:40px;float:left"> 
+				            	 	<option value="1">≥</option> 
+				            		<option value="0"><</option> 
+				            	</select> 
+				            	<input name="ReminderFeeValue" type="text" style="width:72px;float: left;" />
+				            </td> 
+				        </tr> 
+				        <tr > 
+				            <td class="RightHabitat" >电话有效：</td> 
+				            <td  style="text-align:left"> 
+				            	<select name="PhoneEffective" style="width:120px;"> 
+				            	 	<option value="2">全部</option> 
+				            		<option value="1">是</option> 
+				            		<option value="0">否</option> 
+				            	</select> 
+				            </td> 
+				            <td class="RightHabitat">欠费笔数：</td> 
+				            <td > 
+				            	<select name="ArrearsItems" style="width:40px;float:left"> 
+				            	 	<option value="2">≥</option> 
+				            		<option value="1">=</option> 
+				            		<option value="0"><</option> 
+				            	</select> 
+				            	<input name="ArrearsItemsValue" type="text" style="width:78px;float: left;" /> 
+				            </td> 
+				            <td class="RightHabitat">停电标志：</td> 
+				            <td > 
+				            	<select name="PowerCutLogo" style="width:120px"> 
+				            	 	<option value="2">全部</option> 
+				            		<option value="1">已停电</option> 
+				            		<option value="0">未停电</option> 
+				            	</select> 
+				            </td> 
+				            <td ></td> 
+				            <td >
+				            </td> 
+				        </tr> 
+				        <tr > 
+				            <td class="RightHabitat" >费控标志：</td> 
+				            <td style="text-align:left"> 
+				            	<select name="IsControl" style="width:120px; "> 
+				            	 	<option value="2">全部</option> 
+				            		<option value="1">是</option> 
+				            		<option value="0">否</option> 
+				            	</select> 
+				            </td> 
+				            <td class="RightHabitat">租房客户：</td> 
+				            <td style="text-align:left"> 
+				            	<select name="IsRent" style="width:120px"> 
+				            	 	<option value="2">全部</option> 
+				            		<option value="1">是</option> 
+				            		<option value="0">否</option> 
+				            	</select> 
+				            </td> 
+				            <td class="RightHabitat">停电次数：</td> 
+				            <td > 
+				            	<select name="PowerOutages" style="width:40px;float:left"> 
+				            	 	<option value="1">≥</option> 
+				            		<option value="0"><</option> 
+				            	</select> 
+				            	<input name="PowerOutagesValue" type="text" style="width:78px;float: left;" /> 
+				            </td> 
+				           
+				            <td style="text-align:center"  colspan="2"> 
+				            	<button type="button"  class="btn btn-success" style="background-color:#009966" >查询</button> 
+				            </td> 
+				        </tr> 
+			    </table>
+				</form>
+		    </div>
+		    <div id="tip" style="color:red;margin-left:12px;margin-top:-17px;display:none">
+				当前查询没有数据
+			</div>
+
+	
+		    <div id="Arrears" class="TableCss">
+		    	<div>
+		    	
+				</div>
+		    </div>
+		   
+		    <iframe name="frm_dealer" style="display:none"  ></iframe>
+		    <br />
+	
+		    <form name="putfile" action="/ams/reminder/Press" method="post" target="frm_dealer" enctype="multipart/form-data">
+		    <div id="Entry" style="display:none">
+		    <div class="line ClientInfo" >催费信息录入</div>
+		    <div style="border:1px solid #009966;height:160px">
+
+			    <div  style="width:100%;margin-top:15px;">
+
+					<!--<div class=" star" style="float:left;padding-left:2px;" >*</div>-->
+			    	<ul style="height: 30px;  line-height: 30px; vertical-align:middle;margin:0  ">&nbsp;&nbsp;&nbsp;通知单催费：
+			
+				     	 <input name="Photo" type="file" style="height: 25px;  line-height: 25px; vertical-align:middle;width：115px "  >
+
+				   	</ul>
+			
+			    </div>
+			 	<div class="mt_20" >
+			 		<ul style="height: 30px;  line-height: 30px; vertical-align:middle;margin:0 ">&nbsp;&nbsp;&nbsp;&nbsp;电话催费&nbsp;：&nbsp;
+			 			催费电话：
+						<select name="PhoneType"  style="height: 25px;  line-height: 25px; vertical-align:middle;width:118px ">
+			            	 	<option value="1">房东电话</option>
+			            		<option value="0">房客电话</option>
+		            	</select>
+		            	<!--<input name="NewPhone" type="text" style="height: 20px;  line-height: 20px; vertical-align:middle;width:120px;margin-left:20px "/>-->
+				   	</ul>
+				   	<ul style="height: 30px;  line-height: 30px; vertical-align:middle;margin:0;" class="time">催费时间：
+						 <input name="PressTime"  style="height: 25px;  line-height: 25px; vertical-align:middle;width:115px " type="text" id="time">
+				     	 
+				   	</ul>
+					
+			    	<input name="ID" type="hidden" />
+				    <button style="margin-top:4px;background-color:#009966" type="submit" class="btn subm btn-success" disabled="true">催费</button>
+					 
+				<form>
+				</div>
+			</div>
+ 			</div>
+			<br/><br/><br/><br/>
+ 			<style>
+ 				.time
+ 				{
+ 					padding-left:118px;
+ 					padding-left:98px\0;/*IE8、9、10支持*/
+ 					*padding-left:100px ;/*IE7仅支持*/
+ 				}
+ 				:root .time
+ 				{
+ 					padding-left:94px\9;
+ 				}; /*IE9仅支持*/
+
+ 				
+ 				@media screen and (-webkit-min-device-pixel-ratio:0){ .subm 
+ 				{
+ 						margin-left:118px;
+ 				} }
+
+ 				.subm
+ 				{
+ 					margin-left:118px;
+ 					margin-left:98px\0;/*IE8、9、10支持*/
+ 					*margin-left:100px ;/*IE7仅支持*/
+ 					
+ 					
+ 				}
+ 				
+ 				:root .subm
+ 				{
+ 					margin-left:94px\0;
+ 				}; /*IE9仅支持*/
+
+
+ 			
+ 			</style>

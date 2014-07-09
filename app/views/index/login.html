@@ -1,0 +1,223 @@
+
+<script type="text/javascript">
+
+    $(document).ready(function(){
+      var height = (parseInt($(window).height())-132)/2;
+
+      $("[name=login]").css("margin-top",height);
+      $("#UserName").focus();
+      $(window).resize(function(){
+          height = (parseInt($(window).height())-132)/2;
+          $("[name=login]").css("margin-top",height);
+      })
+  
+      var Url = "/ams/index/loginCheck"
+      
+      $("button").click(function(){
+        var data = $("form").serialize();
+        PostAjax(Url,data,LocationUrl)
+          
+      
+    })
+      
+      $("body").keydown(function() {
+   
+        if (event.keyCode == "13") {
+    
+            var data = $("form").serialize();
+            PostAjax(Url,data,LocationUrl)
+          
+          
+        }
+    })
+
+      function PostAjax(Url,data,func) 
+      {
+          $.ajax({
+            url:Url,
+            data:data,
+            dataType:"json",
+            type:'post',
+            success:function(response){
+
+                if (response.success) {
+                    func(response.data);
+                } else {
+                    alert(response.msg);
+                }  
+            },
+            error:function(XMLHttpRequest, textStatus, errorThrown){
+              console.log(errorThrown);
+            }
+        })
+      }
+
+      function LocationUrl(value)
+      {  
+           window.location.href = '/ams/'+value;
+      }
+    })
+</script>
+<div name="login" style="width:470px;height:110px;border:1px solid #009966;margin:0 auto;padding-top:20px">
+<form class="form-horizontal" >
+  <div class="control-group">
+    <label class="control-label" for="UserName">登录名：</label>
+    <div class="controls">
+      <input name="UserName" style="width:180px" type="text" id="UserName" placeholder="用户名">
+    </div>
+  </div>
+  <div class="control-group">
+    <label class="control-label" for="inputPassword">密&nbsp;&nbsp;码：</label>
+    <div class="controls">
+      <input name="Password" style="width:168px;height:15px" type="password" id="inputPassword" placeholder="密码">
+    </div>
+  </div>
+  <div class="control-group">
+    <div class="controls">
+      <button type="button" class="btn">登录</button>
+    </div>
+  </div>
+</form>
+</div>
+
+
+<!--
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312" />
+<title>管理平台</title>
+<script type="text/javascript" src="/ams/public/js/jquery.1.10.2.min.js"></script> 
+<script type="text/javascript">
+
+    $(document).ready(function(){
+      
+     $("#UserName").focus();
+    
+  
+      var Url = "/ams/index/loginCheck"
+      
+      $("button").click(function(){
+        var data = $("form").serialize();
+        PostAjax(Url,data,LocationUrl)
+          
+      
+    })
+      
+      $("body").keydown(function() {
+   
+        if (event.keyCode == "13") {
+    
+            var data = $("form").serialize();
+            PostAjax(Url,data,LocationUrl)
+          
+          
+        }
+    })
+
+      function PostAjax(Url,data,func) 
+      {
+          $.ajax({
+            url:Url,
+            data:data,
+            dataType:"json",
+            type:'post',
+            success:function(response){
+
+                if (response.success) {
+                    func(response.data);
+                } else {
+                    alert(response.msg);
+                }  
+            },
+            error:function(XMLHttpRequest, textStatus, errorThrown){
+              console.log(errorThrown);
+            }
+        })
+      }
+
+      function LocationUrl(value)
+      {  
+           window.location.href = '/ams/'+value;
+      }
+    })
+</script>
+
+
+<style type="text/css">
+
+body {
+  margin:0px;
+  overflow:hidden;
+}
+.STYLE3 {color: #528311; font-size: 12px; }
+.STYLE4 {
+  color: #42870a;
+  font-size: 12px;
+}
+
+</style>
+
+<body>
+  <form>
+<table width="100%" height="100%" border="0" cellpadding="0" cellspacing="0">
+  <tr>
+    <td bgcolor="#e5f6cf">&nbsp;</td>
+  </tr>
+  <tr>
+    <td height="608" background="/ams/images/login/login_03.gif"><table width="862" border="0" align="center" cellpadding="0" cellspacing="0">
+      <tr>
+        <td height="266" background="/ams/images/login/login_04.gif">&nbsp;</td>
+      </tr>
+      <tr>
+        <td height="95"><table width="100%" border="0" cellspacing="0" cellpadding="0">
+          <tr>
+            <td width="424" height="95" background="/ams/images/login/login_06.gif">&nbsp;</td>
+            <td width="183" background="/ams/images/login/login_07.gif"><table width="100%" border="0" cellspacing="0" cellpadding="0">
+              <tr>
+                <td width="21%" height="30"><div align="center"><span class="STYLE3">用户</span></div></td>
+                <td width="79%" height="30"><input name="UserName"  style="height:18px; width:130px; border:solid 1px #cadcb2; font-size:12px; color:#81b432;" type="text" id="UserName" placeholder="用户名"></td>
+              </tr>
+              <tr>
+                <td height="30"><div align="center"><span class="STYLE3">密码</span></div></td>
+                <td height="30"><input name="Password"  style="height:18px; width:130px; border:solid 1px #cadcb2; font-size:12px; color:#81b432;" type="password" id="inputPassword" placeholder="密码">
+                </td>
+              </tr>
+              <tr>
+                <td height="30">&nbsp;</td>
+                <td height="30"><button type="button"  width="81" height="22" class="btn">登录</button></td>
+              </tr>
+            </table></td>
+            <td width="255" background="/ams/images/login/login_08.gif">&nbsp;</td>
+          </tr>
+        </table></td>
+      </tr>
+      <tr>
+        <td height="247" valign="top" background="/ams/images/login/login_09.gif">
+          <table width="100%" border="0" cellspacing="0" cellpadding="0">
+          <tr>
+            <td width="22%" height="30">&nbsp;</td>
+            <td width="56%">&nbsp;</td>
+            <td width="22%">&nbsp;</td>
+          </tr>
+          <tr>
+            <td>&nbsp;</td>
+            <td height="30"><table width="100%" border="0" cellspacing="0" cellpadding="0">
+              <tr>
+                <td width="44%" height="20">&nbsp;</td>
+                <td width="56%" class="STYLE4">版本 2014V1.0 </td>
+              </tr>
+            </table></td>
+            <td>&nbsp;</td>
+          </tr>
+        </table></td>
+      </tr>
+    </table></td>
+  </tr>
+  <tr>
+    <td bgcolor="#a2d962">&nbsp;</td>
+  </tr>
+</table>
+</form>
+</body>
+</html>
+-->

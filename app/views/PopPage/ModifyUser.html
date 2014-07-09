@@ -1,0 +1,83 @@
+<script type="text/javascript">
+  $(document).ready(function(){
+      var G = new AjaxFun();
+      var url = "/ams/UserManager/Useredit";
+      $("button").click(function(){
+
+          var data = $("form").serialize();
+          G.GetAjax('post', url, data, CloseWindow);
+          
+      })
+
+      function CloseWindow()
+      {
+        alert("修改成功");
+        window.close();
+      }
+
+      $("[name=AgainPassword]").keyup(function(){
+          var tpl;
+          var pass = $("[name=Password]").val();
+          var againpass = $("[name=AgainPassword]").val();
+ 
+          if (pass == againpass) {
+              tpl = "两次输入密码一致";
+              $("button").removeAttr("disabled");
+          } else {
+              tpl = "两次输入密码不一致";
+              $("button").attr("disabled","true");
+          }
+          tpl = "<span>"+tpl+"</span>";
+          $("#again span").remove();
+          $("#again").append(tpl);
+      })
+
+  })
+</script>
+<br />
+
+<form class="form-horizontal">
+  <div class="control-group">
+    <label class="control-label" for="Name" style="margin-top:2px">用户名：</label>
+    <div class="controls">
+      <input name="Name" style="width:220px;padding-top:2px" type="text"  value="<?php echo $user->Name; ?>" readonly="true">
+    </div>
+  </div>
+ 
+      <input name="ID" type="hidden"  value="<?php echo $user->ID; ?>">
+ 
+    
+        
+         
+  <?php if ($ts) {?>
+  <div  class="control-group">
+      <label class="control-label" >班&nbsp;&nbsp;组：</label>
+      <div id="select" class="controls">
+        <select name="Group">
+          <?php foreach ($ts as $t) {?>
+          <option value="<?php echo $t->ID; ?>"><?php echo $t->Name; ?></option>
+          <?php } ?>
+        </select>
+      </div>
+  </div>
+    <?php } ?>
+     <div class="control-group">
+    <label class="control-label" for="inputPassword" style="margin-top:2px">密&nbsp;&nbsp;码：</label>
+    <div class="controls">
+      <input name="Password" type="password" id="inputPassword" placeholder="密码" style="height:15px">
+    </div>
+  </div>
+  <div class="control-group">
+    <label class="control-label" for="inputPassword" style="*margin-top:2px">确认密码：</label>
+    <div id="again" class="controls">
+      <input name="AgainPassword" type="password" id="inputPassword" style="height:15px" placeholder="密码"> 
+      <span></span>
+    </div>
+
+  </div>
+  <div  class="control-group">
+    <div class="controls">
+        <button type="button" class="btn" disabled>修改帐户</button>
+    </div>
+  </div>
+</form>

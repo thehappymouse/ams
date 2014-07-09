@@ -1,0 +1,261 @@
+		<script type="text/javascript">
+			$(document).ready(function(){
+				var G = new AjaxFun();
+				var infourl = "/ams/Charges/ChargeInfo";
+				//查询编号的提交
+				$("button:eq(0)").click(function(){
+					
+
+					var val = $("input:eq(0)").val();
+
+					var data = {ID:val};
+
+					G.GetAjax('get',infourl,data,SetTable,"true");
+
+				})
+
+				//撤销提交
+				$("button:eq(1)").click(function(){
+					
+					var url = "/ams/Charges/Cancel";
+					var id  = $("td:eq(3)")[0].innerText;
+					var drawn = $("select").val();
+
+					var ID = $("[name=ID]").val();
+					
+					
+					var data = {Number:id,ID:ID,Drawn:drawn};
+					var val = {ID:id};
+					G.GetAjax('post',url,data);
+						
+					G.GetAjax('get',infourl,val,SetTable);
+					$("button:eq(1)").attr("disabled","true")
+				})
+
+				
+				
+
+				
+
+
+				//添加表格
+				function SetTable(value) 
+				{
+
+					if (value == null){
+
+						$("#info div").remove();
+						$("#tip").css("display","block");
+						$("#Arrears div").remove();
+						$("#form").css("display","none");
+
+						return ; 
+
+					}
+					var v =  ReplaceArray(value);
+					SetInfoTable(v);
+					var title = '收费记录';
+					var headarray = Array("电费年月","收费金额","收费人","收费人时间","房东电话","房客电话");
+					var model = Array("YearMonth","Money","UserName","Time","LandlordPhone","RenterPhone");
+					var number = v.Number;
+					SetArrearsTable(number,v['Charge'],headarray,title,model);
+		
+
+					$("#form").css("display","block");
+
+				}
+
+				$("#Arrears").on("click","[name=select]",function(v){
+					var ID = v.currentTarget.defaultValue;
+					$("[name=ID]").val(ID);
+					$("button:eq(1)").removeAttr("disabled")
+				})
+
+
+				//用户信息表格
+				function SetInfoTable(v)
+				{	
+					var IsCutText;
+					var IsRentText;
+					var IsControlText;
+					if (v.IsCut == 2 ){ IsCutText = '全部'} else if( v.IsCut ==1) { IsCutText = '已停电'} else { IsCutText = '未停电'}
+					if (v.IsRent == 2 ){ IsRentText = '全部'} else if( v.IsRent ==1) { IsRentText = '是'} else { IsRentText = '否'}
+					if (v.IsControl == 2 ){ IsControlText = '全部'} else if( v.IsControl ==1) { IsControlText = '是'} else { IsControlText = '否'}
+
+					var tpl = '<div><div   class="line ClientInfo" >用户基本信息</div><table >'+
+
+				        '<tr >'+
+
+				            '<td style="width:155px" >用户名称：</td>'+
+
+				            '<td style="text-align:left;width:155px">'+v.Name+'</td>'+
+
+				            '<td style="width:155px">用户编号：</td>'+
+
+				            '<td style="text-align:left;width:155px">'+v.Number+'</td>'+
+
+				            '<td style="width:155px">管理班组：</td>'+
+
+				            '<td style="text-align:left;width:155px">'+v.Team+'</td>'+
+
+				        '</tr>'+
+
+				        '<tr>'+
+
+				            '<td class="RightHabitat">用电地址：</td>'+
+
+				            '<td style="text-align:left"><div title="'+v.Address+'" style="width:160px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">'+v.Address+'</div></td>'+
+
+				            '<td class="RightHabitat">抄表段编号：</td>'+
+
+				            '<td style="text-align:left">'+v.SegmentID+'</td>'+
+
+				            '<td class="RightHabitat">抄表员：</td>'+
+
+				            '<td style="text-align:left">'+v.Name+'</td>'+
+
+				        '</tr>'+
+
+				        '<tr>'+
+
+				            '<td class="RightHabitat">停电标志：</td>'+
+
+				            '<td class="Warn" style="text-align:left">'+IsCutText+'</td>'+
+
+				            '<td class="RightHabitat">停电方式：</td>'+
+
+				            '<td class="Warn" style="text-align:left">'+v.CutStyle+'</td>'+
+
+				            '<td class="RightHabitat">费控协议：</td>'+
+
+				            '<td style="text-align:left">'+IsControlText+'</td>'+
+
+				        '</tr>'+
+
+				        '<tr>'+
+
+				            '<td class="RightHabitat">租房户：</td>'+
+
+				            '<td style="text-align:left">'+IsRentText+'</td>'+
+
+				            '<td class="RightHabitat">房东电话：</td>'+
+
+				            '<td style="text-align:left">'+v.LandlordPhone+'</td>'+
+
+				            '<td class="RightHabitat">房客电话：</td>'+
+
+				            '<td style="text-align:left">'+v.RenterPhone+'</td>'+
+
+				        '</tr>'+
+
+				    '</table></div>';
+
+				    $("#info div").remove();
+
+				    $("#info").append(tpl);
+
+				}
+
+
+
+
+				//欠费信息表格
+				function SetArrearsTable(number,s,headarray,title,model)
+				{
+					var headmodel = "";
+					var bodyTpl = "";
+					var s =  ReplaceArray(s);
+					for (var i in s) {
+						bodyTpl += '<tr  style="height:20px">'+
+							'<td style="width:30px;text-align:center"><input name="select" value="'+s[i].ID+'"type="radio" style="vertical-align:text-bottom; " /></td>';
+							for (var n in model) {
+
+								bodyTpl += '<td style="text-align:center">'+s[i][model[n]]+'</td>';
+							}
+				        bodyTpl +='</tr>';
+
+					}
+				
+					var headTpl = '<div><div class="line ClientInfo" >'+title+'</div><table id="info" >'+
+					    		'<thead>'+
+						    	'<tr >'+
+						    	'<th style="text-align:center"></th>';
+
+			    	for (var i in headarray) {
+			    		headmodel +='<th>'+headarray[i]+'</th>';
+			    	}
+					            
+				    var footTpl = '</tr></tbody></table></div>';
+
+				    var tpl = headTpl+headmodel+'</thead><tbody>'+bodyTpl+footTpl;
+				    $("#Arrears div").remove();
+
+				    $("#Arrears").append(tpl);
+				    $("#tip").css("display","none");
+
+
+					$("#Arrears table tr:odd").addClass("InfoTr");
+
+				}
+
+			})
+		</script>
+		<br/>
+			<div>
+				<div class="line ClientInfo" >查询条件</div>
+				<div style="border:1px solid #009966;height:60px;">
+
+					<div style="margin-top:15px">
+			
+				    	<div class=" InputStyle" style="margin-left:12px;float:left;margin-top:2px;*margin-top:3px">用户编号：</div>
+					    <div class=" TreeInput" style="margin-left:3px;float:left">
+					      <input type="text" class="input-small" style="width:120px;">
+					    </div>
+					    <button type="button" class="btn btn-success" style="background-color:#009966;margin-left:20px">查询</button>
+					</div>
+				</div>
+		    </div>
+		     <div id="tip" style="color:red;margin-left:12px;display:none;margin-top:4px">
+				当前查询没有数据
+			</div>
+		    <br />
+		    <div  id="info" class="TableCss" >
+
+		    	<div>
+
+		    	</div>
+
+			
+
+		    </div>
+		    
+		    <br />
+		    <div id="Arrears" class="TableCss">
+
+		    	<div>
+
+		    	</div>
+
+		    </div>
+		    <br />
+		    <input name="ID" type="hidden" />
+		    <div  id="form" style="display:none">
+			    <form>
+			    	<div class="line ClientInfo" >撤销收费操作</div>
+					<div style="border:1px solid #009966;height:60px;">
+				    <div style="margin-top:15px">
+				    	<div class=" InputStyle" style="margin-left:10px;float:left;margin-top:4px;*margin-top:5px">撤销收费：</div>
+					    <div class=" TreeInput" style="margin-left:5px;float:left;margin-top:2px;*margin-top:0">
+					      <select name="withdrawn" style="width:100px">
+									<option value="0">操作失误</option>
+									<option value="1">录入失误</option>
+							</select>
+					    </div>
+					    <button type="button" class="btn btn-success" style="background-color:#009966;*margin-top:1px" disabled>撤销收费</button>
+				    </div>
+				    </div>
+			    </form>
+			</div>
+		   
+		    </div><br/><br/><br/><br/>
+

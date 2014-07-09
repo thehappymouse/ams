@@ -1,0 +1,30 @@
+<script type="text/javascript">
+  $(document).ready(function(){
+      $("button").click(function(){
+          var data = $("form").serialize();
+          G.GetAjax('post',url,data);
+      })
+
+     
+  })
+</script>
+<br />
+<form class="form-horizontal">
+  <div class="control-group">
+    <label class="control-label" for="inputEmail">用户名：</label>
+    <div class="controls">
+      <input type="text" id="inputEmail" placeholder="用户名">
+    </div>
+  </div>
+  <div class="control-group">
+    <label class="control-label" for="inputPassword">密码：</label>
+    <div class="controls">
+      <input type="password" id="inputPassword" placeholder="密码">
+    </div>
+  </div>
+
+   
+  <div class="controls">
+      <button type="submit" class="btn">修改帐户</button>
+  </div>
+</form>
