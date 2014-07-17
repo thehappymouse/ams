@@ -171,7 +171,7 @@ class CustomerHelper extends HelperBase
         }
 
         //是否结清
-        if ($p->IsClean && $p->IsClean != 2){
+        if ($p->IsClean != NULL && $p->IsClean != 2){
             $conditions .= " AND IsClean = $p->IsClean";
         }
 

@@ -86,7 +86,7 @@ class InfoController extends ControllerBase
      */
     private function AddSegment($uid, &$arr)
     {
-        $seg = Segment::find(array("UserID = :ID:", "bind" => array("ID" => $uid)));
+        $seg = Segment::find(array("UserID = :ID: ORDER BY Number", "bind" => array("ID" => $uid)));
 
         $all = array("ID" => "-1", "Number" => "全部");
         $arr["Number"][] = $all;

@@ -39,6 +39,8 @@ class ReminderController extends ControllerBase
 
         $params = $this->request->get();
 
+        $params["IsClean"] = "0";
+
         list($total, $data) = CustomerHelper::ArrearsInfo($params);
 
         $this->ajax->total = $total;

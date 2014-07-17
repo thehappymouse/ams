@@ -82,7 +82,7 @@ class Security extends Phalcon\Mvc\User\Plugin
                 "countsearch" => array("reconciliationinquiry","reconciliation","charges","press","cut","reset","customer"),
                 "jpg" => array("singlebar","arrarscount","cutcount","arrarsmonth","bar","line","pie"),
                 "systemlog" => array("index","list"),
-                "poppage" => array("reminder","powercut","info","modifyuser"),
+                "poppage" => array("reminder","powercut","info","modifyuser", "reminderfee"),
                 "manager" => array("index","userlist","grouplist","groupdel","userdel","build","buildajax","user","group","groupbuild","systemlog","useredit","getgroup","groupbuildajax"),
                 "customer" => array("index","update"),
                 "export" => array("reportpress","reportwork","advance","reportcharge","accountcheck","reconciliation","press","reset","countcut","countcharges","cut","reminder")
@@ -91,22 +91,27 @@ class Security extends Phalcon\Mvc\User\Plugin
             //抄表员
             $materResource = array(
                 "site" => array("index", "index2"),
+
+                "poppage" => array("reminder","powercut","info", "reminderfee"),
                 "info" => array("teamlist", "userlist", "segmentlist"),
-                "poppage" => array("reminder","powercut","info"),
                 "export" => array("reportpress", "reportwork", "advance", "reportcharge", "accountcheck", "reconciliation", "press", "reset", "countcut", "countcharges", "cut", "reminder"),
                 "count" => array("press", "cut", "reset", "customer"),
                 "countsearch" => array("reconciliationinquiry", "reconciliation", "charges", "press", "cut", "reset", "customer"),
                 "jpg" => array("singlebar", "arrarscount", "cutcount", "arrarsmonth", "bar", "line", "pie"),
-                "reminder" => array("reminder", "powerfailure", "cancel", "restoration", "searchfee", "searchpress", "searchreset", "cut", "cancelpress", "press", "advance", "reset"),
+                "reminder" => array("reminder", "powerfailure", "cancel", "restoration", "searchfee", "searchpress", "searchreset", "cut", "cancelpress", "press", "reset"),
                 "countsearch" => array("reconciliationinquiry", "reconciliation", "charges", "press", "cut", "reset", "customer"),
             );
 
             //抄表员班长
             $role_mater_leadResource = array_merge($materResource, array(
-                "report" => array("work"),
-                "reportsearch" => array("work"),
+                "reminder" => array("reminder", "powerfailure", "cancel", "restoration", "searchfee", "searchpress",
+                    "searchreset", "cut", "cancelpress", "press", "advance", "reset", "receipts"),
+                "report" => array("work", "electricity","press"),
+                "reportsearch" => array("work","electricity","press"),
+                "count" => array("press", "cut", "reset", "customer", "singleinquiries", "charges"),
+
                 "export" => array("reportpress", "reportwork", "advance", "reportcharge", "accountcheck", "reconciliation", "press", "reset", "countcut", "countcharges", "cut", "reminder"),
-                "import" => array("advance", "progress", "advanceupload"),
+                "import" => array("advance", "progress", "advanceupload", "arrears", "arrearsupload"),
             ));
 
             //收费员
@@ -118,8 +123,8 @@ class Security extends Phalcon\Mvc\User\Plugin
 
             //收费员班长
             $role_toll_leadResource = array_merge($role_tollResource, array(
-                "count" => array("customer"),
-                "countsearch" => array("customer"),
+                "count" => array("customer", "reconciliationinquiry", "singleinquiries"),
+                "countsearch" => array("customer", "reconciliationinquiry"),
                 "info" => array("teamlist", "userlist", "segmentlist"),
                 "export" => array("reportpress", "reportwork", "advance", "reportcharge", "accountcheck", "reconciliation", "press", "reset", "countcut", "countcharges", "cut", "reminder"),
                 "export" => array("reportpress", "reportwork", "advance", "reportcharge", "accountcheck", "reconciliation", "press", "reset", "countcut", "countcharges", "cut", "reminder"),
