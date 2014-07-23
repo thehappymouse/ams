@@ -11,7 +11,6 @@
 			excel.url = "/ams/export/ReportCharge";
 			excel.exportTo();
 
-
 			var DrownBox = new DropDownBox()//获取三级下拉框
 			DrownBox.select = {"Team":"#team"};
 
@@ -19,52 +18,45 @@
 			var url = "/ams/Info/TeamList";
 			G.GetAjax('get',url,data,DrownBox.SetAllSelect,true);
 
-			
 			var value;
 			$("button").click(function(){
 				var SearchUrl = "/ams/ReportSearch/Electricity";
 				var data = $("form:eq(0)").serialize();
 				excel.Todata = data;
 				//data = data+"&Page="+Page+"&PageSize="+PageSize;
-
 				G.GetAjax('get',SearchUrl,data,ShowTable,true);
-	
 			})
 
 			function ShowTable(v)
-			{	
+			{
 				if (v.years.length == 0){
 					$("#table1 div").remove();
 					$("#tip").css("display","block");
+                    $(".TableCss div:lt(3)").remove();
 					return;
 				}
-				
-				showTitle();
 
+				showTitle();
 				value = v;
 				var headmodel = Array("Money", "NoChargeMoney", "Rate");
 				var headarray = Array( "应收电费", "欠费余额","回收率");
 				SetTable(v, headmodel, headarray);
-			
 			}
 
 			function showTitle(select)
 			{
 				$(".TableCss div:lt(3)").remove();
-
 				SetTitle("电费回收率排名");
 				SetTitle("户数回收率排名");
 				SetTitle("综合排名");
 				$(".TableCss div:eq(0)").addClass("greenColor");
 				$(".TableCss div:eq(1)").addClass("fontColor");
 				$(".TableCss div:eq(2)").addClass("fontColor");
-
 			}
 
 			function SetTitle(title)
 			{
 				var tpl = '<div   class="line fontColor" style="font-size:15px;margin-left:10px;float:left;cursor:pointer">'+title+'</div>';
-
 				$(".TableCss").prepend(tpl);
 			}
 			function SetTable(v, headmodel, headarray)
@@ -75,17 +67,15 @@
 				var tbodyheadmodel = "";
 				var tbodycontent = "";
 				var data;
-			
-				var width = (value.length*3+1)*59;
-				
+				var width = (value.length*3+1)*90;
+
 				if (width < 940) {
 					width = '940px';
-					stylecss = '<div style="'+width+'">';
 				}  else {
-					width += 'px'; 
-					stylecss = '<div style="width:'+width+';overflow:scroll;overflow-y:hidden">';
+					width += 'px';
 				}
-				
+
+                stylecss = '<div style="width:940px;overflow:scroll;overflow-y:hidden">';
 				var table = stylecss+'<table id="info"  class="table-bordered" style="width:'+width+'" >'+
 				    '<thead><tr ><th >抄表员</th>';
 
@@ -93,14 +83,10 @@
 		    	 	headtpl +=  '<th colspan="3">'+value[i].User+'</th>';
 		    	 }
 			    headtpl +='</tr></thead><tbody><tr><td style="color:#009966;font-weight:bold;text-align:center">欠费年月</td>';
-				      
 				     for (var i in value) {
-				    
 				     	for (var i=0; i<3; i++) {
-
 				     		tbodyheadmodel += '<td style="color:#009966;font-weight:bold;text-align:center">'+headarray[i]+'</td>';
 				     	}
-		     			
 				     }
 					tbodyheadmodel +='</tr>';
 
@@ -109,13 +95,9 @@
 					   		tbodycontent += '<tr><td style="text-align:center">'+yeardata+'</td>'
 					   		for (var i in value) {
 									data = value[i].Data;
-									
 								if (data[yeardata] != undefined) {
 							   		contentdata = data[yeardata]
-
 							   		for (var i in headmodel) {
-							   			
-
 							   			tbodycontent  += '<td style="text-align:center">'+contentdata[headmodel[i]]+'</td>';
 							   		}
 							   } else {
@@ -123,14 +105,10 @@
 							   			tbodycontent  += '<td></td>';
 							   		}
 							   }
-								   
-									
 							}
-							   	
 							   tbodycontent += '</tr>'
 							}
 
-				    
 				       var tbodyend =  '<tr ><td style="color:#009966;font-weight:bold;text-align:center">汇总</td>';
 				           for (var i in value) {
 				           		var all = value[i].AllData;
@@ -138,14 +116,11 @@
 				           		for (var i in all) {
 				           			if (headmodel[n]) {
 										tbodyend +=  '<td style="text-align:center">'+all[headmodel[n]]+'</td>';
-				           			
 									}
 									n++;
-				           			
 				           		}
 				           }
-				        
-				           
+
 				        tbodyend += '</tr>'+
 				        '<tr class="InfoTr">'+
 				            '<td style="color:#009966;font-weight:bold;text-align:center">排名</td>';
@@ -154,7 +129,6 @@
 				            	i++;
 				            	tbodyend += '<td colspan="3" style="color:#009966;font-weight:bold;text-align:center">'+i+'</td>';
 				            }
-				            
 				         
 				        tbodyend +='</tr>'+
 				            '<tr>'+
@@ -163,29 +137,23 @@
 				    var end = '</tbody>'+
 			    '</table></div>';
 			    var tpl = table+headtpl+tbodyheadmodel+tbodycontent+tbodyend+end;
-			    
+
 			    $("#table1").append(tpl);
 			    
 			    $("#table1 table tr:odd").addClass("InfoTr");
 			    $("#table1 table tr:eq(1)").removeClass("InfoTr");
-			    //console.log(tpl);
 			}
 			
 
 			$(".TableCss").on("click"," div:eq(0)",function(v,s){
-
 				$(".greenColor").removeClass("greenColor");
 				$(".TableCss div:eq(0)").addClass("greenColor");
 
 				$("#table1 div").remove();
 				ShowTable(value);
-				
-				//$("#table1").append(table);
 			})
 
 			$(".TableCss").on("click"," div:eq(1)",function(v,s){
-				
-				
 				$("#table1 div").remove();
 				
 				showTitle();
@@ -195,7 +163,6 @@
 				var headmodel = Array("ArrearCount", "NoChargeCount", "CountRate");
 				var headarray = Array( "应收户数", "欠费户数","回收率");
 				SetTable(value, headmodel, headarray);
-				
 			})
 
 			$(".TableCss").on("click"," div:eq(2)",function(v,s){
@@ -205,31 +172,23 @@
 				$(".TableCss div:eq(2)").addClass("greenColor");
 				var url = '/ams/ReportSearch/user/'+team;
 				 $("#table1 div").remove();
-
 				 $("#tip").css("display","none");
 			    // 创建图片对象
 			    if (img == undefined) {
 			    	img = new Image();
-			    }
-				 
-				 
+			    } 
 				// 改变图片的src
 				img.src = url;
  		
 			    img.onload = function(){
 			    	if (img.width < 600) {
 			    		width = '600px';
-			    	
 			    	} 
 			    	var tpl = '<div  style="border:1px solid #009966;height:auto;width:'+width+';float:left" >'+
-				    '<img style="margin-top:20px;margin-left:20px"  src="'+url+'" />'+
-				    '</div>';
-
-				   
+                                '<img style="margin-top:20px;margin-left:20px"  src="'+url+'" />'+
+                                '</div>';
 				    $("#table1").append(tpl);
 			    }
-			    
-			    
 			    
 			})
 
@@ -241,15 +200,10 @@
 		    <form>
 		    <div style="border:1px solid #009966;height:55px;">
 			    <div   style="margin-top:15px">
-
-			    	<div class=" InputStyle" style="margin-left:10px;float:left;margin-top:2px;margin-top:1px;\0;*margin-top:4px;">管理班组：</div>
-			    	
+			    	<div class=" InputStyle" style="margin-left:10px;float:left;margin-top:2px;margin-top:1px\0;*margin-top:4px;">管理班组：</div>
 				    <div id="team" class=" TreeInput" style="margin-left:5px;float:left">
-				        
 				    </div>
-					
 					<button type="button" class="btn btn-success" style="background-color:#009966;margin-left:20px;margin-top:-1px\0;*margin-top:2px;">查询</button>
-				
 				</div>
 			</div>
 			</form>
@@ -258,9 +212,6 @@
 			</div>
 		    <br />
 		    <div id="Arrears" class="TableCss">
-		    	
-		    
 		    	<span id="table1">
 			    </span>
-
 		    </div><br/><br/><br/><br/>

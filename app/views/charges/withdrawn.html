@@ -104,19 +104,20 @@
 
 				            '<td class="RightHabitat">用电地址：</td>'+
 
-				            '<td style="text-align:left"><div title="'+v.Address+'" style="width:160px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">'+v.Address+'</div></td>'+
+				            '<td colspan="3" style="text-align:left"><div title="'+v.Address+'" style="width:467px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">'+v.Address+'</div></td>'+
 
 				            '<td class="RightHabitat">抄表段编号：</td>'+
 
 				            '<td style="text-align:left">'+v.SegmentID+'</td>'+
 
-				            '<td class="RightHabitat">抄表员：</td>'+
 
-				            '<td style="text-align:left">'+v.Name+'</td>'+
 
 				        '</tr>'+
 
 				        '<tr>'+
+                            '<td class="RightHabitat">抄表员：</td>'+
+
+                            '<td style="text-align:left">'+v.Name+'</td>'+
 
 				            '<td class="RightHabitat">停电标志：</td>'+
 
@@ -126,13 +127,14 @@
 
 				            '<td class="Warn" style="text-align:left">'+v.CutStyle+'</td>'+
 
-				            '<td class="RightHabitat">费控协议：</td>'+
 
-				            '<td style="text-align:left">'+IsControlText+'</td>'+
 
 				        '</tr>'+
 
 				        '<tr>'+
+                            '<td class="RightHabitat">费控协议：</td>'+
+
+                            '<td style="text-align:left">'+IsControlText+'</td>'+
 
 				            '<td class="RightHabitat">租房户：</td>'+
 
@@ -142,12 +144,18 @@
 
 				            '<td style="text-align:left">'+v.LandlordPhone+'</td>'+
 
-				            '<td class="RightHabitat">房客电话：</td>'+
-
-				            '<td style="text-align:left">'+v.RenterPhone+'</td>'+
 
 				        '</tr>'+
+                        '<tr>'+
 
+                            '<td class="RightHabitat">房客电话：</td>'+
+
+                            '<td style="text-align:left">'+v.RenterPhone+'</td>'+
+                            '<td></td>'+
+                            '<td></td>'+
+                            '<td></td>'+
+                            '<td></td>'+
+                        '</tr>'+
 				    '</table></div>';
 
 				    $("#info div").remove();

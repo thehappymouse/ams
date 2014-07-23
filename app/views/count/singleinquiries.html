@@ -81,7 +81,7 @@ $(document).ready(function(){
 
 	            '<td >用电地址：</td>'+
 
-	            '<td style="text-align:left"><div title="'+value.Address+'" style="width:120px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">'+value.Address+'</div></td>'+
+	            '<td colspan="3" style="text-align:left"><div title="'+value.Address+'" style="width:350px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">'+value.Address+'</div></td>'+
 
 	            '<td >抄表段编号：</td>'+
 
@@ -91,9 +91,7 @@ $(document).ready(function(){
 
 	            '<td style="text-align:left">'+value.AssetNumber+'</td>'+
 
-	            '<td >累计欠费次数：</td>'+
 
-	            '<td style="text-align:left">'+value.ArrearsCount+'</td>'+
 
 	        '</tr>'+
 
@@ -138,12 +136,14 @@ $(document).ready(function(){
 	        '</tr>'+
 
 	        '<tr>'+
+               '<td >累计欠费次数：</td>'+
 
+                '<td style="text-align:left">'+value.ArrearsCount+'</td>'+
 	            '<td >备注：</td>'+
 
 
 
-	            '<td style="text-align:left" colspan="7" ><div style="width:500px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">'+value.Desc+'</div></td>'+
+	            '<td style="text-align:left" colspan="5" ><div style="width:500px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">'+value.Desc+'</div></td>'+
 
 
 
