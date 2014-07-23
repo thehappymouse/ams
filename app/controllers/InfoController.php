@@ -3,12 +3,15 @@
 
 class InfoController extends ControllerBase
 {
+    var $role;
 
     public function initialize()
     {
         $this->view->disable();
 
         parent::initialize();
+
+        $this->role = $this->loginUser["Role"];
     }
 
     /**
@@ -16,9 +19,8 @@ class InfoController extends ControllerBase
      */
     public function  TeamListAction()
     {
-        $role = $this->loginUser["Role"];
 
-        if ($role == ROLE_MATER || $role == ROLE_MATER_LEAD) { //抄表员
+        if ($this->role == ROLE_MATER || $this->role == ROLE_MATER_LEAD) { //抄表员
             $teams = Team::find("ID=" . $this->loginUser["TeamID"]);
         } else {
 
@@ -47,11 +49,8 @@ class InfoController extends ControllerBase
      */
     public function UserListAction()
     {
-
         $teamid = $this->request->get("ID");
-
         $this->addUserWithSeg($teamid, $arr);
-
         $this->ajax->flushData($arr);
     }
 
@@ -60,11 +59,11 @@ class InfoController extends ControllerBase
      */
     private function  addUserWithSeg($tid, &$arr)
     {
-        $role = $this->loginUser["Role"];
-        if ($role == ROLE_MATER) { //抄表员
+        if ($this->role == ROLE_MATER) { //抄表员
             $users = User::find("ID=" . $this->loginUser["ID"]);
-        } else if ($role == ROLE_MATER_LEAD) {
+        } else if ($this->role == ROLE_MATER_LEAD) {    //班长, 添加全部字段
             $users = User::find(array("Role = 1 AND TeamID = :TID:", "bind" => array("TID" => $tid)));
+            $arr["Name"][] = array("ID" => "tid_$tid", "Name" => "全部");
         } else {
             $users = User::find(array("(Role = 1 OR Role = 3) AND TeamID = :TID:", "bind" => array("TID" => $tid)));
         }
@@ -73,8 +72,8 @@ class InfoController extends ControllerBase
         }
 
         //第一个用户的操表段
-        if (($user = $users->getFirst()) != null) {
-            $this->AddSegment($users->getFirst()->ID, $arr);
+        if ($arr["Name"][0] != null) {
+            $this->AddSegment($arr["Name"][0]["ID"], $arr);
         }
     }
 
@@ -86,13 +85,20 @@ class InfoController extends ControllerBase
      */
     private function AddSegment($uid, &$arr)
     {
-        $seg = Segment::find(array("UserID = :ID: ORDER BY Number", "bind" => array("ID" => $uid)));
+
+        if(($tid = User::IsAllUsers($uid))){
+
+            $seg = DataUtil::GetSegmentDataByTid($tid);
+        }
+        else {
+            $seg = DataUtil::GetSegmentsDataByUid($uid);
+        }
 
         $all = array("ID" => "-1", "Number" => "全部");
         $arr["Number"][] = $all;
 
         foreach ($seg as $s) {
-            $arr["Number"][] = $s->dump();
+            $arr["Number"][] = $s;
         }
 
         return $arr;

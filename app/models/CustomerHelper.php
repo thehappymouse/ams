@@ -124,6 +124,8 @@ class CustomerHelper extends HelperBase
         return $data;
     }
 
+
+
     /**
      * 欠费用户信息，多个界面综合使用
      * @param array $params
@@ -143,9 +145,14 @@ class CustomerHelper extends HelperBase
         }
 
         if ($p->Number) {
-            if ($p->Number == "全部") {
-                $uid = $p->Name;
-                $str = DataUtil::GetSegmentsStrByUid($uid);
+            if ($p->Number == "全部") {   //选择了所有抄表段
+                if(($tid = User::IsAllUsers($p->Name))){ //选择了所有抄表员，则取其组下的抄表段
+                    $str = DataUtil::GetSegmentsStrByTid($p->Team);
+                }
+                else {
+                    $str = DataUtil::GetSegmentsStrByUid($p->Name);
+                }
+
                 $conditions .= " AND Segment in ($str)";
             } else {
                 $conditions .= " AND Segment = :segment:";

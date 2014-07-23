@@ -68,6 +68,20 @@ class User extends \Phalcon\Mvc\Model
     }
 
     /**
+     * 查询uid是否表示全部。  int表示否；tid_1 表示全部，1表示组的ID号
+     * @param $uid
+     * @return bool|int
+     */
+    public static function IsAllUsers($uid){
+        if(preg_match('/^tid_(\d{1,})/', $uid, $matches)){
+            return $matches[1];
+        }
+        else {
+            return false;
+        }
+    }
+
+    /**
      * Independent Column Mapping.
      */
     public function columnMap()
