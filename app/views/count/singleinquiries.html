@@ -73,7 +73,7 @@ $(document).ready(function(){
 	            '<td style="text-align:left;width:116px">'+value.Number+'</td>'+
 	            '<td style="width:116px">用户名称：</td>'+
 
-	            '<td style="text-align:left;width:116px">'+value.Name+'</td>'+
+	            '<td style="text-align:left;width:116px"><div title="'+value.Name+'" style="width:110px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">'+value.Name+'</div></td>'+
 
 	        '</tr>'+
 
@@ -184,9 +184,9 @@ $(document).ready(function(){
 								if (source[model[n]] == 2) {
 									text = text = '<div style="'+modelcss[n]+'" title="预收转逾期">预收转逾期</div>';
 								} else if (source[model[n]] == 1){
-									text = text = '<div style="'+modelcss[n]+'" title="已结清">已结清</div>';
+									text = text = '<div style="'+modelcss[n]+'" title="已结清">是</div>';
 								} else {
-									text = text = '<div style="'+modelcss[n]+'" title="未结清">未结清</div>';
+									text = text = '<div style="'+modelcss[n]+'" title="未结清">否</div>';
 								}
 							} else if(model[n] == "IsCut"){
 								if (source[model[n]] == 2) {

@@ -42,7 +42,7 @@
                 <div id="text" align="center"></div>
 
                 <br/>
-                <input id="submit" class="btn " type="button" value="确定" onclick="hideDiv('pop-div');"
+                <input id="submit" class="btn btn-success" type="button" value="确定" onclick="hideDiv('pop-div');"
                        style="width:50px"/>
             </div>
 

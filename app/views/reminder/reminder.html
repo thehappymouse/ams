@@ -3,7 +3,9 @@
 
 <script type="text/javascript">
 $(document).ready(function(){
+                var gridArr = [];
 				var pic = true;
+                $("#from").val(<?php echo $startdate; ?>);
 				$("#time").val(CurrentTime);
 				var G = new AjaxFun();//获取ajax方法
 
@@ -19,13 +21,18 @@ $(document).ready(function(){
 				var SearchUrl = "/ams/reminder/SearchFee";
 				
 				$("button:eq(0)").click(function(){
-					
+                    var reValue = $("input[name=ReminderFeeValue]").val();
+                    if (reValue < 0) {
+                        popupDiv('pop-div','催费次数不能小于0');
+                        return;
+                    }
+
 					data = $("form:eq(0)").serialize();
 					clickpage.Data = data;
 					var SearchData = data+"&Page=1&PageSize="+PageSize;
 
 					G.GetAjax('post',SearchUrl,SearchData,ShowTable,"true");
-					
+
 				})
 
 				
@@ -45,40 +52,42 @@ $(document).ready(function(){
 
 				})
 
-				$("#Condition").on("submit","#page",function(){
 
-					
-				})
 				$("#Arrears").on("click","[name=select]",function(v){
 					var ID = v.currentTarget.defaultValue;
+                    var pType = $("select[name=PhoneType]").val();
+
+                    $("input[name=NewPhone]").val(gridArr[ID][pType]);
 					$("[name=ID]").val(ID);
 					if (pic) {
 						$("button:eq(1)").removeAttr("disabled");
 					}
-					
 				})
 
+                $("select[name=PhoneType]").on("change",function(e){
+                    var pType = e.currentTarget.value;
+                    var ID = $("[name=ID]").val();
+                    if (ID == "" ) {
+                        popupDiv('pop-div', '请选择用户信息');
+                        return;
+                    }
+                    $("input[name=NewPhone]").val(gridArr[ID][pType]);
+                })
 				$("body").keydown(function() {
 					var msg;
-          				if (event.keyCode == "13") {
-          					
-          					if ($("[name=Num]").focus()) {
-          						Page = $("[name=Num]").val();
-
-          						if (Page>PageNumber || Page<1) {
-          							msg = "总共只有"+PageNumber+"页。没有第"+Page+"页！";
-									popupDiv('pop-div',msg);
-									Page =1;
-									
-          						}
-
-								var SearchData = data+"&Page="+Page+"&PageSize="+PageSize;
-								clickpage.Page = Page;
-							
-								G.GetAjax('post',SearchUrl,SearchData,ShowTable);
-          					}
-          					
-          				}
+                    if (event.keyCode == "13") {
+                        if ($("[name=Num]").focus()) {
+                            Page = $("[name=Num]").val();
+                            if (Page>PageNumber || Page<1) {
+                                msg = "总共只有"+PageNumber+"页。没有第"+Page+"页！";
+                                popupDiv('pop-div',msg);
+                                Page =1;
+                            }
+                            var SearchData = data+"&Page="+Page+"&PageSize="+PageSize;
+                            clickpage.Page = Page;
+                            G.GetAjax('post',SearchUrl,SearchData,ShowTable);
+                        }
+                    }
               	})
 
 			 	
@@ -86,18 +95,16 @@ $(document).ready(function(){
 			 
 				
 				$("iframe").load(function(v){
-					var Vdata = window.frames["frm_dealer"].document.documentElement.innerText;
-					
+                    var Vdata = window.frames["frm_dealer"].document.documentElement.innerText;
 					if (Vdata) {
-					
 						var JsonData = eval("("+Vdata+")");
 						if (JsonData.success) {
 							var data = $("form:eq(0)").serialize();
 							data = data+"&Page=1&PageSize="+PageSize;
-						
 							G.GetAjax('post',SearchUrl,data,ShowTable);
+                            //$("form[name=putfile]").reset();
+                            popupDiv('pop-div','成功');
 						} else {
-							
 							popupDiv('pop-div',JsonData.msg);
 						}
 						Page =1;
@@ -107,7 +114,19 @@ $(document).ready(function(){
 					
 				})
 
-		
+                $("form[name=putfile]").submit(function(e){
+                    if ($("input[name=reminderStyle]:checked").val() ==1 ) {
+                        if (!$("input[type=file]").val()) {
+                            popupDiv('pop-div','通知单不能为空');
+                            e.preventDefault();
+                        }
+                    }
+                    /*if ($("input[name=reminderStyle]:checked").val() ==2 ) {
+                        if (!$("input[type=file]").val()) {
+                            popupDiv('pop-div','通知单不能为空');e.preventDefault();
+                        }
+                    }*/
+                });
 			
 				clickpage.SearchUrl = SearchUrl;
 				Page = clickpage.ReturnPage();
@@ -122,23 +141,15 @@ $(document).ready(function(){
 						$("#Arrears div").remove();
 						$("#Entry").css("display","none");
 						$("#tip").css("display","block");
-						//SetInfoTable();
-						//SetArrearsTable('','',array,title,model,modelcss);
-
-						return ; 
-
+						return ;
 					}
 
 					Page = clickpage.ReturnPage();
 					var title = '欠费用户信息';
 					var headarray = Array("抄表段编号", "用户编号", "用户名称", "用电地址", "电费年月", "电费金额", "结清标志", "停电标志", "催费次数", "停电次数");
 					var model = Array("Segment", "CustomerNumber", "CustomerName", "Address", "YearMonth", "Money", "IsClean", "IsCut", "PressCount", "CutCount");
-
 					var modelcss = Array("text-align:center;width:80px", "text-align:center;width:80px", "text-align:center;width:80px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis",  "text-align:left;width:130px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis", "text-align:center;width:80px", "text-align:center;width:80px", "text-align:center;width:70px", "text-align:center;width:80px", "text-align:center;width:80px", "text-align:center;width:81px");
-		
-					
-					SetArrearsTable(total,value,headarray,title,model,modelcss);
-					
+		            SetArrearsTable(total,value,headarray,title,model,modelcss);
 				}
 				
 
@@ -157,12 +168,12 @@ $(document).ready(function(){
 					
 					if (s) {
 						for (var i in s) {
-							
 							var source = ReplaceArray(s[i]);
 							var number = s[i].CustomerNumber;
 							bodyTpl += '<tr>'+
 								'<td style="width:32px;height:20px;text-align:center"><input value="'+source.ID+'" type="radio" style="vertical-align:text-bottom; *margin-bottom:-4px;" name="select"/ ></td>';
 								for (var n in model) {
+                                    gridArr[source['ID']] = [source.RenterPhone,source.LandlordPhone];
 									if (model[n] == "CutCount" || model[n] == "PressCount" || model[n] == "CustomerNumber") {
 										bodyTpl +='<td id="'+model[n]+'"  title="'+source.ID+'/'+number+'/'+source.YearMonth+'"  style="text-decoration:underline;cursor:pointer;'+modelcss[n]+'">'+source[model[n]]+'</td>';
 									} else {
@@ -170,9 +181,9 @@ $(document).ready(function(){
 											if (source[model[n]] == 2) {
 												text = text = '<div style="'+modelcss[n]+'" title="预收转逾期">预收转逾期</div>';
 											} else if (source[model[n]] == 1){
-												text = text = '<div style="'+modelcss[n]+'" title="已结清">已结清</div>';
+												text = text = '<div style="'+modelcss[n]+'" title="已结清">是</div>';
 											} else {
-												text = text = '<div style="'+modelcss[n]+'" title="未结清">未结清</div>';
+												text = text = '<div style="'+modelcss[n]+'" title="未结清">否</div>';
 											}
 										} else if(model[n] == "IsCut"){
 											if (source[model[n]] == 2) {
@@ -230,7 +241,7 @@ $(document).ready(function(){
 					var CurrentNum = s.length;   
 			    	
 				    var pageTpl = '</tr><tr >'+
-				    '<td id="PageNum" colspan="11" style="text-align:left">&nbsp;&nbsp;&nbsp;&nbsp;当前第<input name="Num" type="text" value="'+Page+'" style="padding:0px 8; width:12px" />页，总共'+PageNumber+'页&nbsp;&nbsp;'+PTpl+
+				    '<td id="PageNum" colspan="11" style="text-align:left">&nbsp;&nbsp;&nbsp;&nbsp;当前第<input name="Num" type="text" value="'+Page+'" style="padding:0px 8px; width:12px" />页，总共'+PageNumber+'页&nbsp;&nbsp;'+PTpl+
 				    '&nbsp;&nbsp;<span>本页'+CurrentNum+'条数据，总共'+total+'条数据</span></td></tr>';
 				    var footTpl = '</tbody></table></div>';
 				    var tpl = headTpl+headmodel+'</thead><tbody>'+bodyTpl+pageTpl+footTpl;
@@ -327,8 +338,8 @@ $(document).ready(function(){
 				            	 	<option value="1">≥</option> 
 				            		<option value="0"><</option> 
 				            	</select> 
-				            	<input name="ReminderFeeValue" type="text" style="width:72px;float: left;" />
-				            </td> 
+				            	<input name="ReminderFeeValue" type="text" style="width:72px;float: left;"  value="1" />
+				            </td>
 				        </tr> 
 				        <tr > 
 				            <td class="RightHabitat" >电话有效：</td> 
@@ -430,10 +441,10 @@ $(document).ready(function(){
 			 		<ul style="height: 30px;  line-height: 30px; vertical-align:middle;margin:0 ">&nbsp;&nbsp;&nbsp;&nbsp;电话催费&nbsp;：&nbsp;
 			 			催费电话：
 						<select name="PhoneType"   disabled="true" style="height: 25px;  line-height: 25px; vertical-align:middle;width:118px ">
-			            	 	<option value="1">房东电话</option>
+			            	 	<option value="1" selected>房东电话</option>
 			            		<option value="0">房客电话</option>
 		            	</select>
-		            	<!--<input name="NewPhone" type="text" style="height: 20px;  line-height: 20px; vertical-align:middle;width:120px;margin-left:20px "/>-->
+		            	<input name="NewPhone" type="text" style="height: 20px;  line-height: 20px; vertical-align:middle;width:120px;margin-left:20px "/>
 				   	</ul>
 				   	<ul style="height: 30px;  line-height: 30px; vertical-align:middle;margin:0;" class="time">催费时间：
 						 <input name="PressTime"  style="height: 25px;  line-height: 25px; vertical-align:middle;width:115px "   disabled="true" type="text" id="time">

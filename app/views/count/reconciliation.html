@@ -9,7 +9,7 @@ $(document).ready(function(){
 	var DrownBox = new DropDownBox();//获取三级下拉框
 	DrownBox.select = {"Team":"#team"};
 
-	var Getdata = {ID:"1",Type:"2"};
+	var Getdata = {ID:"1",Type:"2", "All":1};
 	var url = "/ams/Info/TeamList";
 	G.GetAjax('get',url,Getdata,DrownBox.SetAllSelect,true);
 
@@ -136,12 +136,12 @@ $(document).ready(function(){
 						</span>
 					
 				</div>
-				<div style="margin-top:15px">
-						<span >收费时间至：</span>
-						<input  name="FromData"style="width:120px;" type="text" id="time" />
-						
-						
-				</div>
+                <div style="margin-top:15px;*margin-left:-2px">
+                    <span >收费时间至：</span>
+                    <input  name="FromData" style="width:120px;" type="text" id="time" />
+                    &nbsp;&nbsp;<div style="display:inline;margin-left:16px;margin-left:10px\0;*margin-left:7px"></div><span >至</span>&nbsp;&nbsp;
+                    <input  name="ToData" style="width:120px;margin-left:-1px;margin-left:5px\0;*margin-left:8px" type="text" id="Totime" />
+                </div>
 			</form>
 
 			<button   type="button" class="btn btn-success LeftButton" style="background-color:#009966;margin-top:-10px">查询</button>

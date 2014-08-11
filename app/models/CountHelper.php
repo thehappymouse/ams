@@ -194,8 +194,7 @@ class CountHelper extends HelperBase
             $end = $end . " 23:00:00";
         }
 
-        $ss = DataUtil::GetSegmentsByUid($uid);
-        $ss = "'" . implode("','", $ss) . "'";
+        $ss = DataUtil::GetSegmentsStrByUid($uid);
 
         $condition = " WHERE a.Segment IN ($ss) AND (Time between :start: AND :end:)";
 
@@ -232,9 +231,18 @@ class CountHelper extends HelperBase
         $tid = $p->get("Team");
         $uid = $p->get("Name");
         $time = $p->get("FromData");
-
         $data = array();
-        $cs = Charge::find(array("UserID=:uid: AND Time <= :time:", "bind" => array("uid" => $uid, "time" => $time)));
+        if(User::IsAllUsers($uid)){
+            $users = User::find("TeamID = $tid");
+            $uid = array();
+            foreach($users as $user){
+                $uid[] = $user->ID;
+            }
+            $uid = "'" . implode("','", $uid) . "'";
+        }
+
+        $cs = Charge::find(array("UserID IN ($uid) AND Time <= :time:", "bind" => array("time" => $time)));
+
         foreach ($cs as $c) {
             $customer = Customer::findByNumber($c->CustomerNumber);
             $row = $c->dump();
@@ -252,7 +260,7 @@ class CountHelper extends HelperBase
                                                             SUM(Money) AS Money,
                                                             SUM(IsControl) AS ControlCount,
                                                             COUNT(ManageTeam) AS ChargeCount
-                                                            FROM Charge WHERE UserID = $uid AND Time < '$time'
+                                                            FROM Charge WHERE UserID IN( $uid ) AND Time < '$time'
                                                             GROUP BY ManageTeam , Year ORDER BY ManageTeam, Year");
 
         foreach ($results as $r) {
@@ -272,24 +280,27 @@ class CountHelper extends HelperBase
     {
         $p = new RequestParams($params);
         $gid = $p->get("Team");
-        $team = Team::findFirst($gid);
         $time = $p->get("FromData");
 
         $total = array();
-        // 营业班组 3   UserID = 7 可更换为  ChargeTeam=3 统计这个组的
+
+        $condation = " WHERE Time < '$time' ";
+        if($gid != -1){
+            $condation .= "AND ChargeTeam = $gid";
+        }
+        $condation .= " GROUP BY ManageTeam, Year ORDER BY Year, ManageTeam";
 
         $results = parent::getModelManager()->executeQuery("SELECT
-                                                            ManageTeam,
+                                                            ManageTeam, ChargeTeam,
                                                             Year,
                                                             SUM(Money) AS Money,
                                                             SUM(IsControl) AS ControlCount,
                                                             COUNT(ManageTeam) AS ChargeCount
                                                             FROM Charge
-                                                            WHERE ChargeTeam = $gid AND Time < '$time'
-                                                            GROUP BY ManageTeam , Year ORDER BY Year, ManageTeam");
+                                                            $condation");
         foreach ($results as $r) {
             $r->Team = Team::findFirst($r->ManageTeam)->Name;
-            $r->ChargeTeam = $team->Name;
+            $r->ChargeTeam = Team::findFirst($r->ChargeTeam)->Name;
 
             $total[] = (array)$r;
         }

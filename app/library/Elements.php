@@ -118,6 +118,7 @@ class Elements extends Phalcon\Mvc\User\Component
         }
 
         echo '<li style="float:right"><a href="/ams/index/logout">退出</a></li>';
+        echo '<li style="float:right" id="message"><a href="/ams/index/message">消息</a></li>';
         echo '<li style="float:right"><a >' . $auth['Name'] . '</a></li>';
 
         echo '</ul>';

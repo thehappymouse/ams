@@ -25,11 +25,9 @@ $(document).ready(function(){
 
 	$("button:eq(0)").click(function(){
 		data = $("form:eq(0)").serialize();
-
 		excel.Todata = data;
 		var url = "/ams/CountSearch/ReconciliationInquiry";
 		G.GetAjax('post', url, data, SetTable,true);
-		
 	})
 
 
@@ -40,15 +38,10 @@ $(document).ready(function(){
 		var v =  ReplaceArray(value.charges,true);
 	
 		if (v.length == 0){
-		
 			$("#Arrears div").remove();
 			$("#total div").remove();
 			$("#tip").css("display","block");
-			//SetInfoTable();
-			//SetArrearsTable('','',array,title,model,modelcss);
-		
-			return; 
-
+			return;
 		}
 	
 		var title = '收费明细';
@@ -63,9 +56,6 @@ $(document).ready(function(){
 		var model = Array("Year", "Team", "ChargeCount", "Money", "ControlCount", "Phone");
 		var modelcss = Array("text-align:center;width:155px", "text-align:center;width:155px", "text-align:center;width:155px",  "text-align:center;width:155px;", "text-align:center;width:155px", "text-align:center;width:155px", "text-align:center;width:155px");
 		SetArrearsTable('total',t,array,title,model,true,modelcss);
-
-		//$("form").css("display","block");
-
 	}
 
 	//欠费信息表格
@@ -111,11 +101,9 @@ $(document).ready(function(){
 						
 					}
 		        bodyTpl +='</tr>';
-		         //money += parseInt(s[i].Money);
 		        d++;
 			}
 
-			//$("[name=Money]").val(money);
 		}
 		
 
@@ -189,14 +177,13 @@ $(document).ready(function(){
 
 						</span>
 				</div>
-				
-				<div style="margin-top:15px">
-						<div style="display:inline">收费时间至：</div>
-					
-						<input  name="FromData" style="width:120px;margin-top:3px;margin-left:-2px;*margin-left:3px;*margin-bottom:2px" type="text" id="time"  />
-						
-						
-				</div>
+
+                <div style="margin-top:15px;*margin-left:-2px">
+                    <span >收费时间至：</span>
+                    <input  name="FromData" style="width:120px;" type="text" id="time" />
+                    &nbsp;&nbsp;<div style="display:inline;margin-left:16px;margin-left:10px\0;*margin-left:7px"></div><span >至</span>&nbsp;&nbsp;
+                    <input  name="ToData" style="width:120px;margin-left:-1px;margin-left:5px\0;*margin-left:8px" type="text" id="Totime" />
+                </div>
 			</form>
 			<button  type="button" class="btn btn-success LeftButton" style="background-color:#009966;margin-top:-10px" >查询</button>
 		</div>

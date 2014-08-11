@@ -41,7 +41,7 @@ class HelperBase
      * @param $pageSize
      * @return string
      */
-    protected static function addLimit($condition, $page = null, $pageSize = null)
+    public  static function addLimit($condition, $page = null, $pageSize = null)
     {
         $size = $pageSize ? $pageSize : 30;
 

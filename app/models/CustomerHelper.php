@@ -125,7 +125,6 @@ class CustomerHelper extends HelperBase
     }
 
 
-
     /**
      * 欠费用户信息，多个界面综合使用
      * @param array $params
@@ -142,23 +141,23 @@ class CustomerHelper extends HelperBase
         if ($p->CustomerNumber) {
             $conditions .= " AND CustomerNumber = :Customer:";
             $param["Customer"] = $p->CustomerNumber;
-        }
+        } else {
+            if ($p->Number) {
+                if ($p->Number == "全部") { //选择了所有抄表段
+                    if (($tid = User::IsAllUsers($p->Name))) { //选择了所有抄表员，则取其组下的抄表段
+                        $str = DataUtil::GetSegmentsStrByTid($p->Team);
+                    } else {
+                        $str = DataUtil::GetSegmentsStrByUid($p->Name);
+                    }
 
-        if ($p->Number) {
-            if ($p->Number == "全部") {   //选择了所有抄表段
-                if(($tid = User::IsAllUsers($p->Name))){ //选择了所有抄表员，则取其组下的抄表段
-                    $str = DataUtil::GetSegmentsStrByTid($p->Team);
+                    $conditions .= " AND Segment in ($str)";
+                } else {
+                    $conditions .= " AND Segment = :segment:";
+                    $param["segment"] = $p->Number;
                 }
-                else {
-                    $str = DataUtil::GetSegmentsStrByUid($p->Name);
-                }
-
-                $conditions .= " AND Segment in ($str)";
-            } else {
-                $conditions .= " AND Segment = :segment:";
-                $param["segment"] = $p->Number;
             }
         }
+
 
         //只棵催费
         if ($p->OnlyHasPress) {
@@ -178,7 +177,7 @@ class CustomerHelper extends HelperBase
         }
 
         //是否结清
-        if ($p->IsClean != NULL && $p->IsClean != 2){
+        if ($p->IsClean != NULL && $p->IsClean != 2) {
             $conditions .= " AND IsClean = $p->IsClean";
         }
 
@@ -210,13 +209,12 @@ class CustomerHelper extends HelperBase
             $conditions .= " AND CutCount $word :CutCount:";
             $param["CutCount"] = $p->PowerOutagesValue;
         }
-
         //分页
         $total = Arrears::count(array($conditions, "bind" => $param));
 
         $conditions = self::addLimit($conditions, $p->Page, $p->PageSize);
 
-       $arrears = Arrears::find(array($conditions, "bind" => $param));
+        $arrears = Arrears::find(array($conditions, "bind" => $param));
 
         foreach ($arrears as $as) {
             //是否租房  2 全部。 1 租。0 非租
@@ -226,8 +224,15 @@ class CustomerHelper extends HelperBase
                 }
             }
 
+            //是否费控
             if ($p->IsControl && (int)$p->IsControl != 2) {
                 if ($as->Customer->IsControl != $p->IsControl) {
+                    continue;
+                }
+            }
+
+            if ($p->CutType && $p->CutType != "全部") {
+                if ($as->Cutinfo->CutStyle != $p->CutType) {
                     continue;
                 }
             }
@@ -235,10 +240,19 @@ class CustomerHelper extends HelperBase
             $row = $as->dump();
             $row["Address"] = $as->Customer->Address;
             $row["IsCut"] = (int)$as->Customer->IsCut;
-            $row["Phone"] = $as->Customer->LandlordPhone;
+            $row["LandlordPhone"] = $as->Customer->LandlordPhone;
+            $row["RenterPhone"] = $as->Customer->RenterPhone;
             $row["IsControl"] = $as->Customer->IsControl;
             $row["AssetNumber"] = $as->Customer->AssetNumber;
             $row["IsSpecial"] = $as->Customer->IsSpecial;
+            $row["IsRent"] = $as->Customer->IsRent;
+            $row["IsControl"] = $as->Customer->IsControl;
+
+            //计算欠费次数和累计欠费次数
+            $all = Arrears::count("CustomerNumber=$as->CustomerNumber");
+            $row["AllArrearCount"] = $all;
+            $row["ArrearCount"] = Arrears::count("IsClean!=1 AND CustomerNumber=$as->CustomerNumber");
+
             $data[] = $row;
         }
 

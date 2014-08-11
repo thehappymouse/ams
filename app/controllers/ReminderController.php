@@ -3,18 +3,22 @@
 class ReminderController extends ControllerBase
 {
 
+
     public function ReminderAction()
     {
+        $this->view->startdate = Arrears::getStartDate();
         //催费
     }
 
     public function PowerFailureAction()
     {
+        $this->view->startdate = Arrears::getStartDate();
         //停电
     }
 
     public function cancelAction()
     {
+        $this->view->startdate = Arrears::getStartDate();
         //撤销催费
     }
 
@@ -39,7 +43,7 @@ class ReminderController extends ControllerBase
 
         $params = $this->request->get();
 
-        $params["IsClean"] = "0";
+//        $params["IsClean"] = "0";
 
         list($total, $data) = CustomerHelper::ArrearsInfo($params);
 
@@ -103,6 +107,7 @@ class ReminderController extends ControllerBase
      * 操作停电。
      * 1，插入停电信息
      * 2，将用户停电状态改为已停
+     * 2014-08-08 一次可以停电多个
      */
     public function CutAction()
     {
@@ -122,32 +127,36 @@ class ReminderController extends ControllerBase
 
     /**
      * 执行撤销催费
+     * 2014-08-08 一次可以取消多个
      */
     public function cancelpressAction()
     {
-        $id = $this->request->get("ID");
+        $ids = $this->request->get("ID");
+        $ids = explode(",", $ids);
+
         $this->ajax->logData->Action = "撤销催费";
+        foreach($ids as $id){
 
-        $arrear = Arrears::findFirst("ID=$id");
-        if ($arrear->PressCount > 0) {
-            $arrear->PressCount--;
-            $arrear->save();
-        }
-
-        $press = Press::findFirst("Arrear=$id ORDER BY PressTime DESC");
-
-        if ($press->PressStyle == "通知单催费") { //删除文件
-            $root = "/opt/lampp/htdocs/ams";
-            $filename = $root . $press->Photo;
-            if (is_file($filename)) {
-                unlink($root . $press->Photo);
+            $arrear = Arrears::findFirst("ID=$id");
+            if ($arrear->PressCount > 0) {
+                $arrear->PressCount--;
+                $arrear->save();
             }
+
+            $press = Press::findFirst("Arrear=$id ORDER BY PressTime DESC");
+
+            if ($press->PressStyle == "通知单催费") { //删除文件
+                $root = "/opt/lampp/htdocs/ams";
+                $filename = $root . $press->Photo;
+                if (is_file($filename)) {
+                    unlink($root . $press->Photo);
+                }
+            }
+
+            $r = $press->delete();
+
+            $this->ajax->logData->Data .= sprintf("撤销(%s)于(%s)的(%s)", $press->UserName, $press->PressTime, $press->PressStyle);
         }
-
-        $r = $press->delete();
-
-        $this->ajax->logData->Data = sprintf("撤销(%s)于(%s)的(%s)", $press->UserName, $press->PressTime, $press->PressStyle);
-
         $this->ajax->flushOk();
     }
 

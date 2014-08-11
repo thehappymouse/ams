@@ -15,6 +15,14 @@ class  PopPageController extends ControllerBase
         $this->view->ps = $s;
     }
 
+    public function CancelAction($id, $number, $year)
+    {
+        $s = Charge::find("CustomerNumber=$number");
+
+        $this->view->cs = $s;
+        $this->view->customerid = $id;
+    }
+
     /**
      * 停电次数
      */

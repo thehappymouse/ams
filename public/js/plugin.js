@@ -30,14 +30,14 @@ $(document).ready(function(){
 
 				var value = v.currentTarget.title;
 		
-				window.open("/ams/PopPage/ReminderFee/"+value,"cuifei","height="+height+", width="+width);
+				window.open("/ams/PopPage/ReminderFee/"+value,"cuifei","height="+height*1.5+", width="+width*1.5);
 			})
 
 			$("#Arrears").on("dblclick","#CutCount",function(v){
 				var value = v.currentTarget.title;
 			
 		
-				window.open("/ams/PopPage/PowerCut/"+value,"tingdian","height="+height+", width="+width);
+				window.open("/ams/PopPage/PowerCut/"+value,"tingdian","height="+height*1.5+", width="+width*1.5);
 			})
 
 			
@@ -160,7 +160,7 @@ $(document).ready(function(){
 				this.select = {"Name":"", "Team":"", "Number":""};
 				//array数据源，select是jquery选择器的选择元素，name是select name属性的值
 				this.SetAllSelect = function(array)
-				{	
+				{
 					var  select;
 					array = arguments[0]?arguments[0]:false ;
 
@@ -173,7 +173,7 @@ $(document).ready(function(){
 								that.SetSelect(" ",selectOne);
 
 							} else {
-								select = that.select["Number"]; 
+								select = that.select["Number"];
 
 							}
 							that.SetSelect(" ",select);
@@ -186,8 +186,6 @@ $(document).ready(function(){
 							case "Name" : select = that.select["Name"]; name = "Name" ;break;
 							case "Number" : select = that.select["Number"]; name = "Number" ;break;
 						}
-						
-
 						that.SetSelect(name,select,array[name]);
 					}
 				}
@@ -204,11 +202,9 @@ $(document).ready(function(){
 						} else {
 							tpl += '<option value="'+value[i].ID+'">'+value[i].Name+'</option>';
 						}
-								
 					}
 			    	 	
 				    tpl +='</select>';
-
 				    $(select+' select').remove();
 				    $(select).append(tpl);
 				}
@@ -251,17 +247,13 @@ $(document).ready(function(){
 						
 						if ($(this).attr("value") != undefined) {
 							arr.push($(this).attr("value"));
-						
 						}
-						
-					} 
-				
+					}
 				})
 				value =  arr.join();
 				if (fp) {
 					value = 0;
 				}
-				
 				return value;
 			}
 
@@ -290,13 +282,11 @@ $(document).ready(function(){
 						}
 					}
 				}
-				
-			
 				return v;
 			}
 
 			showselect = function (value)
-	      	{ 
+	      	{
 		          var head = '<div><label class="control-label" for="inputPassword">班组：</label><div id="select" class="controls"><select name="Group">';
 		          var foot = '</select></div></div>'
 		          var body = "";
@@ -311,7 +301,6 @@ $(document).ready(function(){
 
 	      	reload =  function ()
 	        {
-		        
 		        location.reload();
 	        }
 
@@ -337,14 +326,12 @@ $(document).ready(function(){
 			}   
 			                      
 			hideDiv = function(div_id) 
-			{   
-
-			    $("#mask").remove(); 
-
+			{
+			    $("#mask").remove();
 			    $("#" + div_id).fadeOut(); 
 			    if (Reload) 
 			    {
-                        	reload();
+                     reload();
                 } 
              	Reload = false;
 			} 
@@ -353,7 +340,6 @@ $(document).ready(function(){
 		
 		ClickPage = function(G,ShowTable)
 		{
-
 			var that =this;
 			this.Data;
 			this.Page = 1;
@@ -378,35 +364,27 @@ $(document).ready(function(){
 				})
 
 				$("#Arrears").on("click","#end",function(){
-				
 					var SearchData = that.Data+"&Page="+PageNumber+"&PageSize="+PageSize;
 					that.Page =PageNumber;
 					G.GetAjax('get',that.SearchUrl,SearchData,ShowTable);
 					that.SetDisable();
-				
 				})
 
 				$("#Arrears").on("click","#start",function(){
-					
 					var SearchData = that.Data+"&Page=1&PageSize="+PageSize;
 					that.Page =1;
 					G.GetAjax('get',that.SearchUrl,SearchData,ShowTable);
 					that.SetDisable();
-					
 				})
-
-				
 			}
 
 			this.ReturnPage = function() 
 			{
-
 				return that.Page;
 			}
 			this.SetDisable = function() 
 			{
 				$("button:eq(1)").attr("disabled","true");
-
 			}
 		}
 

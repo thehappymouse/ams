@@ -23,19 +23,28 @@
 					})
 
 					$("iframe").load(function(v){
-						var Vdata =window.frames["fr_dealer"].document.documentElement.innerText;
-					
+                        var Vdata = window.frames["frm_dealer"].document.documentElement.innerText;
+
 						if (Vdata) {
-						
 							var JsonData = eval("("+Vdata+")");
 							if (JsonData.success) {
-								location.reload();
-							} 
+                                reload();
+							}
 						}
-						
-						 
-						
 					})
+
+                    $("input[name=reminderStyle]").click(function(v){
+                        var val = v.target.value;
+                        if (val == 1) {
+                            $("select[name=PhoneType]").attr("disabled","true");
+                            $("input[name=PressTime]").attr("disabled","true");
+                            $("input[name=Photo]").removeAttr("disabled");
+                        } else {
+                            $("input[name=PressTime]").removeAttr("disabled");
+                            $("select[name=PhoneType]").removeAttr("disabled");
+                            $("input[name=Photo]").attr("disabled","true");
+                        }
+                    })
 				})
 			</script>
 			<link rel="stylesheet" href="/ams/css/jquery-ui.css">
@@ -150,7 +159,7 @@
 		    <div id="Arrears" class="TableCss">
 		    	
 		   
-		    	<div class="line ClientInfo">欠费用户信息</div>
+		    	<div class="line ClientInfo">用户信息</div>
 		    		<table id="info">
 		    			<thead>
 		    				<tr style="height:20px;width:30px">
@@ -194,47 +203,52 @@
 		    		</table>
 		    	
 		    </div>
-		   
-		    <iframe name="fr_dealer" style="display:none"  ></iframe>
-		    <br />
-		    <form action="/ams/ReminderFee/Press" method="post" target="fr_dealer" enctype="multipart/form-data">
-		    <div id="Entry">
-		    <div class="line ClientInfo" >催费信息录入</div>
-		    <div style="border:1px solid #009966;height:150px">
-		    <div style="margin-top:15px;">
-			    <div  style="width:100%;">
 
-					<!--<div class=" star" style="float:left;padding-left:2px;" >*</div>-->
-			    	<ul style="height: 30px;  line-height: 30px; vertical-align:middle;margin:0  ">&nbsp;&nbsp;&nbsp;通知单催费：
-			
-				     	 &nbsp;<input name="Photo" type="file" style="height: 25px;  line-height: 25px; vertical-align:middle; "  >
+            <iframe name="frm_dealer" style="display:none"  ></iframe>
+            <br />
 
-				   	</ul>
-			
-			    </div>
-			 	<div class="mt_20" >
-			 		<ul style="height: 30px;  line-height: 30px; vertical-align:middle;margin:0 ">&nbsp;&nbsp;&nbsp;&nbsp;电话催费&nbsp;：
-			 			&nbsp;催费电话：
-						<select name="PhoneType"  style="height: 25px;  line-height: 25px; vertical-align:middle;width:118px ">
-			            	 	<option value="1">房东电话</option>
-			            		<option value="0">房客电话</option>
-		            	</select>
-		            	<!--<input name="NewPhone" type="text" style="height: 20px;  line-height: 20px; vertical-align:middle;width:120px;margin-left:10px "/>-->
-				   	</ul>
-				   	<ul style="height: 30px;  line-height: 30px; vertical-align:middle;margin:0;" class="time">催费时间：
-						 <input name="PressTime"  style="height: 25px;  line-height: 25px; vertical-align:middle;width:115px " type="text" id="time">
-				     	 
-				   	</ul>
-					
-			    	
-				    <button style="margin-top:4px" type="submit" class="btn subm" disabled="true">催费</button>
-					
-				
-				</div>
-			</div>
-			</div>
- 			</div>
- 			</form>
+            <form name="putfile" action="/ams/reminder/Press" method="post" target="frm_dealer" enctype="multipart/form-data">
+                <div id="Entry" >
+                    <div class="line ClientInfo" >催费信息录入</div>
+
+                    <div style="border:1px solid #009966;height:185px">
+                        <ul style="margin-top:10px;margin-left:10px;height: 20px;  line-height: 20px; vertical-align:middle;">
+                            <input type="radio" style="height: 15px;  line-height: 15px; vertical-align:middle;" name="reminderStyle"  value="1" checked>通知单催费&nbsp;&nbsp;&nbsp;&nbsp;
+                            <input type="radio" style="height: 15px;  line-height: 15px; vertical-align:middle;" name="reminderStyle"  value="2" >电话催费
+                        </ul>
+                        <div  style="width:100%;">
+
+                            <!--<div class=" star" style="float:left;padding-left:2px;" >*</div>-->
+                            <ul style="height: 30px;  line-height: 30px; vertical-align:middle;margin:0  ">&nbsp;&nbsp;&nbsp;通知单催费：
+
+                                <input name="Photo" type="file" style="height: 25px;  line-height: 25px; vertical-align:middle;width：115px "  >
+
+                            </ul>
+
+                        </div>
+                        <div class="mt_20" >
+                            <ul style="height: 30px;  line-height: 30px; vertical-align:middle;margin:0 ">&nbsp;&nbsp;&nbsp;&nbsp;电话催费&nbsp;：&nbsp;
+                                催费电话：
+                                <select name="PhoneType"   disabled="true" style="height: 25px;  line-height: 25px; vertical-align:middle;width:118px ">
+                                    <option value="1">房东电话</option>
+                                    <option value="0">房客电话</option>
+                                </select>
+                                <!--<input name="NewPhone" type="text" style="height: 20px;  line-height: 20px; vertical-align:middle;width:120px;margin-left:20px "/>-->
+                            </ul>
+                            <ul style="height: 30px;  line-height: 30px; vertical-align:middle;margin:0;" class="time">催费时间：
+                                <input name="PressTime"  style="height: 25px;  line-height: 25px; vertical-align:middle;width:115px "   disabled="true" type="text" id="time">
+
+                            </ul>
+
+                            <input name="ID" type="hidden" />
+                            <button style="margin-top:4px;background-color:#009966" type="submit" class="btn subm btn-success" disabled="true">催费</button>
+
+
+                        </div>
+                    </div>
+
+                </div>
+            </form>
  			<style>
  				.time{
  					padding-left:118px;

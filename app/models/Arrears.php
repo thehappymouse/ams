@@ -4,6 +4,15 @@ class Arrears extends \Phalcon\Mvc\Model
 {
 
     /**
+     * 获取欠费的最早年月
+     */
+    public static  function getStartDate()
+    {
+        $model = Arrears::findFirst("1=1 ORDER BY YearMonth ASC");
+        return $model->YearMonth;
+    }
+
+    /**
      *
      * @var integer
      */

@@ -40,15 +40,20 @@ class DataUtil
 
     /**
      * 查找管理班组用户的抄表段集合, 并以sql拼接
+     * 2014-08-08 检查 uid， tid_1 表示组下所有用户
      * @param $uid
      * @return string
      */
     public static  function GetSegmentsStrByUid($uid)
     {
-        $segs = self::GetSegmentsByUid($uid);
+        if(($tid = User::IsAllUsers($uid))){
 
-
-        $ss = "'" . implode("','", $segs) . "'";
+            $ss = DataUtil::GetSegmentsStrByTid($tid);
+        }
+        else {
+            $ss = self::GetSegmentsByUid($uid);
+            $ss = "'" . implode("','", $ss) . "'";
+        }
         return $ss;
     }
 

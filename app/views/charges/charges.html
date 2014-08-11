@@ -101,7 +101,7 @@
 
 				            '<td  style="width:155px" >用户名称：</td>'+
 
-				            '<td style="text-align:left;width:155px">'+v.Name+'</td>'+
+				            '<td style="text-align:left;width:155px"><div title="'+v.Name+'" style="width:150px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">'+v.Name+'</div></td>'+
 
 				            '<td style="width:155px">用户编号：</td>'+
 
@@ -190,9 +190,9 @@
 											if (s[i][model[n]] == 2) {
 												text = text = '<div  title="预收转逾期">预收转逾期</div>';
 											} else if (s[i][model[n]] == 1){
-												text = text = '<div  title="已结清">已结清</div>';
+												text = text = '<div  title="已结清">是</div>';
 											} else {
-												text = text = '<div  title="未结清">未结清</div>';
+												text = text = '<div  title="未结清">否</div>';
 											}
 										} else {
 											text = s[i][model[n]];

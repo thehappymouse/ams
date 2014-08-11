@@ -3,10 +3,8 @@
 
 <script type="text/javascript">
 $(document).ready(function(){
-
-
+                $("#from").val(<?php echo $startdate; ?>);
 				var G = new AjaxFun();//获取ajax方法
-
 				var clickpage = new ClickPage(G,ShowTable);//分页
 
 				var DrownBox = new DropDownBox()//获取三级下拉框
@@ -21,7 +19,6 @@ $(document).ready(function(){
 					data = $("form:eq(0)").serialize();
 					clickpage.Data = data;
 					var SearchData = data+"&Page=1&PageSize="+PageSize;
-
 					G.GetAjax('post',SearchUrl,SearchData,ShowTable,true);
 				})
 
@@ -45,7 +42,8 @@ $(document).ready(function(){
 
 
 				$("#Arrears").on("click","[name=select]",function(v){
-					var ID = v.currentTarget.defaultValue;
+					//var ID = v.currentTarget.defaultValue;
+                    var ID = checkbox();
 					$("[name=ID]").val(ID);
 					$("button:eq(1)").removeAttr("disabled")
 				})
@@ -137,7 +135,7 @@ $(document).ready(function(){
 							var source = ReplaceArray(s[i]);
 							var number = s[i].CustomerNumber;
 							bodyTpl += '<tr>'+
-								'<td style="width:32px;height:20px;text-align:center"><input value="'+source.ID+'" type="radio" style="vertical-align:text-bottom; *margin-bottom:-4px;" name="select"/ ></td>';
+								'<td style="width:32px;height:20px;text-align:center"><input value="'+source.ID+'" type="checkbox" style="vertical-align:text-bottom; *margin-bottom:-4px;" name="select"/ ></td>';
 								for (var n in model) {
 									if (model[n] == "CutCount" || model[n] == "PressCount" || model[n] == "CustomerNumber") {
 										bodyTpl +='<td id="'+model[n]+'"  title="'+source.ID+'/'+number+'/'+source.YearMonth+'"  style="text-decoration:underline;cursor:pointer;'+modelcss[n]+'">'+source[model[n]]+'</td>';
@@ -146,9 +144,9 @@ $(document).ready(function(){
 											if (source[model[n]] == 2) {
 												text = text = '<div style="'+modelcss[n]+'" title="预收转逾期">预收转逾期</div>';
 											} else if (source[model[n]] == 1){
-												text = text = '<div style="'+modelcss[n]+'" title="已结清">已结清</div>';
+												text = text = '<div style="'+modelcss[n]+'" title="已结清">是</div>';
 											} else {
-												text = text = '<div style="'+modelcss[n]+'" title="未结清">未结清</div>';
+												text = text = '<div style="'+modelcss[n]+'" title="未结清">否</div>';
 											}
 										} else if(model[n] == "IsCut"){
 											if (source[model[n]] == 2) {
@@ -205,7 +203,7 @@ $(document).ready(function(){
 			   		var CurrentNum = s.length; 
 				    
 				    var pageTpl = '</tr><tr >'+
-				    '<td id="PageNum" colspan="11" style="text-align:left">&nbsp;&nbsp;&nbsp;&nbsp;当前第<input name="Num" type="text" value="'+Page+'" style="padding:0px 8; width:12px" />页，总共'+PageNumber+'页&nbsp;&nbsp;'+PTpl+
+				    '<td id="PageNum" colspan="11" style="text-align:left">&nbsp;&nbsp;&nbsp;&nbsp;当前第<input name="Num" type="text" value="'+Page+'" style="padding:0px 8px; width:12px" />页，总共'+PageNumber+'页&nbsp;&nbsp;'+PTpl+
 				    '&nbsp;&nbsp;<span>本页'+CurrentNum+'条数据，总共'+total+'条数据</span></td></tr>';
 				    var footTpl = '</tbody></table></div>';
 				    var tpl = headTpl+headmodel+'</thead><tbody>'+bodyTpl+pageTpl+footTpl;
@@ -265,8 +263,8 @@ $(document).ready(function(){
 				            	 	<option value="1">≥</option> 
 				            		<option value="0"><</option> 
 				            	</select> 
-				            	<input name="ReminderFeeValue" type="text" style="width:72px;float: left;" />
-				            </td> 
+				            	<input name="ReminderFeeValue" type="text" style="width:72px;float: left;"  />
+				            </td>
 				        </tr> 
 				        <tr > 
 				            <td class="RightHabitat" >电话有效：</td> 
@@ -344,7 +342,7 @@ $(document).ready(function(){
 		    <iframe name="frm_dealer" style="display:none"  ></iframe>
 		    <br/>
 		    <div id="Entry" style="display:none">
-		    <form action="/ams/reminder/cancelpress" method="post" target="frm_dealer" enctype="multipart/form-data">
+		    <form action="/ams/reminder/cancelpress" method="post" target="frm_dealer" >
 		    		<input name="ID" type="hidden" />
 		  
 				    <button type="submit" class="btn btn-success" style="background-color:#009966;margin-left:10px" disabled="true">撤销催费</button>

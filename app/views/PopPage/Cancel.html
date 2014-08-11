@@ -1,0 +1,76 @@
+<script>
+    $("input[name=box1]").click(function(){
+        alert(1);
+        console.log(v);
+    })
+    //撤销提交
+    $("button:eq(1)").click(function(){
+
+        var url = "/ams/Charges/Cancel";
+       // var id  = $("td:eq(3)")[0].innerText;
+        var drawn = $("select").val();
+
+        var ID = $("[name=ID]").val();
+
+
+       // var data = {Number:id,ID:ID,Drawn:drawn};
+        //var val = {ID:id};
+
+       // $("button:eq(1)").attr("disabled","true")
+    })
+</script>
+<style>
+    .TableCss table  td{text-align:center}
+</style>
+<br />
+
+<div class="TableCss">
+    <input name="box1" type="checkbox" value="<?php echo $s->ID;?>" />
+    <table id="info">
+        <thead>
+        <tr >
+            <th></th>
+            <th >序号</th>
+            <th>电费年月</th>
+            <th>收费金额</th>
+            <th>收费人</th>
+            <th>收费人时间</th>
+            <th>房东电话</th>
+            <th>房客电话</th>
+        </tr>
+        </thead>
+        <tbody>
+        <?php  $i =1;foreach ($cs as $s) { ?>
+        <tr>
+            <td><input name="box" type="checkbox" value="<?php echo $s->ID;?>" /></td>
+            <td><?php  echo $i;			?></td>
+            <td><?php echo $s->YearMonth;	?></td>
+            <td><?php echo $s->Money; 	?></td>
+            <td><?php echo $s->UserName;  ?></td>
+            <td><?php echo $s->Time; ?></td>
+            <td><?php echo $s->LandlordPhone;?></td>
+            <td><?php echo $s->RenterPhone;?></td>
+        </tr>
+        <?php $i++; } ?>
+        </tbody>
+    </table>
+</div>
+<br />
+<input name="ID" type="hidden" value="<?php echo $customerid;	?>"/>
+<div  id="form">
+    <form>
+        <div class="line ClientInfo" >撤销收费操作</div>
+        <div style="border:1px solid #009966;height:60px;">
+            <div style="margin-top:15px">
+                <div class=" InputStyle" style="margin-left:10px;float:left;margin-top:4px;*margin-top:5px">撤销收费：</div>
+                <div class=" TreeInput" style="margin-left:5px;float:left;margin-top:2px;*margin-top:0">
+                    <select name="withdrawn" style="width:100px">
+                        <option value="0">操作失误</option>
+                        <option value="1">录入失误</option>
+                    </select>
+                </div>
+                <button type="button" class="btn btn-success" style="background-color:#009966;*margin-top:1px" disabled>撤销收费</button>
+            </div>
+        </div>
+    </form>
+</div>

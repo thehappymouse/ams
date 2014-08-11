@@ -13,13 +13,9 @@
 			
 			
 			$("button:eq(0)").click(function(){
-				
-				
 				data = $("form:eq(0)").serialize();
-			
 				clickpage.Data = data;
 				var SearchData = data+"&Page=1&PageSize="+PageSize;
-				
 				G.GetAjax('get',SearchUrl,SearchData,ShowTable);
 				
 			})
@@ -34,25 +30,18 @@
           							msg = "总共只有"+PageNumber+"页。没有第"+Page+"页！";
 									popupDiv('pop-div',msg);
 									Page =1;
-									
           						}
-          				
 								var SearchData = data+"&Page="+Page+"&PageSize="+PageSize;
 								clickpage.Page = Page;
-
 								G.GetAjax('get',SearchUrl,SearchData,ShowTable);
           					}
           					
           				}
               	})
-			
-			
-				
 			clickpage.SearchUrl = SearchUrl;
 			Page = clickpage.ReturnPage();
 		 	clickpage.PageClick();
-			
-				
+
 			function ShowTable(value, total)//value, total
 			{
 				Page = clickpage.ReturnPage();

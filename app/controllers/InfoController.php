@@ -32,11 +32,12 @@ class InfoController extends ControllerBase
             }
         }
 
+        if (($all = $this->request->get("All") == 1) && count($teams) > 1) {
+            $arr["Team"][] = array("ID" => -1, "Name" => "全部");
+        }
+
         foreach ($teams as $team) {
             $arr["Team"][] = $team->dump();
-        }
-        if (($all = $this->request->get("All") == 1) && count($arr) > 1) {
-            $arr["Team"][] = array("ID" => -1, "Name" => "全部");
         }
 
         $this->addUserWithSeg($teams->getFirst()->ID, $arr);
@@ -63,10 +64,14 @@ class InfoController extends ControllerBase
             $users = User::find("ID=" . $this->loginUser["ID"]);
         } else if ($this->role == ROLE_MATER_LEAD) {    //班长, 添加全部字段
             $users = User::find(array("Role = 1 AND TeamID = :TID:", "bind" => array("TID" => $tid)));
-            $arr["Name"][] = array("ID" => "tid_$tid", "Name" => "全部");
         } else {
             $users = User::find(array("(Role = 1 OR Role = 3) AND TeamID = :TID:", "bind" => array("TID" => $tid)));
         }
+
+        if($this->role != ROLE_MATER){
+            $arr["Name"][] = array("ID" => "tid_$tid", "Name" => "全部");
+        }
+
         foreach ($users as $u) {
             $arr["Name"][] = $u->dump();
         }

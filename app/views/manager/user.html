@@ -23,7 +23,6 @@
             G.GetAjax('post', Url, data, ShowTable);
         })
         function ShowTable(value) {
-
             var headarray = Array("序号", "用户名", "班组", "职责", "操作");
             var model = Array("#", "Name", "TeamName", "Role", "Manager");
 
@@ -169,7 +168,7 @@
                 }
             }
               
-            tpl = "<span style='color:red'>"+tpl+"</span>";console.log(tpl)
+            tpl = "<span style='color:red'>"+tpl+"</span>";
            
             $("#pw").append(tpl);
             $("#again").append(tpl);

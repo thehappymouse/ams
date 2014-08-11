@@ -114,11 +114,8 @@ class ReportHelper extends HelperBase
         foreach ($results as $rs) {
             $data = array("YearMonth" => $rs->YearMonth, "Rate" => 0, "NoPressCount" => $rs->ArrearCount, "NoPressMoney" => $rs->Money);
 
-
-            $builder = parent::getModelManager()->createBuilder();
+            $builder = parent::getBuilder("Arrears", $seg);
             $press = $builder->columns(array("SUM(Money) as Money", "count(Money) as Count", "YearMonth"))
-                ->from("Arrears")
-                ->inWhere("Segment", $seg)
                 ->andWhere("PressCount > 0")
                 ->andWhere("YearMonth=:ym:")
                 ->groupBy("YearMonth")
@@ -176,6 +173,7 @@ class ReportHelper extends HelperBase
         foreach ($mTeams as $mt) {
 
             $seg = DataUtil::GetSegmengsByTid($mt->ID);
+
             list($team, $years) = self::getFeeStatementsBySeg($seg, $mt->Name, $start, $end);
             $teams[] = $team;
         }

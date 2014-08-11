@@ -7,8 +7,9 @@ class IndexController extends ControllerBase
         $rid = $this->loginUser["Role"];
         $role  = ARole::findFirst($rid);
         $page = $role->IndexPage;
-        $page = $page ? $page : "site/index2";
+        $page = $page ? $page : "/site/index2";
 
+        $page = substr($page, 1);
         $this->redirect($page);
 //
 //        if (in_array($this->loginUser["Role"], array("1"))) {
@@ -27,6 +28,11 @@ class IndexController extends ControllerBase
         $this->loginUser = null;
         $this->session->remove("auth");
         $this->redirect("index/login");
+    }
+
+    public function messageAction()
+    {
+
     }
 
     public function loginAction()

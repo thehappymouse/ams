@@ -10,6 +10,7 @@ class ChargesController extends ControllerBase
 
     public function WithDrawnAction()
     {
+        $this->view->startdate = Arrears::getStartDate();
         //撤销收费界面
     }
 
@@ -23,9 +24,19 @@ class ChargesController extends ControllerBase
      */
     public function ChargeInfoAction()
     {
+        $this->view->disable();
+//
+//        $params = $this->request->get();
+//
+//        list($total, $data) = CustomerHelper::ArrearsInfo($params);
+//
+//        $this->ajax->total = $total;
+//        $this->ajax->flushData($data);
+
         $id = $this->request->get("ID");
         $data = null;
-        $this->view->disable();
+
+
         if ($id) {
             $customer = Customer::findFirst(array("Number=:id:", "bind" => array("id" => $id)));
 
@@ -107,7 +118,6 @@ class ChargesController extends ControllerBase
         $ids = $this->request->get("ID");
         $money = $this->request->get("Money");
         $customer = $this->request->get("Number");
-        $ars = array(); //欠费信息数组
 
         if ($ids == null) { //id为空，表示交所有欠费，再查询一次数据库
             $ars = Arrears::find("CustomerNumber = '$customer'");
@@ -182,6 +192,33 @@ class ChargesController extends ControllerBase
                 $errorCount++;
             }
         }
+
+        try {
+
+            //发送消息到对应的抄表员，以便去复电。 根据客户编码，查找抄表段->抄表员和班长，写信
+            $msg = new Message();
+            $msg->ToUserID = $segment->UserID;
+            $msg->FromUserID = $this->loginUser["ID"];
+            $msg->SendTime = $this->getDateTime();
+            $msg->Sender = $this->loginUser["Name"];
+            $msg->Content = $customerModel->Name . "  已交费";
+            $msg->RefCustomer = $customer;
+            $msg->IsImportant = $customerModel->IsCut;
+            $msg->save();
+
+            $msg->ID = null;
+            $teamamanager = User::findFirst("Role=2 AND TeamID = " . $manager->TeamID);
+            $msg->ToUserID = $teamamanager->ID;
+
+            $msg->save();
+        } catch (Exception $e) {
+            $log = new SystemLog();
+            $log->Action = "收费后向管理员发信";
+            $log->Result = "失败";
+            $log->Time = $this->getDateTime();
+            $log->save();
+        }
+
 
         if ($errorCount == 0) {
             $this->ajax->flushOk();

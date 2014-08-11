@@ -6,20 +6,15 @@ $(document).ready(function(){
     fileupload.progress_key = $("#progress_key").val();
 
     $("iframe").load(function(v){
-
-            var data =  window.frames["frm_dealer"].document.documentElement.innerText;
+        var data =  window.frames["frm_dealer"].document.documentElement.innerText;
         if (data) {
             var jsonData = eval('('+data+')');
             popupDiv('pop-div',jsonData.msg,'',true);
         }
-        
-
-        
     })
 
 
     $("[name=file]").change(function(v){
-
         var filename = v.currentTarget.value;
 
         if (filename) {
@@ -29,7 +24,6 @@ $(document).ready(function(){
             extension = extension.toLowerCase();
          
             if (extension != ".xlsx" && extension != ".xls") {
-
                 popupDiv('pop-div',"上传的文件格式不正确，请上传Excel表格（xls格式文件）!");
                 $("button:eq(0)").attr("disabled","true");
  
@@ -37,17 +31,13 @@ $(document).ready(function(){
                 $("button:eq(0)").removeAttr("disabled");
             }
         } else {
-          
                 popupDiv('pop-div',"你没有上传文件");
         }
         
     })
 
-    
- 
-    start =function (){
+    start = function () {
         fileupload.startProgress()
-     
     }
 })
 </script>
@@ -71,7 +61,7 @@ $(document).ready(function(){
 
 			    	<div style="margin-left:10px;float:left">预存电费数据文件模板下载：</div>
 				    <div  style="margin-left:5px;float:left;cursor:pointer">
-				        	<a style="color:#333"><img  src="/ams/public/images/Excel.png" style="height:16px;width:16px"/></a>
+				        	<a style="color:#333" href="/ams/public/download/模板-欠费明细.xls"><img  src="/ams/public/images/Excel.png" style="height:16px;width:16px"/></a>
 				    </div>
 				</div>
 				<br />
