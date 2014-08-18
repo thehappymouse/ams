@@ -97,7 +97,6 @@ $(document).ready(function(){
 		var d = 1;
 		if (s) {
 			for (var i in s) {
-
 				var number = s[i].CustomerNumber
 				bodyTpl += '<tr style="height:20px">'+
 					'<td  style="text-align:center">'+d+'</td>';
@@ -105,7 +104,6 @@ $(document).ready(function(){
 						if (model[n] == "CutCount" || model[n] == "PressCount" || model[n] == "CustomerNumber") {
 							bodyTpl +='<td id="'+model[n]+'" title="'+s[i].ID+'/'+number+'/'+s[i].YearMonth+'" style="text-decoration:underline;cursor:pointer;'+modelcss[n]+'">'+s[i][model[n]]+'</td>';
 						} else {
-							
 							if(model[n] == "Address" ||model[n]=="CutTime") {
 								text = '<div title="'+s[i][model[n]]+'" style="'+modelcss[n]+'">'+s[i][model[n]]+'</div>';
 							} else {
@@ -113,21 +111,16 @@ $(document).ready(function(){
 							}
 							bodyTpl += '<td style="'+modelcss[n]+'">'+text+'</td>';
 						}
-						
 					}
 		        bodyTpl +='</tr>';
-		      
 		        d++;
-		        
 			}
-			
 		}
 		
 		if (PageNumber == 1) {
 			PTpl="";
 		} else {
 			if ( Page == 1 ) {
-
 				PTpl = "<span id='next' style='cursor:pointer'>下一页</span>&nbsp;&nbsp;<span id='end' style='cursor:pointer'>末页</span>";
 			} else if (Page < PageNumber && Page!= 1 ) {
 				PTpl = "<span id='start' style='cursor:pointer'>首页</span>&nbsp;&nbsp;<span id='prev' style='cursor:pointer'>上一页</span>&nbsp;&nbsp;<span id='next' style='cursor:pointer'>下一页</span>&nbsp;&nbsp;<span id='end' style='cursor:pointer'>末页</span>";

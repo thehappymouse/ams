@@ -7,7 +7,8 @@
  * 14-6-17 增加操作日志入库
  */
 
-ini_set('date.timezone','Asia/Shanghai');
+ini_set('date.timezone', 'Asia/Shanghai');
+
 class AjaxR
 {
     var $success = true;
@@ -27,25 +28,26 @@ class AjaxR
         $this->logData = new Systemlog();
         $this->logData->IP = $_SERVER["REMOTE_ADDR"];
         $this->logData->Time = HelperBase::getDateTime();
-        if($user != null){
+        if ($user != null) {
             $this->logData->UserID = $user["ID"];
             $this->logData->UserName = $user["Name"];
         }
     }
 
-    public function flushOk($msg = ""){
-
+    public function flushOk($msg = "")
+    {
         $this->logData->Result = "操作成功";
         $this->success = true;
         $this->msg = $msg;
         $this->flush();
     }
 
-    private  function flush()
+    private function flush()
     {
         $this->flushLog($this->logData);
         unset($this->logData);
-        echo json_encode($this);exit;
+        echo json_encode($this);
+        exit;
     }
 
     /**
@@ -54,14 +56,14 @@ class AjaxR
      */
     public function flushLog($log)
     {
-        if($log->Action != ""){
+        if ($log->Action != "") {
             $log->save();
         }
     }
 
     public function flushData($data)
     {
-        if(null == $data || 0 == count($data)){
+        if (null == $data || 0 == count($data)) {
             $this->success = false;
             $this->msg = "没有数据";
         }

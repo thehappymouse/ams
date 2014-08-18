@@ -1,31 +1,33 @@
 <script>
-    $("input[name=box1]").click(function(){
-        alert(1);
-        console.log(v);
+    $(document).ready(function(){
+        var G = new AjaxFun();//获取ajax方法
+        $("input[name=box]").click(function(){
+            var ID = checkbox();
+            $("[name=ID]").val(ID);
+        })
+        //撤销提交
+        $("button:eq(0)").click(function(){
+
+            var url = "/ams/Charges/Cancel";
+            var number = $("input[name=number]").val();
+            var drawn = $("select").val();
+            var ID = $("[name=ID]").val();
+            if (ID == "" || ID == 0) {
+                popupDiv('pop-div','请选择要撤销的费用');
+                return;
+            }
+             var data = {Number:number,ID:ID,Drawn:drawn};
+            G.GetAjax('get',url,data,"",true);
+        })
     })
-    //撤销提交
-    $("button:eq(1)").click(function(){
 
-        var url = "/ams/Charges/Cancel";
-       // var id  = $("td:eq(3)")[0].innerText;
-        var drawn = $("select").val();
-
-        var ID = $("[name=ID]").val();
-
-
-       // var data = {Number:id,ID:ID,Drawn:drawn};
-        //var val = {ID:id};
-
-       // $("button:eq(1)").attr("disabled","true")
-    })
 </script>
 <style>
     .TableCss table  td{text-align:center}
 </style>
 <br />
-
+<div class="line ClientInfo" >收费信息</div>
 <div class="TableCss">
-    <input name="box1" type="checkbox" value="<?php echo $s->ID;?>" />
     <table id="info">
         <thead>
         <tr >
@@ -56,7 +58,8 @@
     </table>
 </div>
 <br />
-<input name="ID" type="hidden" value="<?php echo $customerid;	?>"/>
+<input name="number" type="hidden" value="<?php echo $customerid;?>"/>
+<input name="ID" type="hidden" />
 <div  id="form">
     <form>
         <div class="line ClientInfo" >撤销收费操作</div>
@@ -69,7 +72,7 @@
                         <option value="1">录入失误</option>
                     </select>
                 </div>
-                <button type="button" class="btn btn-success" style="background-color:#009966;*margin-top:1px" disabled>撤销收费</button>
+                <button type="button" class="btn btn-success" style="background-color:#009966;*margin-top:1px" >撤销收费</button>
             </div>
         </div>
     </form>

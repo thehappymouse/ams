@@ -1,5 +1,4 @@
 <script>
-
 $(document).ready(function(){
     getNum = function() {
         $.ajax({
@@ -7,25 +6,38 @@ $(document).ready(function(){
             url:'/ams/message/count',
             type:'POST',
             success:function(v) {
+                var n="";
                 if (v.success) {
                     if (v.data > 0) {
-                        document.getElementById("tpl").innerHTML = v.data;
+                        n = v.data;
                     }
+                    document.getElementById("tpl").innerHTML = n;
                 }
             }
         })
     }
 
     setT = function() {
-        var tpl = "<span id='tpl' style='color:red'></span>";
-        $("#message a").append(tpl);
         getNum();
         setTimeout('setT()',50000);
     }
-    window.onload = setT();
-})
 
+    var tpl = "<span id='tpl' class='badge' style='color:white'></span>";
+    $("#message a").append(tpl);
+    setT();
+})
 </script>
+<style>
+
+    .badge {
+        padding-right: 9px;
+        padding-left: 9px;
+        -webkit-border-radius: 9px;
+        -moz-border-radius: 9px;
+        border-radius: 9px;
+        background-color:    red
+       }
+</style>
 <div id="wrap">
 
     <!-- Begin page content -->

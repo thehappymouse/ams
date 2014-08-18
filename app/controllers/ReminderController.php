@@ -112,13 +112,16 @@ class ReminderController extends ControllerBase
     public function CutAction()
     {
         $this->view->disable();
-        $this->ajax->logData->Action = "停电";
 
-        list($r, $cut, $arrear) = CustomerHelper::Cut($this->request->get());
+        $ll = new LogHelper($this->ajax->logData);
 
+        list($r, $ids) = CustomerHelper::Cut($this->request->get());
+
+        foreach($ids as $id){
+            $ll->Cut($id, $r);
+        }
+    
         if ($r) {
-            $this->ajax->logData->Data = $arrear->CustomerName . "|" . $arrear->CustomerNumber . "|(￥)" . $arrear->Money;
-
             $this->ajax->flushOk();
         } else {
             $this->ajax->flushError("操作失败");

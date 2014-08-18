@@ -15,7 +15,6 @@ $(document).ready(function(){
 	G.GetAjax('get', url, Getdata, DrownBox.SetAllSelect, true);
 
 	$("#team").on("change","select:eq(0)",function(v){
-		
 		var id = $("select:eq(0)").val();
 		var data = {ID:id,Type:"Name"};
 		var url = "/ams/Info/UserList";
@@ -34,9 +33,7 @@ $(document).ready(function(){
 	//添加表格
 	function SetTable(value) 
 	{
-
 		var v =  ReplaceArray(value.charges,true);
-	
 		if (v.length == 0){
 			$("#Arrears div").remove();
 			$("#total div").remove();
@@ -61,8 +58,7 @@ $(document).ready(function(){
 	//欠费信息表格
 	//代表 select是选择器，number用户编号，s数据是填充表格的数据，headarray是表头,title是表格上的标题
 	function SetArrearsTable(select,s,headarray,title,model,th,modelcss)
-	{	
-		
+	{
 		var bodyTpl = "";
 		var headmodel = "";
 		var tr = "";
@@ -82,7 +78,6 @@ $(document).ready(function(){
 							bodyTpl +='<td id="'+model[n]+'" title="'+s[i].ID+'/'+number+'/'+s[i].YearMonth+'" style="text-decoration:underline;cursor:pointer;'+modelcss[n]+'">'+s[i][model[n]]+'</td>';
 						} else  {
 							if (model[n] == "IsRent" || model[n] == "IsControl") {
-
 								if (s[i][model[n]] == "0") {
 									text = "否";
 								} else if(s[i][model[n]] == 1) {

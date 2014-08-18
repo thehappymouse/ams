@@ -85,7 +85,7 @@
 					width += 'px'; 
 
 				}
-                stylecss = '<div style="width:940px;overflow:scroll;overflow-y:hidden">';
+                stylecss = '<div style="width:940px;overflow:scroll;overflow-y:hidden;border:1px solid #009966;border-top:none">';
 				if (th) {
 					people="班组";
 				} else {
@@ -100,9 +100,7 @@
 			    headtpl +='</tr></thead><tbody><tr><td style="color:#009966;font-weight:bold;text-align:center">欠费年月</td>';
 				      
 				     for (var i in value) {
-				    
 				     	for (var i=0; i<3; i++) {
-
 				     		tbodyheadmodel += '<td style="color:#009966;font-weight:bold;text-align:center">'+headarray[i]+'</td>';
 				     	}
 		     			
@@ -119,8 +117,6 @@
 						   		contentdata = data[yeardata]
 
 						   		for (var i in headmodel) {
-						   			
-
 						   			tbodycontent  += '<td style="text-align:center">'+contentdata[headmodel[i]]+'</td>';
 						   		}
 						   } else {
@@ -128,14 +124,9 @@
 						   			tbodycontent  += '<td></td>';
 						   		}
 						   }
-							   
-								
 						}
-					   	
 					   tbodycontent += '</tr>'
 					}
-
-				    
 				       var tbodyend =  '<tr><td style="color:#009966;font-weight:bold;text-align:center">汇总</td>';
 				           for (var i in value) {
 				           		var all = value[i].AllData;
@@ -144,21 +135,15 @@
 				           			for (var i in all) {
 					           			if (headmodel[n]) {
 											tbodyend +=  '<td style="text-align:center" >'+all[headmodel[n]]+'</td>';
-					           			
 										}
 										n++;
-					           			
 					           		}
 				           		} else {
 				           			for (var i = 0; i<3; i++) {
 				           				tbodyend +=  '<td style="text-align:center" ></td>';
 				           			}
 				           		}
-				           		
-				           	
-				           } 
-				        
-				           
+				           }
 				        tbodyend += '</tr>'+
 				        '<tr >'+
 				            '<td style="color:#009966;font-weight:bold;text-align:center">排名</td>';
@@ -167,9 +152,7 @@
 				            	i++;
 				            	tbodyend += '<td colspan="3" style="color:#009966;font-weight:bold;text-align:center">'+i+'</td>';
 				            }
-				            
-				          
-				        tbodyend +='</tr>'+
+                        tbodyend +='</tr>'+
 				            '<tr>'+
 				        '<td colspan="'+parseInt(i*3+1)+'" style="text-align:left" ><form name="excelform" id="excelform" method="post" target="put_excel" >&nbsp;&nbsp;&nbsp;&nbsp;导出文件：&nbsp;&nbsp;<span  id="excel" style="cursor:pointer"><img  src="/ams/public/images/Excel.png" style="height:25px;width:25px"/></span>&nbsp;&nbsp;</form></td>'+
 				           ' </tr>';
@@ -182,7 +165,6 @@
 			    $("#table1 table tr:eq(1)").removeClass("InfoTr");
 			    
 			    $("#tip").css("display","none");
-			    //console.log(tpl);
 			}
 			
 

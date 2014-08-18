@@ -4,22 +4,37 @@
     }
 </style>
 <script>
-    var img;
     var BoredrWidth;
-    if (img == undefined) {
-        img = new Image();
+    initImg = function(url) {
+        if (img == undefined) {
+            img = new Image();
+        }
+        img.src = "/ams/Jpg/SingleBar";
+        return img;
     }
-    img.src = "/ams/Jpg/SingleBar";
-
+    var img = initImg("/ams/Jpg/SingleBar");
     img.onload = function(){
         if (img.width < 535) {
             BoredrWidth = "535px";
         } else {
-            BoredrWidth = "auto";
+            BoredrWidth = "675px";
         }
-        var tpl = '<div style="border:1px solid #009966;width:'+BoredrWidth+';height:auto;"><img style="margin-top:20px;margin-left:20px" src="'+img.src+'"  /></div>';
+        var tpl = '<div style="border:1px solid #009966;width:675px;height:auto;overflow:scroll;overflow-y:hidden"><img style="margin-top:20px;margin-left:20px;width:'+BoredrWidth+';" src="'+img.src+'"  /></div>';
         $("#single").append(tpl);
     }
+
+    var arrasImage = initImg("/ams/Jpg/SingleBar");
+        arrasImage.onload = function(){
+            if (img.width < 920) {
+                BoredrWidth = "920px";
+            } else {
+                BoredrWidth = img.width;
+            }
+            var tpl = '<div style="border:1px solid #009966;width:675px;height:auto;overflow:scroll;overflow-y:hidden"><img style="margin-top:20px;margin-left:20px;width:'+BoredrWidth+';" src="'+img.src+'"  /></div>';
+            $("#single").append(tpl);
+        }
+
+    <img style="margin-top:20px;margin-left:20px;width:auto;height:250px;" src="/ams/Jpg/ArrarsMonth"/>
 </script>
 <br/>
 <div style="height:454px">
@@ -90,13 +105,13 @@
             <img style="margin-top:20px;margin-left:20px" src="/ams/Jpg/ArrarsCount"/>
         </div>
 
-        <div style="border:1px solid #009966;width:auto;height:auto;margin-left:40px;float:left">
+        <div style="border:1px solid #009966;width:auto;height:auto;margin-left:195px;float:left">
             <img style="margin-top:20px;margin-left:20px" src="/ams/Jpg/CutCount"/>
         </div>
     </div>
 
-    <div style="border:1px solid #009966;width:auto;height:auto;float:left;margin-top:20px">
-        <img style="margin-top:20px;margin-left:20px" src="/ams/Jpg/ArrarsMonth"/>
+    <div   id="arrasImage" style="border:1px solid #009966;width:940px;float:left;margin-top:20px;overflow:scroll;overflow-y:hidden">
+
     </div>
 
 </div>

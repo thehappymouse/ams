@@ -67,7 +67,6 @@ $(document).ready(function(){
 						} else {
 							bodyTpl += '<td style="text-align:center">'+s[i][model[n]]+'</td>';
 						}
-						
 					}
 		        bodyTpl +='</tr>';
 		        money += parseInt(s[i].Money);
@@ -75,8 +74,6 @@ $(document).ready(function(){
 			}
 			$("[name=Money]").val(money);
 		}
-		
-
 
 		var headTpl = '<div><div class="line ClientInfo" >'+title+'</div><table id="info"  >'+
 		    		'<thead>'+
@@ -97,16 +94,11 @@ $(document).ready(function(){
 		}   
     	
 	    var footTpl = tr + '</tr></thead><tbody></tbody></table></div>';
-
 	    var tpl = headTpl+headmodel+bodyTpl+footTpl;
-
 	    var selected = "#"+select;
 	    $(selected+" div").remove();
-
 	    $(selected).append(tpl);
-
 		$(selected+" table tr:even").addClass("InfoTr");
-
 		$(selected+" table tr:eq(0)").removeClass("InfoTr");
 		$("#tip").css("display","none");
 	}
@@ -132,9 +124,7 @@ $(document).ready(function(){
 				<div>
 						<span>营<div class="full"></div>业<div class="full"></div>班<div class="full"></div>组：</span>
 						<span id="team">
-							
 						</span>
-					
 				</div>
                 <div style="margin-top:15px;*margin-left:-2px">
                     <span >收费时间至：</span>

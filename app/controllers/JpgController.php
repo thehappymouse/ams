@@ -278,6 +278,7 @@ class  JpgController extends ControllerBase
             $builder->from("Arrears")->columns("YearMonth, count(DISTINCT CustomerNumber) AS Count");
 
             $builder->groupBy("YearMonth");
+//            $builder->andWhere("YearMonth > '20140101'");
             $rs = $builder->getQuery()->execute();
         } else {
 
@@ -289,19 +290,23 @@ class  JpgController extends ControllerBase
         for ($i = 1; $i <= (int)date('m'); $i++) {
             $ym = date('Y') . str_pad($i, 2, "0", STR_PAD_LEFT);
             $dataX[] = $ym;
+            $count = 0;
             if ($rs) {
                 foreach ($rs as $r) {
 
                     if ($r->YearMonth == $ym && in_array($r->YearMonth, $dataX)) {
-                        $dataY[] = $r->Count;
-                    } else {
-                        $dataY[] = 0;
+                        $count += $r->Count;
                     }
                 }
-            } else {
-                $dataY[] = 0;
-            }
 
+            }
+            $dataY[] = $count;
+        }
+
+        //将年份的20去掉
+        foreach($dataX as $key => $value){
+            $value = substr($value, 2);
+            $dataX[$key] = $value;
         }
 
         if (count($dataX) < 2) {
@@ -313,7 +318,7 @@ class  JpgController extends ControllerBase
         }
 
         // Setup the graph
-        $graph = new Graph(760, 250);
+        $graph = new Graph(1760, 250);
         $graph->SetScale("textlin");
 
         $theme_class = new UniversalTheme;

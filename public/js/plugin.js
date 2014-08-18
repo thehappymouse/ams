@@ -19,34 +19,37 @@ $(document).ready(function(){
 			  return fmt;
 			}
 
-			PageSize = 30;
+			PageSize = 2;
 
-			width = window.screen.width/2;
-			height = window.screen.height/2;
+			width = window.screen.width;
+			height = window.screen.height;
 			
 			UserDuty =  {"1":"抄表员", "2":"抄表员班长", "3":"收费员", "4":"收费员班长", "5":"对账", "6":"管理人员"};
 
-			$("#Arrears").on("dblclick","#PressCount",function(v){
+			$("#Arrears").on("click","#PressCount",function(v){
 
 				var value = v.currentTarget.title;
 		
-				window.open("/ams/PopPage/ReminderFee/"+value,"cuifei","height="+height*1.5+", width="+width*1.5);
+				window.open("/ams/PopPage/ReminderFee/"+value,"cuifei","height="+height+", width="+width);
 			})
 
-			$("#Arrears").on("dblclick","#CutCount",function(v){
+			$("#Arrears").on("click","#CutCount",function(v){
 				var value = v.currentTarget.title;
-			
-		
-				window.open("/ams/PopPage/PowerCut/"+value,"tingdian","height="+height*1.5+", width="+width*1.5);
+				window.open("/ams/PopPage/PowerCut/"+value,"tingdian","height="+height+", width="+width);
 			})
 
 			
-			$("#Arrears").on("dblclick","#CustomerNumber",function(v){
-			
+			$("#Arrears").on("click","#CustomerNumber",function(v){
 				var value = v.currentTarget.title;
 	
-				window.open("/ams/PopPage/Info/"+value,"info","height="+height*1.5+", width="+width*1.5);
+				window.open("/ams/PopPage/Info/"+value,"info","height="+height+", width="+width);
 			})
+
+            $("#Arrears").on("click","#Number",function(v){
+                var value = v.currentTarget.title;
+
+                window.open("/ams/PopPage/Cancel/"+value,"info","height="+height+", width="+width);
+            })
 
 	
 	
@@ -100,9 +103,7 @@ $(document).ready(function(){
 			{
 				var that = this;
 				this.SubmitData = function (value)
-				{	
-				
-						//alert(value);
+				{
 						popupDiv('pop-div',value);
 				}
 				this.is_alert = true;
@@ -211,9 +212,9 @@ $(document).ready(function(){
 			}
 			
 
-		/*	$("#Arrears").on("click","input:checkbox:eq(0)",function(){
+			$("#Arrears").on("click","input:checkbox:eq(0)",function(){
 
-					//SelectChexkBox();
+					SelectChexkBox();
 			})
 
 
@@ -234,7 +235,7 @@ $(document).ready(function(){
 						$(this).attr("checked", v); 
 				})
 			}
-		*/
+
 			checkbox = function (v)
 			{
 				var value = "";
@@ -244,7 +245,6 @@ $(document).ready(function(){
 				$("input:checkbox").each(function(v){
 					if ($(this)[0].checked) {
 						fp = false;
-						
 						if ($(this).attr("value") != undefined) {
 							arr.push($(this).attr("value"));
 						}
@@ -307,22 +307,22 @@ $(document).ready(function(){
 	        var Reload = false;
 	        popupDiv = function(div_id,content,dishid,isload) 
 	        {   
-                        var div_obj = $("#" + div_id);  
-                        var posLeft = ($(window).width() - div_obj.width()) / 2;
-                        var posTop = ($(window).height() - div_obj.height()) / 2;
-                    
-                        //添加并显示遮罩层   
-                        $("<div id='mask'></div>").addClass("mask")     
-                                                  .appendTo("body")   
-                                                  .fadeIn(200); 
-                                                  
-                        div_obj.css({"top": posTop , "left": posLeft}).fadeIn();
-                        var tpl = "<div>"+content+"</div>"
-                        $("#text div").remove();
-                        $("#text").append(tpl);
-                        $("#hide").val(dishid);
-                       
-                         Reload =   isload       
+                    var div_obj = $("#" + div_id);
+                    var posLeft = ($(window).width() - div_obj.width()) / 2;
+                    var posTop = ($(window).height() - div_obj.height()) / 2;
+
+                    //添加并显示遮罩层
+                    $("<div id='mask'></div>").addClass("mask")
+                                              .appendTo("body")
+                                              .fadeIn(200);
+
+                    div_obj.css({"top": posTop , "left": posLeft}).fadeIn();
+                    var tpl = "<div>"+content+"</div>"
+                    $("#text div").remove();
+                    $("#text").append(tpl);
+                    $("#hide").val(dishid);
+
+                     Reload =   isload
 			}   
 			                      
 			hideDiv = function(div_id) 
@@ -348,8 +348,7 @@ $(document).ready(function(){
 			this.PageClick = function() {
 				$("#Arrears").on("click","#next",function(){
 					var NextPage = parseInt(that.Page)+1;
-
-					var SearchData = that.Data+"&Page="+NextPage+"&PageSize="+PageSize;
+                    var SearchData = that.Data+"&Page="+NextPage+"&PageSize="+PageSize;
 					that.Page = NextPage;
 					G.GetAjax('get',that.SearchUrl,SearchData,ShowTable);
 					that.SetDisable();

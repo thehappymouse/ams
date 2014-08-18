@@ -18,6 +18,7 @@ class MessageController extends ControllerBase
         $conditions = "ToUserID=" . $this->loginUser["ID"];
         $total = Message::count($conditions);
 
+        $conditions .="ORDER BY SendTime DESC";
         $conditions = HelperBase::addLimit($conditions, $this->request->get("Page"), $this->request->get("PageSize"));
 
         $md = Message::find($conditions);

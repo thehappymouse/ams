@@ -129,20 +129,16 @@ $(document).ready(function(){
 							}
 							bodyTpl += '<td style="text-align:center">'+text+'</td>';
 						}
-						
 					}
 		        bodyTpl +='</tr>';
-		
 		        d++;
 			}
-			
 		}
 		
 		if (PageNumber == 1) {
 			PTpl="";
 		} else {
 			if ( Page == 1 ) {
-
 				PTpl = "<span id='next' style='cursor:pointer'>下一页</span>&nbsp;&nbsp;<span id='end' style='cursor:pointer'>末页</span>";
 			} else if (Page < PageNumber && Page!= 1 ) {
 				PTpl = "<span id='start' style='cursor:pointer'>首页</span>&nbsp;&nbsp;<span id='prev' style='cursor:pointer'>上一页</span>&nbsp;&nbsp;<span id='next' style='cursor:pointer'>下一页</span>&nbsp;&nbsp;<span id='end' style='cursor:pointer'>末页</span>";
@@ -165,9 +161,7 @@ $(document).ready(function(){
     	for (var i in headarray) {
     		headmodel +='<th style="'+modelcss[i]+';text-align:center">'+headarray[i]+'</th>';
     	}
-		
 
-				    '</td></tr>';
 		if (!th){
 			 tr = pageTpl+'<tr>'+
 			        '<td colspan="10" style="text-align:left" ><form name="excelform" id="excelform" method="post" target="put_excel" >&nbsp;&nbsp;&nbsp;&nbsp;导出文件：&nbsp;&nbsp;<span  id="excel" style="cursor:pointer"><img  src="/ams/public/images/Excel.png" style="height:25px;width:25px"/></span>&nbsp;&nbsp;</form></td>'+
@@ -177,18 +171,12 @@ $(document).ready(function(){
 		}   
     	
 	    var footTpl = tr + '</tr></thead><tbody></tbody></table></div>';
-
 	    var tpl = headTpl+headmodel+bodyTpl+footTpl;
-
 	    var selected = "#"+select;
 	    $(selected+" div").remove();
-
 	    $(selected).append(tpl);
-
 		$(selected+" table tr:even").addClass("InfoTr");
-
 		$(selected+" table tr:eq(0)").removeClass("InfoTr");
-
 		$("#tip").css("display","none");
 	}
 	$("#time").val(AgoTime);

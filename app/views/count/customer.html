@@ -168,14 +168,12 @@ $(document).ready(function(){
 		}
 
 		var CurrentNum = s.length;
-        var stylecss = '<div style="width:940px;overflow:scroll;overflow-y:hidden">';
+        var stylecss = '<div style="width:940px;overflow:scroll;overflow-y:hidden;border:1px solid #009966;border-top:none">';
 		var pageTpl = '<tr >'+
 			    '<td id="PageNum" colspan="17" style="text-align:left">&nbsp;&nbsp;&nbsp;&nbsp;当前第<input name="Num" type="text" value="'+Page+'" style="width:12px;padding:0 8px"  />页，总共'+PageNumber+'页&nbsp;&nbsp;'+PTpl+
 			    '&nbsp;&nbsp;<span>本页'+CurrentNum+'条数据，总共'+total+'条数据</span></td>';
 
-        console.log(model.length);
         var width = model.length*100;
-        console.log(width);
         if (width < 940) {
             width = '940px';
         }  else {

@@ -20,7 +20,7 @@ class  PopPageController extends ControllerBase
         $s = Charge::find("CustomerNumber=$number");
 
         $this->view->cs = $s;
-        $this->view->customerid = $id;
+        $this->view->customerid = $number;
     }
 
     /**

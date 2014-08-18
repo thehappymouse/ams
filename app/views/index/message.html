@@ -21,11 +21,16 @@
             var headmodel = "";
             var money = 0;
             var t = 1;
-
+            var color;
             if (s) {
                 for (var i in s) {
                     var source = ReplaceArray(s[i]);
-                    bodyTpl += '<tr>';
+                    if (s[i].IsRead != 1) {
+                          color = "style='color:red'";
+                    } else {
+                        color = "";
+                    }
+                    bodyTpl += '<tr '+color+'>';
                     for (var n in model) {
                         if (model[n] == "#") {
                             bodyTpl += '<td style="' + modelcss[n] + '">' + t + '</td>';
@@ -33,7 +38,7 @@
                             bodyTpl += '<td  style="' + modelcss[n] + '"><button id="action" name="0268564926" class="btn btn-success" style="background-color:#009966">操作</button></a></td>';
                         }*/ else if (model[n] == "Role") {
                             bodyTpl += '<td style="' + modelcss[n] + '">' + UserDuty[source[model[n]]] + '</td>';
-                        } else {
+                        }  else {
                             bodyTpl += '<td style="' + modelcss[n] + '">' + source[model[n]] + '</td>';
                         }
                     }

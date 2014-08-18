@@ -35,13 +35,9 @@ $(document).ready(function(){
 
 		var title = '电费信息';
 		var array = Array("电费年月", "电费金额", "结清标志", "停电标志", "催费次数", "停电次数", "收费人", "收费日期");
-
 		var model = Array("YearMonth", "Money", "IsClean", "IsCut", "PressCount", "CutCount", "Charge", "ChargeDate");
 		var modelcss = Array("text-align:center", "text-align:center", "text-align:center", "text-align:center",  "text-align:center", "text-align:center", "text-align:center", "text-align:center", "text-align:center");
 		SetArrearsTable( List, array, title, model, modelcss);
-
-		//$("form").css("display","block");
-
 	}
 
 
@@ -57,104 +53,53 @@ $(document).ready(function(){
 		if (value.IsControl == 2 ){ IsControlText = '全部'} else if( value.IsControl ==1) { IsControlText = '是'} else { IsControlText = '否'}
 		if (value.IsSpecial == 2 ){ IsSpecialText = '全部'} else if( value.IsSpecial ==1) { IsSpecialText = '是'} else { IsSpecialText = '否'}
 		var tpl = '<div><div   class="line ClientInfo" >用户详细信息</div><table  >'+
-
 	        '<tr >'+
-
 	            '<td  style="width:116px">管理班组：</td>'+
-
 	            '<td style="text-align:left;width:120px">'+value.Team+'</td>'+
-
 	            '<td style="width:116px">抄表员：</td>'+
-
 	            '<td style="text-align:left;width:116px">'+value.SegUser+'</td>'+
-
 	            '<td style="width:116px">用户编号：</td>'+
-
 	            '<td style="text-align:left;width:116px">'+value.Number+'</td>'+
 	            '<td style="width:116px">用户名称：</td>'+
-
 	            '<td style="text-align:left;width:116px"><div title="'+value.Name+'" style="width:110px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">'+value.Name+'</div></td>'+
-
 	        '</tr>'+
-
 	        '<tr>'+
-
 	            '<td >用电地址：</td>'+
-
 	            '<td colspan="3" style="text-align:left"><div title="'+value.Address+'" style="width:350px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">'+value.Address+'</div></td>'+
-
 	            '<td >抄表段编号：</td>'+
-
 	            '<td style="text-align:left">'+value.Segment+'</td>'+
-
 	            '<td >电表资产号：</td>'+
-
 	            '<td style="text-align:left">'+value.AssetNumber+'</td>'+
-
-
-
 	        '</tr>'+
-
 	        '<tr>'+
-
 	            '<td >特殊客户：</td>'+
-
 	            '<td class="Warn" style="text-align:left">'+IsSpecialText+'</td>'+
-
 	            '<td >停电标志：</td>'+
-
 	            '<td class="Warn" style="text-align:left">'+IsCutText+'</td>'+
-
 	            '<td  >停电方式：</td>'+
-
 	            '<td class="Warn" style="text-align:left">'+value.CutStyle+'</td>'+
-
 	            '<td >费控标志：</td>'+
-
 	            '<td class="Warn" style="text-align:left">'+IsControlText+'</td>'+
-
 	        '</tr>'+
-
 	        '<tr>'+
-
 	            '<td >租房客户：</td>'+
-
 	            '<td style="text-align:left">'+IsRentText+'</td>'+
-
 	            '<td >房东电话：</td>'+
-
 	            '<td style="text-align:left">'+value.LandlordPhone+'</td>'+
-
 	            '<td >房客电话：</td>'+
-
 	            '<td style="text-align:left">'+value.RenterPhone+'</td>'+
-
 	            '<td >欠费原因：</td>'+
-
 	            '<td style="text-align:left"><div style="width:100px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">'+value.Cause+'</div></td>'+
-
 	        '</tr>'+
-
 	        '<tr>'+
                '<td >累计欠费次数：</td>'+
-
                 '<td style="text-align:left">'+value.ArrearsCount+'</td>'+
 	            '<td >备注：</td>'+
-
-
-
 	            '<td style="text-align:left" colspan="5" ><div style="width:500px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">'+value.Desc+'</div></td>'+
-
-
-
 	        '</tr>'+
-
 	    '</table></div>';
-
 	    $("#info div").remove();
-
 	    $("#info").append(tpl);
-
 	}
 
 
@@ -201,20 +146,12 @@ $(document).ready(function(){
 							}
 							bodyTpl += '<td  style="'+modelcss[n]+'" >'+text+'</td>';
 						}
-
 					}
 		        bodyTpl +='</tr>';
-
-
 		        money += parseInt(s[i].Money);
-		        //0268001535
-
 			}
 			d++;
-			//$("[name=Money]").val(money);
 		}
-
-
 
 		var headTpl = '<div><div class="line ClientInfo" >'+title+'</div><table id="info"  >'+
 		    		'<thead>'+
@@ -233,7 +170,6 @@ $(document).ready(function(){
 	    var tpl = headTpl+headmodel+bodyTpl+footTpl;
 
 	    $("#Arrears div").remove();
-
 	    $("#Arrears").append(tpl);
 	    $("#tip").css("display","none");
 		$("#Arrears table tr:odd").addClass("InfoTr");

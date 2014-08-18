@@ -41,7 +41,7 @@ class CustomerHelper extends HelperBase
     }
 
     /**
-     * 停电
+     * 停电  20140808 多记录同时停止
      * @param array $params
      * @return bool
      */
@@ -50,35 +50,42 @@ class CustomerHelper extends HelperBase
         $success = false;
         $request = new RequestParams($params);
 
-        $cut = new Cutinfo();
-        $cut->CutStyle = $request->CutType;
-        $cut->CutTime = $request->CutTime;
-        $cut->Arrear = $request->ID;
+        $ids = explode(",", $request->ID);
+
+        foreach($ids as $id){
+            $cut = new Cutinfo();
+            $cut->CutStyle = $request->CutType;
+            $cut->CutTime = $request->CutTime;
+            $cut->Arrear = $id;
+
+            $arrear = Arrears::findFirst($cut->Arrear);
+
+            $customer = Customer::findByNumber($arrear->CustomerNumber);
+
+            $cut->CutUserName = $customer->SegUser;
+            $cut->CustomerNumber = $customer->Number;
+            $cut->Segment = $arrear->Segment;
+            $cut->YearMonth = $arrear->YearMonth;
+            $cut->Money = $arrear->Money;
+
+            $r = $cut->save();
 
 
-        $arrear = Arrears::findFirst($cut->Arrear);
+            if ($r) {
+                $arrear->CutCount = (int)$arrear->CutCount + 1;
+                $arrear->IsCut = 1;
+                $arrear->save();
 
-        $customer = Customer::findByNumber($arrear->CustomerNumber);
+                $customer->IsCut = 1;
+                $customer->save();
+                $success = true;
 
-        $cut->CutUserName = $customer->SegUser;
-        $cut->CustomerNumber = $customer->Number;
-        $cut->Segment = $arrear->Segment;
-        $cut->YearMonth = $arrear->YearMonth;
-        $cut->Money = $arrear->Money;
-
-        $r = $cut->save();
-        if ($r) {
-            $arrear->CutCount = (int)$arrear->CutCount + 1;
-            $arrear->IsCut = 1;
-            $arrear->save();
-
-            $customer->IsCut = 1;
-            $customer->save();
-            $success = true;
-        } else {
-            var_dump($cut->getMessages());
+            } else {
+                var_dump($cut->getMessages());
+            }
         }
-        return array($success, $cut, $arrear);
+
+        return array($success, $ids);
     }
 
     public static function Charge(array $params)
