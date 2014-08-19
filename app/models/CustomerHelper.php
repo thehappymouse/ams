@@ -52,7 +52,7 @@ class CustomerHelper extends HelperBase
 
         $ids = explode(",", $request->ID);
 
-        foreach($ids as $id){
+        foreach ($ids as $id) {
             $cut = new Cutinfo();
             $cut->CutStyle = $request->CutType;
             $cut->CutTime = $request->CutTime;
@@ -131,9 +131,46 @@ class CustomerHelper extends HelperBase
         return $data;
     }
 
+    /**
+     * 客户统计数据。增加统计信息
+     * @param array $params
+     */
+    public static function Customers(array $params)
+    {
+        list($total, $data, $conditions, $param) = self::ArrearsInfo($params);
+
+        $builder = parent::getModelManager()->createBuilder();
+        $result = $builder->columns(array("COUNT( DISTINCT CustomerNumber) as Count, SUM(IsCut) as CutCount"))
+            ->from("Arrears")
+            ->andWhere($conditions)
+            ->getQuery()->execute($param)->getFirst();
+        $allCustomer = $result->Count;
+        $cutCount = $result->CutCount;
+
+
+        $sql = "SELECT  * from User WHERE Role = " . ROLE_MATER . " AND TeamID in (SELECT ID FROM Team WHERE Type = 1)";
+        $u = new User();
+        $users = new Phalcon\Mvc\Model\Resultset\Simple(null, $u, $u->getReadConnection()->query($sql));
+
+        $conditions = str_replace("AND (YearMonth BETWEEN :start: AND :end:)", "", $conditions);
+        $builder = parent::getModelManager()->createBuilder();
+        $result = $builder->columns("SUM(IsSpecial) as Count")
+            ->from("Customer")
+            ->andWhere($conditions)
+            ->andWhere("IsClean!=1")
+            ->getQuery()->execute($param)->getFirst();
+
+        $specialCount = (int)$result->Count; //这个需要特殊处理
+
+        $countinfo = array("allCustomer" => $allCustomer, "cutCount" => $cutCount, "specialCount" => $specialCount);
+
+        return array($total, $data, $countinfo);
+    }
+
+
 
     /**
-     * 欠费用户信息，多个界面综合使用
+     * 欠费用户信息，多个界面综合使用 客户分类统计中，增加统计数据
      * @param array $params
      * @return array
      */
@@ -219,6 +256,8 @@ class CustomerHelper extends HelperBase
         //分页
         $total = Arrears::count(array($conditions, "bind" => $param));
 
+        $conditions_mini = $conditions;
+
         $conditions = self::addLimit($conditions, $p->Page, $p->PageSize);
 
         $arrears = Arrears::find(array($conditions, "bind" => $param));
@@ -263,6 +302,6 @@ class CustomerHelper extends HelperBase
             $data[] = $row;
         }
 
-        return array($total, $data);
+        return array($total, $data, $conditions_mini, $param);
     }
 } 

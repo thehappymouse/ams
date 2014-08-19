@@ -21,13 +21,7 @@ $(document).ready(function(){
 				var SearchUrl = "/ams/reminder/SearchFee";
 				
 				$("button:eq(0)").click(function(){
-                    var reValue = $("input[name=ReminderFeeValue]").val();
-                    if (reValue < 0) {
-                        popupDiv('pop-div','催费次数不能小于0');
-                        return;
-                    }
-
-					data = $("form:eq(0)").serialize();
+                    data = $("form:eq(0)").serialize();
 					clickpage.Data = data;
 					var SearchData = data+"&Page=1&PageSize="+PageSize;
 
@@ -134,8 +128,8 @@ $(document).ready(function(){
 			
 				
 			
-				function ShowTable(value, total)
-				{	
+				function ShowTable(value, total, info)
+				{
 					if (value == null){
 						$("#info div").remove();
 						$("#Arrears div").remove();
@@ -149,14 +143,14 @@ $(document).ready(function(){
 					var headarray = Array("抄表段编号", "用户编号", "用户名称", "用电地址", "电费年月", "电费金额", "结清标志", "停电标志", "催费次数", "停电次数");
 					var model = Array("Segment", "CustomerNumber", "CustomerName", "Address", "YearMonth", "Money", "IsClean", "IsCut", "PressCount", "CutCount");
 					var modelcss = Array("text-align:center;width:80px", "text-align:center;width:80px", "text-align:center;width:80px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis",  "text-align:left;width:130px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis", "text-align:center;width:80px", "text-align:center;width:80px", "text-align:center;width:70px", "text-align:center;width:80px", "text-align:center;width:80px", "text-align:center;width:81px");
-		            SetArrearsTable(total,value,headarray,title,model,modelcss);
+		            SetArrearsTable(total,value,headarray,title,model,modelcss, info);
 				}
 				
 
 
 				
 				//代表number用户编号，s数据是填充表格的数据，headarray是表头,title是表格上的标题 modelcss是model的css样式
-				function SetArrearsTable(total,s,headarray,title,model,modelcss)
+				function SetArrearsTable(total,s,headarray,title,model,modelcss, info)
 				{	PageNumber = Math.ceil(total/PageSize);
 					var bodyTpl = "";
 					var headmodel = "";
@@ -165,7 +159,8 @@ $(document).ready(function(){
 					var text;
 					var CleanRedCss = "";
 					var CutRedCss = "";
-					
+                    var arrasNum = 0;
+                    var arrasTotal = 0;
 					if (s) {
 						for (var i in s) {
 							var source = ReplaceArray(s[i]);
@@ -204,15 +199,9 @@ $(document).ready(function(){
 										}
 										bodyTpl += '<td style="'+modelcss[n]+'">'+text+'</div></td>';
 									}
-									
-									
-									
 								}
 					        bodyTpl +='</tr>';
-					      
 					        money += parseInt(source.Money);
-					        
-					        
 						}
 						$("[name=Money]").val(money);
 					}
@@ -242,7 +231,7 @@ $(document).ready(function(){
 			    	
 				    var pageTpl = '</tr><tr >'+
 				    '<td id="PageNum" colspan="11" style="text-align:left">&nbsp;&nbsp;&nbsp;&nbsp;当前第<input name="Num" type="text" value="'+Page+'" style="padding:0px 8px; width:12px" />页，总共'+PageNumber+'页&nbsp;&nbsp;'+PTpl+
-				    '&nbsp;&nbsp;<span>本页'+CurrentNum+'条数据，总共'+total+'条数据</span></td></tr>';
+				    '&nbsp;&nbsp;<span>本页'+CurrentNum+'条数据，总共'+total+'条数据</span><span>欠费：'+info.arrearsCount+'笔，欠费金额：'+info.arrearsMoney+'元</span></td></tr>';
 				    var footTpl = '</tbody></table></div>';
 				    var tpl = headTpl+headmodel+'</thead><tbody>'+bodyTpl+pageTpl+footTpl;
 
@@ -251,10 +240,7 @@ $(document).ready(function(){
 				    $("#tip").css("display","none");
 					$("#Arrears table tr:odd").addClass("InfoTr");
 					$("#Entry").css("display","block");
-
 				}
-
-			
 
 				$("[name=Photo]").change(function(v){
 					var filename = v.currentTarget.value;
@@ -262,7 +248,6 @@ $(document).ready(function(){
 						var length = filename.lastIndexOf(".");
 						var extension= filename.substr(length);
 						extension = extension.toLowerCase();
-
 						if (extension != ".jpg" && extension != ".png" && extension != ".jpeg") {
 							popupDiv('pop-div',"你所上传的图片格式不正确，请上传jpg、png格式图片!");
 							$("button:eq(1)").attr("disabled","true");
@@ -338,7 +323,7 @@ $(document).ready(function(){
 				            	 	<option value="1">≥</option> 
 				            		<option value="0"><</option> 
 				            	</select> 
-				            	<input name="ReminderFeeValue" type="text" style="width:72px;float: left;"  value="1" />
+				            	<input name="ReminderFeeValue" type="text" style="width:72px;float: left;"   />
 				            </td>
 				        </tr> 
 				        <tr > 

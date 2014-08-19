@@ -22,22 +22,11 @@ $(document).ready(function(){
         setTimeout('setT()',50000);
     }
 
-    var tpl = "<span id='tpl' class='badge' style='color:white'></span>";
+    var tpl = "<span id='tpl' style='color:red'></span>";
     $("#message a").append(tpl);
     setT();
 })
 </script>
-<style>
-
-    .badge {
-        padding-right: 9px;
-        padding-left: 9px;
-        -webkit-border-radius: 9px;
-        -moz-border-radius: 9px;
-        border-radius: 9px;
-        background-color:    red
-       }
-</style>
 <div id="wrap">
 
     <!-- Begin page content -->

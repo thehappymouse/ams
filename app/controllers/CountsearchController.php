@@ -85,8 +85,12 @@ class CountsearchController extends ControllerBase
     {
         $params = $this->request->get();
 
-        list($total, $data) = CustomerHelper::ArrearsInfo($params);
+        list($total, $data, $countInfo) = CustomerHelper::Customers($params);
+//        list($total, $data) = CustomerHelper::ArrearsInfo($params);
+
+
         $this->ajax->total = $total;
+        $this->ajax->countInfo = $countInfo;
         $this->ajax->flushData($data);
     }
 

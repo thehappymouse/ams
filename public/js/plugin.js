@@ -19,7 +19,7 @@ $(document).ready(function(){
 			  return fmt;
 			}
 
-			PageSize = 2;
+			PageSize = 30;
 
 			width = window.screen.width;
 			height = window.screen.height;
@@ -120,10 +120,13 @@ $(document).ready(function(){
 							type:type,
 							success:function(response)
 							{
-
 									if (response.success) {
 										if (func != null ) {
-											func(response.data, response.total);
+                                            if (response.hasOwnProperty("countInfo")) {
+                                                func(response.data, response.total, response.countInfo);
+                                            } else {
+                                                func(response.data, response.total);
+                                            }
 										} else {
 											if (response.msg){
 												that.SubmitData(response.msg);
@@ -166,7 +169,6 @@ $(document).ready(function(){
 					array = arguments[0]?arguments[0]:false ;
 
 					if (!array) {
-							
 							var name = document.activeElement.name;
 							if (name == "Team") {
 								var  selectOne = that.select["Name"];
@@ -193,8 +195,7 @@ $(document).ready(function(){
 
 				//name是select name属性的值，select是jquery选择器的选择元素，value是数据源需拥有ID和Value两个字段
 				this.SetSelect = function(name,select,value)
-				{	
-				
+				{
 					var tpl = '<select name="'+name+'" id="'+name+'" style="width:120px;"> ';
 				
 					for (var i in value) {
@@ -214,13 +215,12 @@ $(document).ready(function(){
 
 			$("#Arrears").on("click","input:checkbox:eq(0)",function(){
 
-					SelectChexkBox();
+					//SelectChexkBox();
 			})
 
 
 			function SelectChexkBox()
 			{
-				
 				if ($("input:checkbox:eq(0)")[0].checked == true) {
 
 					EachChexBox(true);

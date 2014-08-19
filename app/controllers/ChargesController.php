@@ -146,9 +146,7 @@ class ChargesController extends ControllerBase
         if ($this->request->get("RenterPhone")) {
             $customerModel->RenterPhone = $this->request->get("RenterPhone");
         }
-        if (!$customerModel->save()) {
-            var_dump($customerModel->getMessages());
-        }
+
 
         $userTeam = Team::findFirst($this->loginUser["TeamID"]);
         $segment = Segment::findFirst(array("Number=:num:", "bind" => array("num" => $ars->getFirst()->Segment)));
@@ -193,6 +191,15 @@ class ChargesController extends ControllerBase
             }
         }
 
+        //如果用户没有欠费信息，则将客户IsClean=1
+        if(Arrears::count("CustomerNumber=$customer AND IsClena=0") == 0){
+            $customerModel->IsClean = 1;
+        }
+
+        if (!$customerModel->save()) {
+            var_dump($customerModel->getMessages());
+        }
+
         try {
 
             //发送消息到对应的抄表员，以便去复电。 根据客户编码，查找抄表段->抄表员和班长，写信
@@ -232,6 +239,7 @@ class ChargesController extends ControllerBase
      * 撤消收费
      * 1，将收费记录删除
      * 2，将收费记录对应的欠费记录置为未结清
+     * 将用户结清置为未结清
      */
     public function CancelAction()
     {
@@ -265,6 +273,9 @@ class ChargesController extends ControllerBase
                 $logd .= "|" . $a->YearMonth . "|￥" . $a->Money;
             }
         }
+        $customerModel = Customer::findByNumber($customer);
+        $customerModel->IsClean = 0;
+        $customerModel->save();
 
         $this->ajax->logData->Data .= $name . "|" . $customer . $logd;
 

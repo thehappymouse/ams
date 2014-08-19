@@ -48,32 +48,25 @@ $(document).ready(function(){
 	$("body").keydown(function() {
 		var msg;
 				if (event.keyCode == "13") {
-					
 					if ($("[name=Num]").focus()) {
 						Page = $("[name=Num]").val();
-
 						if (Page>PageNumber || Page<1) {
 							msg = "总共只有"+PageNumber+"页。没有第"+Page+"页！";
 							popupDiv('pop-div',msg);
 							Page =1;
-						
 						}
 
 						var SearchData = data+"&Page="+Page+"&PageSize="+PageSize;
 						clickpage.Page = Page;
-					
 						G.GetAjax('post',SearchUrl,SearchData,ShowTable);
 					}
-					
 				}
   	})
 
-	function ShowTable(value,Total)
-	{	
-
+	function ShowTable(value,Total, info)
+	{
 		if(value == null){
 			$("#Arrears div").remove();
-		
 			$("#tip").css("display","block");
 			return;
 		}
@@ -82,19 +75,15 @@ $(document).ready(function(){
 		var headarray = Array("抄表段编号", "用户编号", "用户名称", "用电地址","房东电话" , "电费年月", "电费金额","费控标志", "结清标志", "停电标志", "催费次数", "停电次数" , "欠费笔数",  "累计欠费次数", "特殊客户", "租房客户");
 		var modelcss = Array("text-align:center;width:90px", "text-align:center;width:70px","text-align:center;width:70px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis",  "text-align:center;width:150px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis",  "text-align:center;width:100px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis", "text-align:center;width:80px", "text-align:center;width:80px", "text-align:center;width:85px", "text-align:center;width:90px", "text-align:center;width:90px",
                 "text-align:center;width:90px", "text-align:center;width:80px", "text-align:center;width:80px", "text-align:center;width:120px", "text-align:center;width:80px", "text-align:center;width:80px");
-	
 		var model = Array("Segment", "CustomerNumber", "CustomerName", "Address", "LandlordPhone", "YearMonth", "Money", "IsControl", "IsClean", "IsCut", "PressCount", "CutCount", "ArrearCount", "AllArrearCount", "IsSpecial", "IsRent");
-		
-		
-		SetArrearsTable('Arrears',value,headarray,title,model,false,modelcss,Total);
+		SetArrearsTable('Arrears',value,headarray,title,model,false,modelcss,Total, info);
 	}
-	
-
 
 	
 	//代表number用户编号，s数据是填充表格的数据，headarray是表头,title是表格上的标题
-	function SetArrearsTable(select,s,headarray,title,model,th,modelcss,total)
-	{	
+	function SetArrearsTable(select,s,headarray,title,model,th,modelcss,total, info)
+	{
+        //console.log(info);return;
 		PageNumber = Math.ceil(total/PageSize);
 		Page = clickpage.ReturnPage();
 		var bodyTpl = "";
@@ -105,7 +94,6 @@ $(document).ready(function(){
 		var PTpl;
 		if (s) {
 			for (var i in s) {
-		
 				var number = s[i].CustomerNumber;
 				var source = ReplaceArray(s[i]);
 				bodyTpl += '<tr style="height:20px;">'+
@@ -137,28 +125,21 @@ $(document).ready(function(){
 									text = "未停电";
 								}
 							} else if( model[n] == "CustomerName" || model[n] == "Address"){
-
 								text = '<div title="'+s[i][model[n]]+'" style="'+modelcss[n]+'">'+source[model[n]]+'</div>';
 							} else {
-								
 								text = source[model[n]];
 							}
 							bodyTpl += '<td style="'+modelcss[n]+'">'+text+'</td>';
 						}
-						
 					}
 		        bodyTpl +='</tr>';
-		       
 		        d++;
-		        
 			}
-			
 		}
 		if (PageNumber == 1) {
 			PTpl="";
 		} else {
 			if ( Page == 1 ) {
-
 				PTpl = "<span id='next' style='cursor:pointer'>下一页</span>&nbsp;&nbsp;<span id='end' style='cursor:pointer'>末页</span>";
 			} else if (Page < PageNumber && Page!= 1 ) {
 				PTpl = "<span id='start' style='cursor:pointer'>首页</span>&nbsp;&nbsp;<span id='prev' style='cursor:pointer'>上一页</span>&nbsp;&nbsp;<span id='next' style='cursor:pointer'>下一页</span>&nbsp;&nbsp;<span id='end' style='cursor:pointer'>末页</span>";
@@ -171,7 +152,7 @@ $(document).ready(function(){
         var stylecss = '<div style="width:940px;overflow:scroll;overflow-y:hidden;border:1px solid #009966;border-top:none">';
 		var pageTpl = '<tr >'+
 			    '<td id="PageNum" colspan="17" style="text-align:left">&nbsp;&nbsp;&nbsp;&nbsp;当前第<input name="Num" type="text" value="'+Page+'" style="width:12px;padding:0 8px"  />页，总共'+PageNumber+'页&nbsp;&nbsp;'+PTpl+
-			    '&nbsp;&nbsp;<span>本页'+CurrentNum+'条数据，总共'+total+'条数据</span></td>';
+			    '&nbsp;&nbsp;<span>本页'+CurrentNum+'条数据，总共'+total+'条数据</span>&nbsp;&nbsp;&nbsp;&nbsp;<span ">欠费用户：'+info.allCustomer+'位，停电用户：'+info.cutCount+'位，特殊用户：'+info.specialCount+'位</span></td>';
 
         var width = model.length*100;
         if (width < 940) {

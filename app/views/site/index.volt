@@ -4,37 +4,34 @@
     }
 </style>
 <script>
-    var BoredrWidth;
     initImg = function(url) {
-        if (img == undefined) {
-            img = new Image();
+        if (!img){
+            var img = new Image();
         }
-        img.src = "/ams/Jpg/SingleBar";
+        img.src = url;
         return img;
     }
     var img = initImg("/ams/Jpg/SingleBar");
     img.onload = function(){
+        var BoredrWidth;
         if (img.width < 535) {
             BoredrWidth = "535px";
         } else {
             BoredrWidth = "675px";
         }
+
         var tpl = '<div style="border:1px solid #009966;width:675px;height:auto;overflow:scroll;overflow-y:hidden"><img style="margin-top:20px;margin-left:20px;width:'+BoredrWidth+';" src="'+img.src+'"  /></div>';
         $("#single").append(tpl);
     }
 
-    var arrasImage = initImg("/ams/Jpg/SingleBar");
-        arrasImage.onload = function(){
-            if (img.width < 920) {
-                BoredrWidth = "920px";
-            } else {
-                BoredrWidth = img.width;
-            }
-            var tpl = '<div style="border:1px solid #009966;width:675px;height:auto;overflow:scroll;overflow-y:hidden"><img style="margin-top:20px;margin-left:20px;width:'+BoredrWidth+';" src="'+img.src+'"  /></div>';
-            $("#single").append(tpl);
-        }
+    var arrasImage = initImg("/ams/Jpg/ArrarsMonth");
+    arrasImage.onload = function(){
+        var BoredrWidth = arrasImage.width+"px";
+        var tpl = '<img style="margin-top:20px;margin-left:20px;width:'+BoredrWidth+';height:250px;" src="'+arrasImage.src+'"/>';
+        $("#arrasImage").append(tpl);
+    }
 
-    <img style="margin-top:20px;margin-left:20px;width:auto;height:250px;" src="/ams/Jpg/ArrarsMonth"/>
+
 </script>
 <br/>
 <div style="height:454px">
@@ -109,10 +106,9 @@
             <img style="margin-top:20px;margin-left:20px" src="/ams/Jpg/CutCount"/>
         </div>
     </div>
-
-    <div   id="arrasImage" style="border:1px solid #009966;width:940px;float:left;margin-top:20px;overflow:scroll;overflow-y:hidden">
-
+    <div   id="arrasImage"  style="border:1px solid #009966;width:940px;float:left;margin-top:20px;overflow:scroll;overflow-y:hidden">
     </div>
+
 
 </div>
 <div style="height:20px;float:left;width:500px"></div>

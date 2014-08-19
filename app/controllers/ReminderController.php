@@ -40,13 +40,22 @@ class ReminderController extends ControllerBase
     public function SearchFeeAction()
     {
         $this->view->disable();
-
         $params = $this->request->get();
 
-//        $params["IsClean"] = "0";
+        list($total, $data, $conditions, $param) = CustomerHelper::ArrearsInfo($params);
+        $builder = $this->modelsManager->createBuilder();
+        $result = $builder->columns(array("Count(*) as Count, SUM(Money) as Money "))
+            ->from("Arrears")
+            ->andWhere($conditions)
+            ->andWhere("IsClean=0")
+            ->getQuery()->execute($param)->getFirst();
 
-        list($total, $data) = CustomerHelper::ArrearsInfo($params);
+        $count = $result->Count;
+        $money = $result->Money;
 
+        $countinfo = array("arrearsCount" => $count, "arrearsMoney" => $money);
+
+        $this->ajax->countInfo = $countinfo;
         $this->ajax->total = $total;
         $this->ajax->flushData($data);
     }
@@ -120,7 +129,7 @@ class ReminderController extends ControllerBase
         foreach($ids as $id){
             $ll->Cut($id, $r);
         }
-    
+
         if ($r) {
             $this->ajax->flushOk();
         } else {

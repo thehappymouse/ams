@@ -30,6 +30,11 @@ $(document).ready(function(){
 
 
 	$("button:eq(0)").click(function(){
+        var reValue = $("input[name=ReminderFeeValue]").val();
+        if (reValue < 0) {
+            popupDiv('pop-div','催费次数不能小于0');
+            return;
+        }
 		data = $("form:eq(0)").serialize();
 		SearchData = data+"&Page=1&PageSize="+PageSize;
         console.log(SearchData);
@@ -80,7 +85,7 @@ $(document).ready(function(){
 	Page = clickpage.ReturnPage();
  	clickpage.PageClick();
 
-	function ShowTable(value,total)
+	function ShowTable(value, total, info)
 	{
 		if (value == null){
 			$("#info div").remove();
@@ -93,14 +98,14 @@ $(document).ready(function(){
 		var headarray = Array("抄表段编号", "用户编号", "用户名称", "用电地址", "电费年月", "电费金额", "结清标志", "停电标志", "催费次数", "停电次数");
 		var model = Array("Segment", "CustomerNumber", "CustomerName", "Address", "YearMonth", "Money", "IsClean", "IsCut", "PressCount", "CutCount");
 		var modelcss = Array("text-align:center;width:80px;", "text-align:center;width:80px;", "text-align:center;width:80px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis",  "text-align:left;width:130px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis", "text-align:center;width:80px;", "text-align:center;width:80px", "text-align:center;width:70px", "text-align:center;width:80px;", "text-align:center;width:80px", "text-align:center;width:81px");
-		SetArrearsTable(total,value,headarray,title,model,modelcss);
+		SetArrearsTable(total,value,headarray,title,model,modelcss, info);
 	}
 	
 
 
 	
 	//代表number用户编号，s数据是填充表格的数据，headarray是表头,title是表格上的标题
-	function SetArrearsTable(total, s, headarray, title, model, modelcss)
+	function SetArrearsTable(total, s, headarray, title, model, modelcss, info)
 	{	
 		Page = clickpage.ReturnPage();
 		PageNumber = Math.ceil(total/PageSize);
@@ -159,7 +164,6 @@ $(document).ready(function(){
 			PTpl="";
 		} else {
 			if ( Page == 1 ) {
-
 				PTpl = "<span id='next' style='cursor:pointer'>下一页</span>&nbsp;&nbsp;<span id='end' style='cursor:pointer'>末页</span>";
 			} else if (Page < PageNumber && Page!= 1 ) {
 				PTpl = "<span id='start' style='cursor:pointer'>首页</span>&nbsp;&nbsp;<span id='prev' style='cursor:pointer'>上一页</span>&nbsp;&nbsp;<span id='next' style='cursor:pointer'>下一页</span>&nbsp;&nbsp;<span id='end' style='cursor:pointer'>末页</span>";
@@ -232,7 +236,7 @@ $(document).ready(function(){
 				            	 	<option value="1">≥</option> 
 				            		<option value="0"><</option> 
 				            	</select> 
-				            	<input name="ReminderFeeValue" type="text" style="width:72px;float: left;"  />
+				            	<input name="ReminderFeeValue" type="text" style="width:72px;float: left;"  value="1" />
 				            </td> 
 				        </tr> 
 				        </tr> 
