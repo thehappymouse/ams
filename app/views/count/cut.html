@@ -3,6 +3,7 @@ $(document).ready(function(){
 	var G = new AjaxFun();
 
 	var clickpage = new ClickPage(G,SetTable);//分页
+    var groupData = new Grouping(G,SetTable);//排序
 
 	var excel = new ExportExcel();
 	excel.url = "/ams/export/CountCut";
@@ -28,6 +29,7 @@ $(document).ready(function(){
 		data = $("form:eq(0)").serialize();
 		excel.Todata = data;
 		clickpage.Data = data;
+        groupData.Data = data;//排序
 		var SearchData = data+"&Page=1&PageSize="+PageSize; 
 		G.GetAjax('get', SearchUrl, SearchData, SetTable,true);
 	})
@@ -35,6 +37,8 @@ $(document).ready(function(){
 	clickpage.SearchUrl = SearchUrl;
 	Page = clickpage.ReturnPage();
 	clickpage.PageClick();
+    groupData.Url = SearchUrl;//排序
+    groupData.clickFun();//排序
 
 	$("body").keydown(function() {
 		var msg;
@@ -63,11 +67,9 @@ $(document).ready(function(){
 	function SetTable(value) 
 	{
 		if (value == null){
-
 			$("#Arrears div").remove();
 			$("#tip").css("display","block");
-			return ; 
-
+			return ;
 		}
 		
 		var v =  ReplaceArray(value.data,true);
@@ -138,9 +140,17 @@ $(document).ready(function(){
 			    	'<tr >'+
 			    	'<th style="width:40px">序号</th>';
 
-    	for (var i in headarray) {
-    		headmodel +='<th style="'+modelcss[n]+';text-align:center">'+headarray[i]+'</th>';
-    	}
+        var txt;
+        for (var i in headarray) {//排序
+            if (headarray[i]== '抄表段编号') {
+                txt ='<div id="segment" style="cursor: pointer">'+headarray[i]+'</div>';
+            } else if(headarray[i] == "用户编号") {
+                txt ='<div id="number" style="cursor: pointer">'+headarray[i]+'</div>';
+            } else{
+                txt = headarray[i];
+            }
+            headmodel += '<th style="'+modelcss[i]+';text-align:center">'+txt+'</th>';
+        }
 		
 		
 		if (!th){

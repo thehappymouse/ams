@@ -3,7 +3,7 @@ $(document).ready(function(){
 	var G = new AjaxFun();
 
 	var clickpage = new ClickPage(G,ShowTable);//分页
-    var groupData = new Grouping(G,ShowTable);
+    var groupData = new Grouping(G,ShowTable);//排序
 	var excel = new ExportExcel();
 	excel.url = "/ams/export/reminder";
 	excel.exportTo();
@@ -32,20 +32,19 @@ $(document).ready(function(){
 
 	var SearchUrl = "/ams/countsearch/customer";
 	$("button:eq(0)").click(function(){
-	
 		data = $("form:eq(0)").serialize();
 		excel.Todata = data;
 		clickpage.Data = data;
-		var SearchData = data+"&Page=1&PageSize="+PageSize; 
-		
+        groupData.Data = data;//排序
+		var SearchData = data+"&Page=1&PageSize="+PageSize;
 		G.GetAjax('post', SearchUrl, SearchData, ShowTable,true);
 	})
 
 	clickpage.SearchUrl = SearchUrl;
 	Page = clickpage.ReturnPage();
 	clickpage.PageClick();
-    groupData.Url = "/ams/Info/UserList";
-    groupData.clickFun();
+    groupData.Url = SearchUrl;//排序
+    groupData.clickFun();//排序
 	$("body").keydown(function() {
 		var msg;
 				if (event.keyCode == "13") {
@@ -165,16 +164,16 @@ $(document).ready(function(){
 		    		'<thead>'+
 			    	'<tr >'+
 			    	'<th style="width:40px">序号</th>';
-
-    	for (var i in headarray) {
+        var txt;
+    	for (var i in headarray) {//排序
             if (headarray[i]== '抄表段编号') {
-                headmodel +='<th style="'+modelcss[i]+';text-align:center"><div id="segment" style="cursor: pointer">'+headarray[i]+'</div></th>';
+                txt ='<div id="segment" style="cursor: pointer">'+headarray[i]+'</div>';
             } else if(headarray[i] == "用户编号") {
-                headmodel +='<th style="'+modelcss[i]+';text-align:center"><div id="number" style="cursor: pointer">'+headarray[i]+'</div></th>';
+                txt ='<div id="number" style="cursor: pointer">'+headarray[i]+'</div>';
             } else{
-                headmodel +='<th style="'+modelcss[i]+';text-align:center">'+headarray[i]+'</th>';
+                 txt = headarray[i];
             }
-
+            headmodel += '<th style="'+modelcss[i]+';text-align:center">'+txt+'</th>';
     	}
 		            
     	if (!th){
@@ -182,16 +181,13 @@ $(document).ready(function(){
 			        '<td colspan="17" style="text-align:left;" ><form name="excelform" id="excelform" method="post" target="put_excel" >&nbsp;&nbsp;&nbsp;&nbsp;导出文件：&nbsp;&nbsp;<span  id="excel" style="cursor:pointer"><img  src="/ams/public/images/Excel.png" style="height:25px;width:25px"/></span></form></td>';
 		}  
 	    var footTpl = tr+'</tr></thead><tbody></tbody></table></div></div>';
-
 	    var tpl = headTpl+headmodel+bodyTpl+footTpl;
 
 	    $("#Arrears div").remove();
-
 	    $("#Arrears").append(tpl);
 	    $("#tip").css("display","none");
 		$("#Arrears table tr:odd").addClass("InfoTr");
 		$("#Entry").css("display","block");
-
 	}
 
 	

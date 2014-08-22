@@ -31,9 +31,18 @@ class CountHelper extends HelperBase
         $query = "SELECT a.Arrear, b.Segment, a.CustomerNumber, b.ID, b.Name, b.Address, a.PressTime, a.PressStyle
                          FROM Press as a LEFT JOIN Customer as b  ON a.CustomerNumber = b.Number";
 
+        $condition_Sort = $condition;
+        //排序
+        if($p->numberSort) {
+            $condition_Sort .= " ORDER BY CustomerNumber " . ($p->numberSort == 1 ? "Desc ": "ASC ");
+        }
+        if($p->segmentSort) {
+            $condition_Sort .= " ORDER BY b.Segment " . ($p->segmentSort == 1 ? "Desc ": "ASC ");
+        }
+
         $param = array("start" => $p->FromData, "end" => $p->ToData);
 
-        $query .= self::addLimit($condition, $p->Page, $p->PageSize);
+        $query .= self::addLimit($condition_Sort, $p->Page, $p->PageSize);
         $results = parent::getModelManager()->executeQuery($query, $param);
 
         foreach ($results as $rs) {
