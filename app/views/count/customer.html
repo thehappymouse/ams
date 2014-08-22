@@ -3,7 +3,7 @@ $(document).ready(function(){
 	var G = new AjaxFun();
 
 	var clickpage = new ClickPage(G,ShowTable);//分页
-
+    var groupData = new Grouping(G,ShowTable);
 	var excel = new ExportExcel();
 	excel.url = "/ams/export/reminder";
 	excel.exportTo();
@@ -44,7 +44,8 @@ $(document).ready(function(){
 	clickpage.SearchUrl = SearchUrl;
 	Page = clickpage.ReturnPage();
 	clickpage.PageClick();
-
+    groupData.Url = "/ams/Info/UserList";
+    groupData.clickFun();
 	$("body").keydown(function() {
 		var msg;
 				if (event.keyCode == "13") {
@@ -166,7 +167,14 @@ $(document).ready(function(){
 			    	'<th style="width:40px">序号</th>';
 
     	for (var i in headarray) {
-    		headmodel +='<th style="'+modelcss[i]+';text-align:center">'+headarray[i]+'</th>';
+            if (headarray[i]== '抄表段编号') {
+                headmodel +='<th style="'+modelcss[i]+';text-align:center"><div id="segment" style="cursor: pointer">'+headarray[i]+'</div></th>';
+            } else if(headarray[i] == "用户编号") {
+                headmodel +='<th style="'+modelcss[i]+';text-align:center"><div id="number" style="cursor: pointer">'+headarray[i]+'</div></th>';
+            } else{
+                headmodel +='<th style="'+modelcss[i]+';text-align:center">'+headarray[i]+'</th>';
+            }
+
     	}
 		            
     	if (!th){

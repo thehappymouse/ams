@@ -47,7 +47,7 @@ $(document).ready(function(){
 				})
 
 
-				$("#Arrears").on("click","[name=select]",function(v){
+				/*$("#Arrears").on("click","[name=select]",function(v){
 					var ID = v.currentTarget.defaultValue;
                     var pType = $("select[name=PhoneType]").val();
 
@@ -56,9 +56,9 @@ $(document).ready(function(){
 					if (pic) {
 						$("button:eq(1)").removeAttr("disabled");
 					}
-				})
+				})*/
 
-                $("select[name=PhoneType]").on("change",function(e){
+               /* $("select[name=PhoneType]").on("change",function(e){
                     var pType = e.currentTarget.value;
                     var ID = $("[name=ID]").val();
                     if (ID == "" ) {
@@ -66,7 +66,7 @@ $(document).ready(function(){
                         return;
                     }
                     $("input[name=NewPhone]").val(gridArr[ID][pType]);
-                })
+                })*/
 				$("body").keydown(function() {
 					var msg;
                     if (event.keyCode == "13") {
@@ -87,7 +87,7 @@ $(document).ready(function(){
 			 	
 			 
 			 
-				
+			/*
 				$("iframe").load(function(v){
                     var Vdata = window.frames["frm_dealer"].document.documentElement.innerText;
 					if (Vdata) {
@@ -106,9 +106,9 @@ $(document).ready(function(){
 					}
 					$("button:eq(1)").attr("disabled","true");
 					
-				})
+				})*/
 
-                $("form[name=putfile]").submit(function(e){
+            /*    $("form[name=putfile]").submit(function(e){
                     if ($("input[name=reminderStyle]:checked").val() ==1 ) {
                         if (!$("input[type=file]").val()) {
                             popupDiv('pop-div','通知单不能为空');
@@ -120,7 +120,7 @@ $(document).ready(function(){
                             popupDiv('pop-div','通知单不能为空');e.preventDefault();
                         }
                     }*/
-                });
+               // });
 			
 				clickpage.SearchUrl = SearchUrl;
 				Page = clickpage.ReturnPage();
@@ -133,8 +133,8 @@ $(document).ready(function(){
 					if (value == null){
 						$("#info div").remove();
 						$("#Arrears div").remove();
-						$("#Entry").css("display","none");
-						$("#tip").css("display","block");
+						//$("#Entry").css("display","none");
+						//$("#tip").css("display","block");
 						return ;
 					}
 
@@ -165,8 +165,7 @@ $(document).ready(function(){
 						for (var i in s) {
 							var source = ReplaceArray(s[i]);
 							var number = s[i].CustomerNumber;
-							bodyTpl += '<tr>'+
-								'<td style="width:32px;height:20px;text-align:center"><input value="'+source.ID+'" type="radio" style="vertical-align:text-bottom; *margin-bottom:-4px;" name="select"/ ></td>';
+							bodyTpl += '<tr>';
 								for (var n in model) {
                                     gridArr[source['ID']] = [source.RenterPhone,source.LandlordPhone];
 									if (model[n] == "CutCount" || model[n] == "PressCount" || model[n] == "CustomerNumber") {
@@ -221,8 +220,7 @@ $(document).ready(function(){
 
 					var headTpl = '<div><div class="line ClientInfo" >'+title+'</div><table id="info" >'+
 					    		'<thead>'+
-						    	'<tr >'+
-						    	'<th style="20px"></th>';
+						    	'<tr >';
 
 			    	for (var i in headarray) {
 			    		headmodel +='<th style="'+modelcss[i]+';text-align:center;">'+headarray[i]+'</th>';
@@ -230,19 +228,19 @@ $(document).ready(function(){
 					var CurrentNum = s.length;   
 			    	
 				    var pageTpl = '</tr><tr >'+
-				    '<td id="PageNum" colspan="11" style="text-align:left">&nbsp;&nbsp;&nbsp;&nbsp;当前第<input name="Num" type="text" value="'+Page+'" style="padding:0px 8px; width:12px" />页，总共'+PageNumber+'页&nbsp;&nbsp;'+PTpl+
+				    '<td id="PageNum" colspan="10" style="text-align:left">&nbsp;&nbsp;&nbsp;&nbsp;当前第<input name="Num" type="text" value="'+Page+'" style="padding:0px 8px; width:12px" />页，总共'+PageNumber+'页&nbsp;&nbsp;'+PTpl+
 				    '&nbsp;&nbsp;<span>本页'+CurrentNum+'条数据，总共'+total+'条数据</span><span>欠费：'+info.arrearsCount+'笔，欠费金额：'+info.arrearsMoney+'元</span></td></tr>';
 				    var footTpl = '</tbody></table></div>';
 				    var tpl = headTpl+headmodel+'</thead><tbody>'+bodyTpl+pageTpl+footTpl;
 
 				    $("#Arrears div").remove();
 				    $("#Arrears").append(tpl);
-				    $("#tip").css("display","none");
+				   // $("#tip").css("display","none");
 					$("#Arrears table tr:odd").addClass("InfoTr");
-					$("#Entry").css("display","block");
+					//$("#Entry").css("display","block");
 				}
 
-				$("[name=Photo]").change(function(v){
+		/*		$("[name=Photo]").change(function(v){
 					var filename = v.currentTarget.value;
 					if (filename) {
 						var length = filename.lastIndexOf(".");
@@ -264,9 +262,9 @@ $(document).ready(function(){
 						popupDiv('pop-div',"你没有上传图片");
 					}
 					
-				})
+				})*/
 
-                $("input[name=reminderStyle]").click(function(v){
+               /* $("input[name=reminderStyle]").click(function(v){
                     var val = v.target.value;
                     if (val == 1) {
                         $("select[name=PhoneType]").attr("disabled","true");
@@ -277,7 +275,7 @@ $(document).ready(function(){
                         $("select[name=PhoneType]").removeAttr("disabled");
                         $("input[name=Photo]").attr("disabled","true");
                     }
-                })
+                })*/
 })
 </script>
  
@@ -399,7 +397,7 @@ $(document).ready(function(){
 		    	
 				</div>
 		    </div>
-		   
+		   <!--
 		    <iframe name="frm_dealer" style="display:none"  ></iframe>
 		    <br />
 	
@@ -415,7 +413,7 @@ $(document).ready(function(){
 			    <div  style="width:100%;">
 
 					<!--<div class=" star" style="float:left;padding-left:2px;" >*</div>-->
-			    	<ul style="height: 30px;  line-height: 30px; vertical-align:middle;margin:0  ">&nbsp;&nbsp;&nbsp;通知单催费：
+			    <!--	<ul style="height: 30px;  line-height: 30px; vertical-align:middle;margin:0  ">&nbsp;&nbsp;&nbsp;通知单催费：
 			
 				     	 <input name="Photo" type="file" style="height: 25px;  line-height: 25px; vertical-align:middle;width：115px "  >
 
@@ -444,9 +442,9 @@ $(document).ready(function(){
 			</div>
 
  			</div>
-            </form>
+            </form>-->
 			<br/><br/><br/><br/>
- 			<style>
+ 			<!--<style>
  				.time
  				{
  					padding-left:118px;
@@ -480,4 +478,4 @@ $(document).ready(function(){
 
 
  			
- 			</style>
+ 			</style>-->

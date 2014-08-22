@@ -63,7 +63,7 @@ class  JpgController extends ControllerBase
 
         //计算图片总宽度
         $n = (count($datay) + 1) * 2;
-        $siglewidth = 35; //--单一宽度
+        $siglewidth = 35; //--单一宽度 35
         $TotalWidth = $siglewidth * $n;
 
 
@@ -318,7 +318,7 @@ class  JpgController extends ControllerBase
         }
 
         // Setup the graph
-        $graph = new Graph(1760, 250);
+        $graph = new Graph(900, 250);
         $graph->SetScale("textlin");
 
         $theme_class = new UniversalTheme;

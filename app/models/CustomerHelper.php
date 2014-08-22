@@ -156,8 +156,8 @@ class CustomerHelper extends HelperBase
         $builder = parent::getModelManager()->createBuilder();
         $result = $builder->columns("SUM(IsSpecial) as Count")
             ->from("Customer")
-            ->andWhere($conditions)
             ->andWhere("IsClean!=1")
+            ->andWhere($conditions)
             ->getQuery()->execute($param)->getFirst();
 
         $specialCount = (int)$result->Count; //这个需要特殊处理
@@ -253,10 +253,22 @@ class CustomerHelper extends HelperBase
             $conditions .= " AND CutCount $word :CutCount:";
             $param["CutCount"] = $p->PowerOutagesValue;
         }
+
+
+        $conditions_mini = $conditions;
+
+        //排序
+        if($p->numberSort) {
+            $conditions .= " ORDER BY CustomerNumber " . ($p->numberSort == 1 ? "Desc ": "ASC ");
+        }
+
+        if($p->segmentSort) {
+            $conditions .= " ORDER BY Segment " . ($p->segmentSort == 1 ? "Desc ": "ASC ");
+        }
+
         //分页
         $total = Arrears::count(array($conditions, "bind" => $param));
 
-        $conditions_mini = $conditions;
 
         $conditions = self::addLimit($conditions, $p->Page, $p->PageSize);
 

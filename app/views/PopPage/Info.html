@@ -11,7 +11,7 @@
 					$("#Arrears table tr:odd").addClass("InfoTr");
 					
 					$("#Arrears").on("click","[name=select]",function(v){
-						var ID = v.currentTarget.defaultValue;
+						var ID = checkbox();
 						$("[name=ID]").val(ID);
 						$("button:eq(1)").removeAttr("disabled")
 					})
@@ -24,7 +24,6 @@
 
 					$("iframe").load(function(v){
                         var Vdata = window.frames["frm_dealer"].document.documentElement.innerText;
-
 						if (Vdata) {
 							var JsonData = eval("("+Vdata+")");
 							if (JsonData.success) {
@@ -176,7 +175,7 @@
 		    			<tbody>
 		    				<?php $sum = 0; foreach ($arrears as $s) { ?>
 				       		 <tr style="height:20px">
-				    			<td ><input value="<?php echo $s->ID; 	?>" type="radio" name="select" style="vertical-align:text-bottom; *margin-bottom:-4px;" /> </td>
+				    			<td ><input value="<?php echo $s->ID; 	?>" type="checkbox" name="select" style="vertical-align:text-bottom; *margin-bottom:-4px;" /> </td>
 				    			<td >
 				    				<?php echo $s->YearMonth; 	?>
 				    			</td>
@@ -203,8 +202,7 @@
 		    		</table>
 		    	
 		    </div>
-
-            <iframe name="frm_dealer" style="display:none"  ></iframe>
+             <iframe name="frm_dealer" style="display:none"  ></iframe>
             <br />
 
             <form name="putfile" action="/ams/reminder/Press" method="post" target="frm_dealer" enctype="multipart/form-data">
@@ -242,11 +240,8 @@
 
                             <input name="ID" type="hidden" />
                             <button style="margin-top:4px;background-color:#009966" type="submit" class="btn subm btn-success" disabled="true">催费</button>
-
-
                         </div>
                     </div>
-
                 </div>
             </form>
  			<style>
@@ -257,18 +252,11 @@
  				}
  				:root .time{padding-left:94px\9;}; /*IE9仅支持*/
 
- 				
  				@media screen and (-webkit-min-device-pixel-ratio:0){ .subm {margin-left:118px;} }
  				.subm{
  					margin-left:118px;
  					margin-left:98px\0;/*IE8、9、10支持*/
  					*margin-left:100px ;/*IE7仅支持*/
- 					
- 					
  				}
- 				
  				:root .subm{margin-left:94px\0;}; /*IE9仅支持*/
-
-
- 			
  			</style>

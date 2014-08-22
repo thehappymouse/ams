@@ -81,9 +81,9 @@
 			    for (i in value) {
 			    	var count = value[i].Count;
 			    	var money = value[i].Money;
-			    	tbodycontent += '<tr ><td rowspan="2" style="text-align:center;">'+i+'</td><td rowspan="2" style="text-align:center;">20140712</td><td style="text-align:center;">笔数</td>';
+			    	tbodycontent += '<tr ><td rowspan="2" style="text-align:center;">'+i+'</td><td rowspan="2" style="text-align:center;">20140712</td><td style="text-align:center;" class="InfoTr">笔数</td>';
 			    	for (var i in headmodel) {
-			    		tbodycontent += '<td style="text-align:center;">'+count[headmodel[i]]+'</td>';
+			    		tbodycontent += '<td style="text-align:center;" class="InfoTr">'+count[headmodel[i]]+'</td>';
 			    	}
 			    	tbodycontent += '</tr><tr><td style="text-align:center;">金额</td>';
 
@@ -126,14 +126,14 @@
 			    	for (var i in source) {
 			    		var count = source[i].Count;
 				    	var money = source[i].Money;
-				    	tbodycontent += '<td  rowspan="2" style="text-align:center;">'+i+'</td><td  style="text-align:center;">笔数</td>';
+				    	tbodycontent += '<td  rowspan="2" style="text-align:center;">'+i+'</td><td  style="text-align:center;" class="InfoTr">笔数</td>';
 				    	for (var i in headmodel) {
 				    		if (count[headmodel[i]]) {
 				    			var text = count[headmodel[i]];
 				    		} else {
 				    			text ="";
 				    		}
-				    		tbodycontent += '<td   style="text-align:center;">'+text+'</td>';
+				    		tbodycontent += '<td   style="text-align:center;" class="InfoTr">'+text+'</td>';
 				    	}
 
 				    	tbodycontent += '</tr><tr><td   style="text-align:center;">金额</td>';

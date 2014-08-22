@@ -16,6 +16,8 @@ class RequestParams
     public function  __construct($data)
     {
         $this->data = $data;
+        if(!$this->PageSize) $this->PageSize = 30;
+        if(!$this->Page) $this->Page=0;
     }
 
     public function setData($data)

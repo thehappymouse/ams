@@ -88,7 +88,9 @@ class Elements extends Phalcon\Mvc\User\Component
         echo '<ul class="nav nav-tabs" >';
         $moels = $this->getPermissionsMenu();
 
-
+        if ($auth["Role"] == ROLE_MATER) {
+            echo '<li><a href="/ams/site/index">首页</a></li>';
+        }
         foreach ($moels as $m) {
 
             if (count($m["model"]) == 0) continue;

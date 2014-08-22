@@ -411,5 +411,40 @@ $(document).ready(function(){
 				return tmpColor;
 			}
 		}
-				
+
+      //点击用户--抄表段编号，用户编号进行分组
+        Grouping = function(G, ShowTable) {
+            var that =this;
+            this.segmentSort = true;
+            this.numberSort = true;
+            this.Url;
+            this.Data = "";
+
+            this.clickFun = function()
+            {
+                $("#Arrears").on("click","#segment",function(){
+                    var data;
+                    if (that.segmentSort) {
+                        data = that.Data+"&segmentSort=1";
+                        that.segmentSort = false;
+                    } else {
+                        data = that.Data+"&segmentSort=0";
+                        that.segmentSort = true;
+                    }
+                    G.GetAjax('get',that.Url,data,ShowTable);
+                })
+
+                $("#Arrears").on("click","#number",function(){
+                    var data;
+                    if (that.numberSort) {
+                        data = that.Data+"&numberSort=1";
+                        that.numberSort = false;
+                    } else {
+                        data = that.Data+"&numberSort=0";
+                        that.numberSort = true;
+                    }
+                    G.GetAjax('get',that.Url,data,ShowTable);
+                })
+            }
+        }
 })

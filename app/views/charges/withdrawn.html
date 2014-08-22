@@ -16,11 +16,6 @@
                 var SearchUrl = "/ams/reminder/SearchFee";
 				//查询编号的提交
 				$("button:eq(0)").click(function(){
-                    var reValue = $("input[name=ReminderFeeValue]").val();
-                    if (reValue < 0) {
-                        popupDiv('pop-div','催费次数不能小于0');
-                        return;
-                    }
                     data = $("form:eq(0)").serialize();
                     clickpage.Data = data;
                     var SearchData = data+"&Page=1&PageSize="+PageSize;
@@ -84,8 +79,7 @@
                         for (var i in s) {
                             var source = ReplaceArray(s[i]);
                             var number = s[i].CustomerNumber;
-                            bodyTpl += '<tr>'+
-                                    '<td style="width:32px;height:20px;text-align:center"><input value="'+source.ID+'" type="radio" style="vertical-align:text-bottom; *margin-bottom:-4px;" name="select"/ ></td>';
+                            bodyTpl += '<tr>';
                             for (var n in model) {
                                 gridArr[source['ID']] = [source.RenterPhone,source.LandlordPhone];
                                 if (model[n] == "CutCount" || model[n] == "PressCount" || model[n] == "CustomerNumber") {
@@ -138,15 +132,14 @@
                     }
 
                     var headTpl = '<div ><div class="line ClientInfo" >'+title+'</div><div style="width:940px;overflow:scroll;overflow-y:hidden;border:1px solid #009966;border-top:none"><table id="info" style="width:1200px">'+
-                            '<thead>'+
-                            '<th style="20px"></th>';
+                            '<thead>';
 
                     for (var i in headarray) {
                         headmodel +='<th style="'+modelcss[i]+';text-align:center;">'+headarray[i]+'</th>';
                     }
                     var CurrentNum = s.length;
                     var pageTpl = '<tr >'+
-                            '<td id="PageNum" colspan="11" style="text-align:left">&nbsp;&nbsp;&nbsp;&nbsp;当前第<input name="Num" type="text" value="'+Page+'" style="padding:0px 8px; width:12px" />页，总共'+PageNumber+'页&nbsp;&nbsp;'+PTpl+
+                            '<td id="PageNum" colspan="10" style="text-align:left">&nbsp;&nbsp;&nbsp;&nbsp;当前第<input name="Num" type="text" value="'+Page+'" style="padding:0px 8px; width:12px" />页，总共'+PageNumber+'页&nbsp;&nbsp;'+PTpl+
                             '&nbsp;&nbsp;<span>本页'+CurrentNum+'条数据，总共'+total+'条数据</span></td></tr>';
                     var footTpl = '</tbody></table></div></div>';
                     var tpl= headTpl+headmodel+'</thead><tbody>'+bodyTpl+pageTpl+footTpl;
@@ -200,7 +193,7 @@
                             <option value="1">≥</option>
                             <option value="0"><</option>
                         </select>
-                            <input name="ReminderFeeValue" type="text" style="width:72px;float: left;" value="1" />
+                            <input name="ReminderFeeValue" type="text" style="width:72px;float: left;" />
                         </td>
                     </tr>
                     <tr >

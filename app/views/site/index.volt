@@ -13,21 +13,17 @@
     }
     var img = initImg("/ams/Jpg/SingleBar");
     img.onload = function(){
-        var BoredrWidth;
-        if (img.width < 535) {
-            BoredrWidth = "535px";
-        } else {
-            BoredrWidth = "675px";
-        }
-
-        var tpl = '<div style="border:1px solid #009966;width:675px;height:auto;overflow:scroll;overflow-y:hidden"><img style="margin-top:20px;margin-left:20px;width:'+BoredrWidth+';" src="'+img.src+'"  /></div>';
+        var BoredrWidth = img.width+"px";
+        var BoredrHeight = img.height+"px";
+        var tpl = '<div style="border:1px solid #009966;width:675px;height:auto;overflow:scroll;overflow-y:hidden"><div style="width:'+BoredrWidth+';height:'+BoredrHeight+';"><img style="margin-top:20px;margin-left:20px;width:'+BoredrWidth+';" src="'+img.src+'"  /></div></div>';
         $("#single").append(tpl);
     }
 
     var arrasImage = initImg("/ams/Jpg/ArrarsMonth");
     arrasImage.onload = function(){
         var BoredrWidth = arrasImage.width+"px";
-        var tpl = '<img style="margin-top:20px;margin-left:20px;width:'+BoredrWidth+';height:250px;" src="'+arrasImage.src+'"/>';
+        var BoredrHeight = arrasImage.height+"px";
+        var tpl = '<div style="width:'+BoredrWidth+';height:'+BoredrHeight+';"><img style="margin-top:20px;margin-left:20px;width:'+BoredrWidth+';height:'+BoredrHeight+';" src="'+arrasImage.src+'"/></div>';
         $("#arrasImage").append(tpl);
     }
 
@@ -90,7 +86,7 @@
     </div>
 
 </div>
-<div style="float:left;">
+<div  style="float:left;">
     <div class="line ClientInfo" style="width:100px;font-size:15px;">欠费客户分析</div>
     <br/>
 
@@ -106,9 +102,8 @@
             <img style="margin-top:20px;margin-left:20px" src="/ams/Jpg/CutCount"/>
         </div>
     </div>
-    <div   id="arrasImage"  style="border:1px solid #009966;width:940px;float:left;margin-top:20px;overflow:scroll;overflow-y:hidden">
+
+    <div id="arrasImage"  style="border:1px solid #009966;width:940px;float:left;margin-top:20px;overflow:scroll;overflow-y:hidden">
     </div>
-
-
 </div>
 <div style="height:20px;float:left;width:500px"></div>

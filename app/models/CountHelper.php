@@ -144,6 +144,14 @@ class CountHelper extends HelperBase
         $query = "SELECT a.Arrear,b.Segment, a.Money, a.YearMonth, b.ID, a.CustomerNumber, b.Name, b.Address, a.CutTime, a.CutStyle
                          FROM Cutinfo as a LEFT JOIN Customer as b ON a.CustomerNumber = b.Number" . $condition;
 
+        //排序
+        if($p->numberSort) {
+            $query .= " ORDER BY CustomerNumber " . ($p->numberSort == 1 ? "Desc ": "ASC ");
+        }
+        if($p->segmentSort) {
+            $query .= " ORDER BY b.Segment " . ($p->segmentSort == 1 ? "Desc ": "ASC ");
+        }
+
         $param = array("start" => $p->FromData, "end" => $p->ToData);
 
         $data = array();
