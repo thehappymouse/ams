@@ -126,7 +126,7 @@ class ReminderController extends ControllerBase
 
         list($r, $ids) = CustomerHelper::Cut($this->request->get());
 
-        foreach($ids as $id){
+        foreach ($ids as $id) {
             $ll->Cut($id, $r);
         }
 
@@ -147,7 +147,7 @@ class ReminderController extends ControllerBase
         $ids = explode(",", $ids);
 
         $this->ajax->logData->Action = "撤销催费";
-        foreach($ids as $id){
+        foreach ($ids as $id) {
 
             $arrear = Arrears::findFirst("ID=$id");
             if ($arrear->PressCount > 0) {
@@ -176,30 +176,20 @@ class ReminderController extends ControllerBase
      * 进行一个催费动作
      * 1，接收表单： 欠费信息ID, 房东电话，时间，照片，催费方式
      * 2，欠费记录中，催费次数加1
+     * 20140824  多记录同时催费
      */
     public function PressAction()
     {
         $this->view->disable();
 
-        $press = new Press();
-        $press->Arrear = $this->request->get("ID");
-        if (!$press->Arrear) {
-            $this->ajax->flushError("没有传入数据ID");
-        }
+        $ids = explode(",", $this->request->get("ID"));
 
-        $press->PressTime = $this->request->get("PressTime");
-
-        $ar = Arrears::findFirst($press->Arrear);
-
-//        $press->UserID = ""
-        $press->UserName = $ar->Customer->SegUser;
-        $press->CustomerNumber = $ar->Customer->Number;
-        $press->Segment = $ar->Segment;
-        $press->YearMonth = $ar->YearMonth;
-        $press->Money = $ar->Money;
+        $pressStyle = "";
+        $pressPhoto = "";
+        $pressPhone = "";
 
         if ($this->request->hasFiles()) {
-            $press->PressStyle = "通知单催费";
+            $pressStyle = "通知单催费";
 
             $files = $this->request->getUploadedFiles("Photo");
             $file = $files[0];
@@ -209,25 +199,49 @@ class ReminderController extends ControllerBase
             $savefile = $dir . $file->getName();
 
             if (move_uploaded_file($file->getTempName(), $savefile)) {
-
-                $press->Photo = str_replace($root, "", $savefile);
+                $pressPhoto = str_replace($root, "", $savefile);
             } else {
                 var_dump("文件上传失败" . $savefile);
             }
         } else {
-            $press->PressStyle = "电话催费";
+            $pressStyle = "电话催费";
         }
 
-        $r = $press->save();
+        $ll = new LogHelper($this->ajax->logData);
 
-        $this->ajax->logData->Action = $press->PressStyle;
-        $this->ajax->logData->Data = $ar->CustomerName . "|" . $ar->CustomerNumber . "|$ar->YearMonth|￥$ar->Money";
-        if ($r) {
-            $ar->PressCount = (int)$ar->PressCount + 1;
-            $ar->save();
-        } else {
-            var_dump($press->getMessages());
+        foreach ($ids as $id) {
+            $press = new Press();
+            $press->Arrear = $id;
+            if (!$press->Arrear) {
+                $this->ajax->flushError("没有传入数据ID");
+            }
+
+            $press->PressTime = $this->request->get("PressTime");
+
+            $ar = Arrears::findFirst($press->Arrear);
+
+            //        $press->UserID = ""
+            $press->UserName = $ar->Customer->SegUser;
+            $press->CustomerNumber = $ar->Customer->Number;
+            $press->Segment = $ar->Segment;
+            $press->YearMonth = $ar->YearMonth;
+            $press->Money = $ar->Money;
+            $press->PressStyle = $pressStyle;
+            $press->Phone = $pressPhone;
+            $press->Photo = $pressPhoto;
+            $r = $press->save();
+
+            $ll->Press($id, $r, $pressStyle);
+
+            if ($r) {
+                $ar->PressCount = (int)$ar->PressCount + 1;
+                $ar->save();
+            } else {
+                var_dump($press->getMessages());
+            }
         }
+
+
         $this->ajax->flushOk();
     }
 
@@ -255,10 +269,10 @@ class ReminderController extends ControllerBase
         $param = $this->request->get();
         $param["User"] = $this->loginUser["Name"]; //复电用户
 
-        list($r, $cut, $arrear) = CustomerHelper::Reset($param);
+        list($r, $ids) = CustomerHelper::Reset($param);
         if ($r) {
 
-            $this->ajax->logData->Data = $arrear->CustomerName . "|" . $arrear->CustomerNumber;
+//            $this->ajax->logData->Data = $arrear->CustomerName . "|" . $arrear->CustomerNumber;
 
             $this->ajax->flushOk();
         } else {

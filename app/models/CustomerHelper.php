@@ -16,28 +16,33 @@ class CustomerHelper extends HelperBase
     public static function Reset(array $params)
     {
         $p = new RequestParams($params);
-
         $result = false;
-        $cut = Cutinfo::findFirst("Arrear = $p->ID");
 
-        if ($cut == null) throw new Exception("未找到停电记录");
+        $ids = explode(",", $p->ID);
+        foreach($ids as $id){
+            $cut = Cutinfo::findFirst("Arrear = $id");
+            if ($cut == null) {
+                continue;
+            }
 
-        $cut->ResetTime = $p->ResetTime;
-        $cut->ResetStyle = $p->ResetType;
-        $cut->ResetPhone = $p->ResetPhone;
+            $cut->ResetTime = $p->ResetTime;
+            $cut->ResetStyle = $p->ResetType;
+            $cut->ResetPhone = $p->ResetPhone;
 
-        $cut->ResetUser = $p->User;
-        if ($cut->save()) {
-            $arrear = Arrears::findFirst($p->ID);
-            $arrear->IsCut = 0;
-            $arrear->save();
+            $cut->ResetUser = $p->User;
+            if ($cut->save()) {
+                $arrear = Arrears::findFirst($id);
+                $arrear->IsCut = 0;
+                $arrear->save();
 
-            $customer = Customer::findByNumber($arrear->CustomerNumber);
-            $customer->IsCut = 0;
-            $customer->save();
-            $result = true;
+                $customer = Customer::findByNumber($arrear->CustomerNumber);
+                $customer->IsCut = 0;
+                $customer->save();
+                $result = true;
+            }
         }
-        return array($result, $cut, $arrear);
+
+        return array($result, $ids);
     }
 
     /**

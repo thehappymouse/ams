@@ -30,9 +30,8 @@ class CountHelper extends HelperBase
 
         $query = "SELECT a.Arrear, b.Segment, a.CustomerNumber, b.ID, b.Name, b.Address, a.PressTime, a.PressStyle
                          FROM Press as a LEFT JOIN Customer as b  ON a.CustomerNumber = b.Number";
-
-        $condition_Sort = $condition;
         //排序
+        $condition_Sort = $condition;
         if($p->numberSort) {
             $condition_Sort .= " ORDER BY CustomerNumber " . ($p->numberSort == 1 ? "Desc ": "ASC ");
         }
@@ -99,6 +98,14 @@ class CountHelper extends HelperBase
         $query = "SELECT a.CutUserName, a.Arrear,b.Segment, a.CustomerNumber, b.ID, b.Name, b.Address, a.ResetTime, a.ResetStyle, a.ResetPhone
                          FROM Cutinfo as a LEFT JOIN Customer as b ON a.CustomerNumber = b.Number
                          WHERE a.ResetTime != '' AND a.Segment IN ($ss)";
+
+        //排序
+        if($p->numberSort) {
+            $query .= " ORDER BY CustomerNumber " . ($p->numberSort == 1 ? "Desc ": "ASC ");
+        }
+        if($p->segmentSort) {
+            $query .= " ORDER BY b.Segment " . ($p->segmentSort == 1 ? "Desc ": "ASC ");
+        }
 
         $param = array();
         $data = array();
@@ -219,6 +226,15 @@ class CountHelper extends HelperBase
                           c.ID, a.CustomerNumber, c.Segment, c.Name, c.Address
                           FROM Charge as a inner  join Customer as c on a.CustomerNumber = c.Number";
         $query .= $condition;
+
+        //排序
+        $condition_Sort = $condition;
+        if($p->numberSort) {
+            $query .= " ORDER BY CustomerNumber " . ($p->numberSort == 1 ? "Desc ": "ASC ");
+        }
+        if($p->segmentSort) {
+            $query .= " ORDER BY a.Segment " . ($p->segmentSort == 1 ? "Desc ": "ASC ");
+        }
 
         $query = parent::addLimit($query, $p->Page, $p->PageSize);
 

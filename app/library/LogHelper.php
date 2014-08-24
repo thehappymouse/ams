@@ -19,11 +19,32 @@ class LogHelper
      */
     function __construct($obj = null)
     {
-        if($obj){
+        if ($obj) {
             $this->userid = $obj->UserID;
             $this->username = $obj->UserName;
             $this->ip = $obj->IP;
         }
+    }
+
+    /*
+     * 催费
+     */
+    public function Press($arrearid, $success, $style)
+    {
+        $log = new Systemlog();
+        $arrear = Arrears::findFirst($arrearid);
+        $log->Action = "催费";
+        
+        $log->Data = $arrear->CustomerName . "|" . $arrear->CustomerNumber . "|$arrear->YearMonth|￥$arrear->Money";
+
+        $log->Success = $success;
+        $log->Result = $success ? "操作成功" : "操作失败";
+        $log->UserID = $this->userid;
+        $log->UserName = $this->username;
+        $log->IP = $this->ip;
+        $log->Time = HelperBase::getDateTime();
+        $r = $log->save();
+        return $r;
     }
 
     /**
@@ -37,7 +58,7 @@ class LogHelper
         $log->Action = "停电";
         $log->Data = $arrear->CustomerName . "|" . $arrear->CustomerNumber . "|(￥)" . $arrear->Money;
         $log->Success = $success;
-        $log->Result = $success ? "操作成功": "操作失败";
+        $log->Result = $success ? "操作成功" : "操作失败";
         $log->UserID = $this->userid;
         $log->UserName = $this->username;
         $log->IP = $this->ip;
