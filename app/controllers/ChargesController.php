@@ -234,6 +234,20 @@ class ChargesController extends ControllerBase
         }
     }
 
+    /**
+     * 撤销收费的查询
+     */
+    public function SearchFeeAction()
+    {
+        $this->view->disable();
+        $params = $this->request->get();
+        $params["IsClean"] = 1;
+
+        list($total, $data, $conditions, $param) = CustomerHelper::ArrearsInfo($params);
+
+        $this->ajax->total = $total;
+        $this->ajax->flushData($data);
+    }
 
     /**
      * 撤消收费

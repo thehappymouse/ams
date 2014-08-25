@@ -194,6 +194,7 @@ class Customer extends \Phalcon\Mvc\Model
             'IsSpecial' => 'IsSpecial',
             'AssetNumber' => 'AssetNumber',
             'Desc' => 'Desc',
+            'ArrearsCount' => 'ArrearsCount',
         );
     }
 }

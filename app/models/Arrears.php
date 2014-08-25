@@ -88,7 +88,7 @@ class Arrears extends \Phalcon\Mvc\Model
     public function initialize()
     {
         $this->setSource('Arrears');
-        $this->belongsTo('CustomerNumber', 'Customer', 'Number');
+//        $this->belongsTo('CustomerNumber', 'Customer', 'Number');
         $this->hasOne('ID', 'Cutinfo', 'Arrear');
 
         $this->PressCount = 0;
@@ -96,6 +96,22 @@ class Arrears extends \Phalcon\Mvc\Model
         $this->CutCount = 0;
         $this->IsCut = 0;
     }
+
+
+    var  $customer;
+
+    public function __get($name)
+    {
+        if($name == "Customer"){
+            if(!$this->customer){
+                $this->customer = Customer::findByNumber($this->CustomerNumber);
+            }
+            return $this->customer;
+        }
+
+        return parent::__get($name);
+    }
+
 
 
     /**

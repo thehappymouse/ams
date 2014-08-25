@@ -26,6 +26,27 @@ class LogHelper
         }
     }
 
+    /**
+     * 复电
+     * @param $arrearid
+     * @param $success
+     */
+    public function Reset($arrearid, $success)
+    {
+        $log = new Systemlog();
+        $arrear = Arrears::findFirst($arrearid);
+        $log->Action = "复电";
+        $log->Data = $arrear->CustomerName . "|" . $arrear->CustomerNumber;
+        $log->Success = $success;
+        $log->Result = $success ? "操作成功" : "操作失败";
+        $log->UserID = $this->userid;
+        $log->UserName = $this->username;
+        $log->IP = $this->ip;
+        $log->Time = HelperBase::getDateTime();
+        $r = $log->save();
+        return $r;
+    }
+
     /*
      * 催费
      */
@@ -34,8 +55,8 @@ class LogHelper
         $log = new Systemlog();
         $arrear = Arrears::findFirst($arrearid);
         $log->Action = "催费";
-        
-        $log->Data = $arrear->CustomerName . "|" . $arrear->CustomerNumber . "|$arrear->YearMonth|￥$arrear->Money";
+
+        $log->Data = $style . "|" . $arrear->CustomerName . "|" . $arrear->CustomerNumber . "|$arrear->YearMonth|￥$arrear->Money";
 
         $log->Success = $success;
         $log->Result = $success ? "操作成功" : "操作失败";

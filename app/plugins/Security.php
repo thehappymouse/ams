@@ -72,7 +72,7 @@ class Security extends Phalcon\Mvc\User\Plugin
             $adminResource = array(
                 "index" => array("index","logout","login","logincheck", "message"),
                 "site" => array("index","error","index2"),
-                "charges" => array("charges","withdrawn","index","chargeinfo","customer","create","cancel"),
+                "charges" => array("charges","withdrawn","index","chargeinfo","customer","create","cancel", "searchfee"),
                 "reminder" => array("reminder","powerfailure","cancel","restoration","receipts","searchfee","searchpress","searchreset","cut","cancelpress","press","advance","reset"),
                 "import" => array("arrears","advance","progress","advanceupload","arrearsupload"),
                 "report" => array("electricity","press","work"),
@@ -121,14 +121,17 @@ class Security extends Phalcon\Mvc\User\Plugin
                 "site" => array("index", "index2"),
                 "index" => array("index", "message"),
                 "poppage" => array("info","cancel"),
-                "charges" => array("charges", "withdrawn", "index", "chargeinfo", "customer", "create", "cancel"),
+
+                "reminder" => array("cancel", "restoration", "searchfee"),
+                "info" => array("teamlist", "userlist", "segmentlist"),
+                "charges" => array("charges", "withdrawn", "index", "chargeinfo", "customer", "create", "cancel", "searchfee"),
             );
 
             //收费员班长
             $role_toll_leadResource = array_merge($role_tollResource, array(
                 "count" => array("customer", "reconciliationinquiry", "singleinquiries"),
                 "countsearch" => array("customer", "reconciliationinquiry"),
-                "info" => array("teamlist", "userlist", "segmentlist"),
+
                 "export" => array("reportpress", "reportwork", "advance", "reportcharge", "accountcheck", "reconciliation", "press", "reset", "countcut", "countcharges", "cut", "reminder"),
                 "export" => array("reportpress", "reportwork", "advance", "reportcharge", "accountcheck", "reconciliation", "press", "reset", "countcut", "countcharges", "cut", "reminder"),
             ));

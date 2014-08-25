@@ -604,16 +604,20 @@ class ExportController extends ControllerBase
 
         $headArr = $this->headArrear;
 
-        $params["PageSize"] = 10000; //不再需要分页
-        list($total, $data) = CustomerHelper::ArrearsInfo($params);
+        $params["PageSize"] = 100000; //不再需要分页
 
+        list($total, $data, $countinfo) = CustomerHelper::Customers($params);
+//        list($total, $data) = CustomerHelper::ArrearsInfo($params);
         foreach ($data as $key => $d) {
             $d["IsClean"] = $d["IsClean"] ? "是" : "否";
             $d["IsCut"] = $d["IsCut"] ? "是" : "否";
-
             $data[$key] = $d;
         }
 
-        ExcelImportUtils::arrayToExcel("客户分类统计", $headArr, $data);
+
+        $floor = "共：%s条记录，欠费用户：%s 位，停电用户：%s位，特殊用户：%s位";
+        $floor = sprintf($floor, count($data), $countinfo["allCustomer"],$countinfo["cutCount"],$countinfo["specialCount"]);
+
+        ExcelImportUtils::arrayToExcel("客户分类统计", $headArr, $data, $floor);
     }
 } 

@@ -262,21 +262,20 @@ class ReminderController extends ControllerBase
      */
     public function ResetAction()
     {
-
-        $this->ajax->logData->Action = "复电";
-
+        $ll = new LogHelper($this->ajax->logData);
 
         $param = $this->request->get();
         $param["User"] = $this->loginUser["Name"]; //复电用户
 
         list($r, $ids) = CustomerHelper::Reset($param);
+
+        foreach($ids as $id){
+            $ll->Reset($id, $r);
+        }
+
         if ($r) {
-
-//            $this->ajax->logData->Data = $arrear->CustomerName . "|" . $arrear->CustomerNumber;
-
             $this->ajax->flushOk();
         } else {
-            var_dump($cut->getMessages());
             $this->ajax->flushError("信息保存失败");
         }
     }

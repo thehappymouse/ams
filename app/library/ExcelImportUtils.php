@@ -159,7 +159,10 @@ class ExcelImportUtils
                     }
                 }
 
-                self::saveCustomer($arr);
+                $c = self::saveCustomer($arr);
+                if ($c != null) {
+                    $c->ArrearsCount = $c->ArrearsCount + 1;
+                }
                 self::saveSegment($arr);
 
             } catch (PDOException $e) {
@@ -192,7 +195,7 @@ class ExcelImportUtils
 
         $date = date("Y_m_d", time());
         $fileName .= "_{$date}.xls";
-        $fileName = iconv( "UTF-8", "gb2312" , $fileName);
+        $fileName = iconv("UTF-8", "gb2312", $fileName);
 
         //创建新的PHPExcel对象
         $objPHPExcel = new PHPExcel();
@@ -229,8 +232,8 @@ class ExcelImportUtils
 
         if ($floor) {
             $row++;
-            $objPHPExcel->getActiveSheet()->mergeCells("A$row:". chr(count($headArr) -1 + ord("A")) ."$row" );
-            $objActSheet->setCellValue("A". ($row), $floor);
+            $objPHPExcel->getActiveSheet()->mergeCells("A$row:" . chr(count($headArr) - 1 + ord("A")) . "$row");
+            $objActSheet->setCellValue("A" . ($row), $floor);
         }
 
         $objPHPExcel->getActiveSheet()->setTitle('Simple');
