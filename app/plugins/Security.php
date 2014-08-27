@@ -120,7 +120,7 @@ class Security extends Phalcon\Mvc\User\Plugin
             $role_tollResource = array(
                 "site" => array("index", "index2"),
                 "index" => array("index", "message"),
-                "poppage" => array("info","cancel"),
+                "poppage" => array("info","cancel", "reminderfee", "powercut"),
 
                 "reminder" => array("cancel", "restoration", "searchfee"),
                 "info" => array("teamlist", "userlist", "segmentlist"),

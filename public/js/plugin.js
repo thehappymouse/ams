@@ -1,5 +1,5 @@
 $(document).ready(function(){
-
+            var agva = '';
 			Date.prototype.format = function(fmt)
 			{ //author: meizz
 			  var o = {
@@ -177,7 +177,6 @@ $(document).ready(function(){
 
 							} else {
 								select = that.select["Number"];
-
 							}
 							that.SetSelect(" ",select);
 							return;
@@ -205,7 +204,6 @@ $(document).ready(function(){
 							tpl += '<option value="'+value[i].ID+'">'+value[i].Name+'</option>';
 						}
 					}
-			    	 	
 				    tpl +='</select>';
 				    $(select+' select').remove();
 				    $(select).append(tpl);
@@ -293,7 +291,6 @@ $(document).ready(function(){
 		          for (var i in value) {
 		              body +='<option value="'+value[i].ID+'">'+value[i].Name+'</option>';
 		          }
-
 		          var tpl = head + body + foot;
 		          $("#Group div").remove();
 		          $("#Group").append(tpl);
@@ -348,7 +345,7 @@ $(document).ready(function(){
 			this.PageClick = function() {
 				$("#Arrears").on("click","#next",function(){
 					var NextPage = parseInt(that.Page)+1;
-                    var SearchData = that.Data+"&Page="+NextPage+"&PageSize="+PageSize;
+                    var SearchData = that.Data+"&Page="+NextPage+"&PageSize="+PageSize+agva;
 					that.Page = NextPage;
 					G.GetAjax('get',that.SearchUrl,SearchData,ShowTable);
 					that.SetDisable();
@@ -356,21 +353,21 @@ $(document).ready(function(){
 
 				$("#Arrears").on("click","#prev",function(){
 					var PrevPage = parseInt(that.Page)-1;
-					var SearchData = that.Data+"&Page="+PrevPage+"&PageSize="+PageSize;
+					var SearchData = that.Data+"&Page="+PrevPage+"&PageSize="+PageSize+agva;
 					that.Page = PrevPage;
 					G.GetAjax('get',that.SearchUrl,SearchData,ShowTable);
 					that.SetDisable();
 				})
 
 				$("#Arrears").on("click","#end",function(){
-					var SearchData = that.Data+"&Page="+PageNumber+"&PageSize="+PageSize;
+					var SearchData = that.Data+"&Page="+PageNumber+"&PageSize="+PageSize+agva;
 					that.Page =PageNumber;
 					G.GetAjax('get',that.SearchUrl,SearchData,ShowTable);
 					that.SetDisable();
 				})
 
 				$("#Arrears").on("click","#start",function(){
-					var SearchData = that.Data+"&Page=1&PageSize="+PageSize;
+					var SearchData = that.Data+"&Page=1&PageSize="+PageSize+agva;
 					that.Page =1;
 					G.GetAjax('get',that.SearchUrl,SearchData,ShowTable);
 					that.SetDisable();
@@ -396,8 +393,28 @@ $(document).ready(function(){
 			{
 				$("#Arrears").on("click","#excel",function(){
 					var url = that.url+"?"+that.Todata;
-					document.forms["excelform"].action = url;
-					document.forms["excelform"].submit(); 
+
+					//document.forms["excelform"].action = url;
+					//document.forms["excelform"].submit();
+                    popupDiv("pop-div","Excel文件在生成中");
+                    $("#pop-form #submit").hide();
+                    $.ajax({
+                        url:url,
+                        dataType:"json",
+                        type:'POST',
+                        success:function(response)
+                        {
+                            var tpl;
+                            if (response.success) {
+                                tpl = "<div>Excel文件已经生成。<div>请点击<a href="+response.msg+">下载</a></div></div>";
+                            } else {
+                                tpl = "<div>"+response.msg+"</div>";
+                            }
+                            $("#pop-form #text div").remove();
+                            $("#pop-form #text").append(tpl);
+                            $("#pop-form #submit").show();
+                        }
+                    })
 				})
 			}
 		}
@@ -412,39 +429,55 @@ $(document).ready(function(){
 			}
 		}
 
-      //点击用户--抄表段编号，用户编号进行分组
+      //点击用户--抄表段编号，用户编号进行排序
         Grouping = function(G, ShowTable) {
             var that =this;
             this.segmentSort = true;
             this.numberSort = true;
             this.Url;
-            this.Data = "";
-
+            this.Data;
+            this.postAgva;
+            this.init = function()
+            {
+                setTimeout(function(){$("#segment").append("<span>↓</span>")},600);
+            }
             this.clickFun = function()
             {
                 $("#Arrears").on("click","#segment",function(){
                     var data;
                     if (that.segmentSort) {
-                        data = that.Data+"&segmentSort=1";
+                        that.postAgva = "&segmentSort=1";//从小到大+ -
                         that.segmentSort = false;
+                        setTimeout(function(){$("#segment").append("<span>↑</span>");$("#number span").remove()},800);
                     } else {
-                        data = that.Data+"&segmentSort=0";
+                        that.postAgva = "&segmentSort=2";//从大到小|
                         that.segmentSort = true;
+                        setTimeout(function(){$("#segment").append("<span>↓</span>");$("#number span").remove()},800);
                     }
+
+                    data = that.Data+that.postAgva;
                     G.GetAjax('get',that.Url,data,ShowTable);
+
+                    agva = that.postAgva;
                 })
 
                 $("#Arrears").on("click","#number",function(){
                     var data;
                     if (that.numberSort) {
-                        data = that.Data+"&numberSort=1";
+                        that.postAgva = "&numberSort=1";
                         that.numberSort = false;
+                        setTimeout(function(){$("#number").append("<span>↑</span>");$("#segment span").remove()},800);
                     } else {
-                        data = that.Data+"&numberSort=0";
+                        that.postAgva = "&numberSort=2";
                         that.numberSort = true;
+                        setTimeout(function(){$("#number").append("<span>↓</span>");$("#segment span").remove()},800);
                     }
+                    data = that.Data+that.postAgva;
                     G.GetAjax('get',that.Url,data,ShowTable);
+                    agva = that.postAgva;
                 })
             }
         }
+
+
 })

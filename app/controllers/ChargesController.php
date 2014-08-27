@@ -114,6 +114,7 @@ class ChargesController extends ControllerBase
     {
         $this->view->disable();
         $this->ajax->logData->Action = "收费";
+        $ll = new LogHelper($this->ajax->logData);
 
         $ids = $this->request->get("ID");
         $money = $this->request->get("Money");
@@ -128,7 +129,6 @@ class ChargesController extends ControllerBase
             }
         }
 
-        $this->ajax->logData->Data = $ars->getFirst()->CustomerName . "|" . $ars->getFirst()->CustomerNumber;
 
         //IsAgreement
         //TODO 校验金额
@@ -184,6 +184,9 @@ class ChargesController extends ControllerBase
             $a->ChargeDate = $c->Time;
 
             $r = $a->save();
+
+            $ll->Charge($a->ID, $r);
+
 
             if (!$r) {
                 var_dump($a->getMessages());

@@ -120,7 +120,7 @@ $di->set('db', function () use ($config) {
     $logger = new \Phalcon\Logger\Adapter\File("../app/logs/debug.log");
     $eventsManager->attach('db', function($event, $connection) use ($logger) {
         if ($event->getType() == 'beforeQuery') {
-            $logger->log($connection->getSQLStatement(), Logger::INFO);
+//            $logger->log($connection->getSQLStatement(), Logger::INFO);
         }
     });
 

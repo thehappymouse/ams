@@ -20,7 +20,7 @@
 					var value = $("form").serialize()+'&Number='+number;
 					var val = {ID:number};
 					G.GetAjax('post',url,value);
-					G.GetAjax('get',infourl,val,SetTable);
+					setTimeout(function(){popupDiv('pop-div',"提交成功");$("button:eq(1)").removeAttr("disabled");G.GetAjax('get',infourl,val,SetTable)},900);
 
 					$("form")[0].reset();
 					$("button:eq(1)").attr("disabled","true")
@@ -34,12 +34,18 @@
                         $("button:eq(1)").attr("disabled","true");
                     } else {
                         var idArr = ID.split(",");
-                        for (var i in idArr) {
-                            money += parseInt(c[idArr[i]]);
+                        if (idArr != 0) {
+                            for (var i in idArr) {
+                                if (c[idArr[i]] != undefined) {
+                                    money += parseInt(c[idArr[i]]);
+                                }
+                            }
+                            $("input[name=ID]").val(ID);
                         }
-                        $("input[name=ID]").val(ID);
+
                         $("button:eq(1)").removeAttr("disabled");
                     }
+
                     $("input[name=Money]").val(money);
 				})
 
@@ -151,6 +157,7 @@
                                 c[s[i].ID] = s[i].Money;
 					        }
 						}
+                        console.log(money);
 						$("input[name=Money]").val(money);
 					}
 
@@ -241,7 +248,7 @@
 									<option value="1">是</option>
 							</select>
 				    	</div>
-						<button type="button"  class="btn btn-success" style="*margin-top:2px;background-color:#009966" disabled>收费</button>
+						<button type="button"  class="btn btn-success" style="*margin-top:2px;background-color:#009966" >收费</button>
 					</div>
 			</div>
 			</form>	

@@ -42,7 +42,7 @@ class AjaxR
         $this->flush();
     }
 
-    private function flush()
+    public  function flush()
     {
         $this->flushLog($this->logData);
         unset($this->logData);
@@ -56,7 +56,7 @@ class AjaxR
      */
     public function flushLog($log)
     {
-        if ($log->Action != "") {
+        if ($log->Action != "" && $log->Data != "") {
             $log->save();
         }
     }

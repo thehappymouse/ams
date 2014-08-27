@@ -5,7 +5,7 @@
                 var G = new AjaxFun();//获取ajax方法
 
                 var DrownBox = new DropDownBox()//获取三级下拉框
-                var clickpage = new ClickPage(G,SetTable);//分页
+                var clickpage = new ClickPage(G,SetTable);//分页0273353719
 
                 DrownBox.select = {"Team":"td:eq(1)", "Name":"td:eq(3)", "Number":"td:eq(5)"};
                 var Getdata = {ID:"1",Type:"1"};
@@ -13,7 +13,7 @@
                 G.GetAjax('get',url,Getdata,DrownBox.SetAllSelect,true);
 
 				var G = new AjaxFun();
-                var SearchUrl = "/ams/reminder/SearchFee";
+                var SearchUrl = "/ams/charges/SearchFee";
 				//查询编号的提交
 				$("button:eq(0)").click(function(){
                     data = $("form:eq(0)").serialize();
@@ -22,6 +22,21 @@
 					G.GetAjax('get',SearchUrl,SearchData,SetTable,"true");
 				})
 
+                $("#Condition").on("change","select:eq(0)",function(v){
+                    var id = $("select:eq(0)").val();
+                    var selectdata = {ID:id,Type:"Name"};
+                    var url = "/ams/Info/UserList";
+                    G.GetAjax('get',url,selectdata,DrownBox.SetAllSelect,true);
+
+                })
+
+                $("#Condition").on("change","select:eq(1)",function(v){
+                    var id = $("select:eq(1)").val();
+                    var selectdata = {ID:id,Type:"Number"};
+                    var url = "/ams/Info/SegmentList";
+                    G.GetAjax('get',url,selectdata,DrownBox.SetAllSelect,true);
+
+                })
 
                 $("body").keydown(function() {
                     var msg;
@@ -84,7 +99,7 @@
                                 gridArr[source['ID']] = [source.RenterPhone,source.LandlordPhone];
                                 if (model[n] == "CutCount" || model[n] == "PressCount" || model[n] == "CustomerNumber") {
                                     if ( model[n] == "CustomerNumber") {idText = 'Number';} else {idText = model[n];}
-                                    bodyTpl +='<td id="'+idText+'"  title="'+source.ID+'/'+number+'/'+source.YearMonth+'"  style="text-decoration:underline;cursor:pointer;'+modelcss[n]+'">'+source[model[n]]+'</td>';
+                                    bodyTpl +='<td style="text-align: center"><span id="'+idText+'"  title="'+source.ID+'/'+number+'/'+source.YearMonth+'"  style="text-decoration:underline;cursor:pointer;'+modelcss[n]+'">'+source[model[n]]+'</span></td>';
                                 } else {
                                     if (model[n] == "IsClean") {
                                         if (source[model[n]] == 2) {
@@ -107,9 +122,9 @@
                                         tmp_color = color(0,source['IsClean'], "#CC6600", tmp_color);
                                         tmp_color = color(1,source['IsCut'], "#0066FF", tmp_color);
                                         tmp_color = color(1,source['IsSpecial'], "red", tmp_color);
-                                        text = '<div style="'+modelcss[n]+';color:'+tmp_color+'" title="'+source[model[n]]+'">'+source[model[n]]+'</div>';
+                                        text = '<span style="'+modelcss[n]+';color:'+tmp_color+'" title="'+source[model[n]]+'">'+source[model[n]]+'</span>';
                                     } else {
-                                        text = '<div style="'+modelcss[n]+'" title="'+source[model[n]]+'">'+source[model[n]]+'</div>';
+                                        text = '<span style="'+modelcss[n]+'" title="'+source[model[n]]+'">'+source[model[n]]+'</span>';
                                     }
                                     bodyTpl += '<td style="'+modelcss[n]+'">'+text+'</td>';
                                 }
@@ -143,7 +158,6 @@
                             '&nbsp;&nbsp;<span>本页'+CurrentNum+'条数据，总共'+total+'条数据</span></td></tr>';
                     var footTpl = '</tbody></table></div></div>';
                     var tpl= headTpl+headmodel+'</thead><tbody>'+bodyTpl+pageTpl+footTpl;
-                    console.log(tpl);
                     $("#Arrears div").remove();
                     $("#Arrears").append(tpl);
                     $("#tip").css("display","none");

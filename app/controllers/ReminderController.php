@@ -164,12 +164,18 @@ class ReminderController extends ControllerBase
                     unlink($root . $press->Photo);
                 }
             }
-
             $r = $press->delete();
+
+            if($r){
+                $this->ajax->success = true;
+            }
+            else{
+                var_dump($press->getMessages());
+            }
 
             $this->ajax->logData->Data .= sprintf("撤销(%s)于(%s)的(%s)", $press->UserName, $press->PressTime, $press->PressStyle);
         }
-        $this->ajax->flushOk();
+        $this->ajax->flush();
     }
 
     /**
@@ -187,6 +193,12 @@ class ReminderController extends ControllerBase
         $pressStyle = "";
         $pressPhoto = "";
         $pressPhone = "";
+
+        if($this->request->get("reminderStyle") == 1){
+            if(!$this->request->hasFiles()){
+                $this->ajax->flushError("未上传通知单照片");
+            }
+        }
 
         if ($this->request->hasFiles()) {
             $pressStyle = "通知单催费";

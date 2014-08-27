@@ -34,6 +34,7 @@ $(document).ready(function(){
 		
 		var SearchData = data+"&Page=1&PageSize="+PageSize; 
 		G.GetAjax('post', SearchUrl, SearchData, SetTable,true);
+        groupData.init();
 	})
 
 	clickpage.SearchUrl = SearchUrl;
@@ -75,7 +76,7 @@ $(document).ready(function(){
 		var data2 =  ReplaceArray(value.data2,true);
 		var title = '回收明细';
 		var array = Array("抄表员", "抄表段编号", "用户编号", "用户名称", "用电地址", "电费年月", "电费金额", "结清标志", "复电时间", "复电电话");
-		var modelcss = Array("text-align:center;width:60px", "text-align:center;width:90px", "text-align:center;width:60px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis",  "text-align:center;width:80px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis", "text-align:left;width:160px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis", "text-align:center;width:80px", "text-align:center;width:80px", "text-align:center;width:80px", "text-align:center;width:90px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis", "text-align:center;width:80px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis");
+		var modelcss = Array("text-align:center;width:60px", "text-align:center;width:90px", "text-align:center;width:70px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis",  "text-align:center;width:80px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis", "text-align:left;width:130px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis", "text-align:center;width:80px", "text-align:center;width:80px", "text-align:center;width:80px", "text-align:center;width:90px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis", "text-align:center;width:80px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis");
 		var model = Array("CutUserName", "Segment", "CustomerNumber", "Name", "Address", "YearMonth", "Money", "IsClean", "ResetTime", "ResetPhone");
 		
 		var Total = value.TotalData.Count;
@@ -104,9 +105,9 @@ $(document).ready(function(){
 					'<td style="text-align:center">'+d+'</td>';
 					for (var n in model) {
 						if (model[n] == "CutCount" || model[n] == "PressCount" || model[n] == "CustomerNumber") {
-							bodyTpl +='<td id="'+model[n]+'" title="'+s[i].ID+'/'+number+'/'+s[i].YearMonth+'" style="text-decoration:underline;cursor:pointer;'+modelcss[n]+'">'+s[i][model[n]]+'</td>';
+							bodyTpl +='<td style="text-align: center"><span id="'+model[n]+'" title="'+s[i].ID+'/'+number+'/'+s[i].YearMonth+'" style="text-decoration:underline;cursor:pointer;'+modelcss[n]+'">'+s[i][model[n]]+'</span></td>';
 						} else {
-							 if (model[n] == "Address" || model[n] == "Name" || model[n] == "ResetTime" || model[n] == "ResetPhone"){
+							 if (model[n] == "Address" || model[n] == "Name" || model[n] == "ResetTime" || model[n] == "ResetPhone"|| model[n] == "CutUserName"){
 								text = '<div title="'+s[i][model[n]]+'" style="'+modelcss[n]+'">'+s[i][model[n]]+'</div>';
 							} else {
 								if (s[i][model[n]] == 1) {
@@ -140,7 +141,7 @@ $(document).ready(function(){
 		}
 
 		var pageTpl = '<tr >'+
-			    '<td id="PageNum" colspan="10" style="text-align:left">&nbsp;&nbsp;&nbsp;&nbsp;当前第<input name="Num" type="text" value="'+Page+'" style="width:12px;padding:0 8px"  />页，总共'+PageNumber+'页&nbsp;&nbsp;'+PTpl+
+			    '<td id="PageNum" colspan="11" style="text-align:left">&nbsp;&nbsp;&nbsp;&nbsp;当前第<input name="Num" type="text" value="'+Page+'" style="width:12px;padding:0 8px"  />页，总共'+PageNumber+'页&nbsp;&nbsp;'+PTpl+
 			    '</td>';
 
 		var headTpl = '<div><div class="line ClientInfo" >'+title+'</div><table id="info" >'+
@@ -151,7 +152,7 @@ $(document).ready(function(){
         var txt;
         for (var i in headarray) {//排序
             if (headarray[i]== '抄表段编号') {
-                txt ='<div id="segment" style="cursor: pointer">'+headarray[i]+'</div>';
+                txt ='<div id="segment" style="cursor: pointer ;width:90px">'+headarray[i]+'</div>';
             } else if(headarray[i] == "用户编号") {
                 txt ='<div id="number" style="cursor: pointer">'+headarray[i]+'</div>';
             } else{

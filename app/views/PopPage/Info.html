@@ -36,12 +36,21 @@
                         var val = v.target.value;
                         if (val == 1) {
                             $("select[name=PhoneType]").attr("disabled","true");
-                            $("input[name=PressTime]").attr("disabled","true");
+                            //$("input[name=PressTime]").attr("disabled","true");
                             $("input[name=Photo]").removeAttr("disabled");
                         } else {
-                            $("input[name=PressTime]").removeAttr("disabled");
+                            //$("input[name=PressTime]").removeAttr("disabled");
                             $("select[name=PhoneType]").removeAttr("disabled");
                             $("input[name=Photo]").attr("disabled","true");
+                        }
+                    })
+
+                    $("form:eq(1)").submit(function(){
+                        if ($("input[name=reminderStyle]:checked").val() ==1 ) {
+                            if (!$("input[type=file]").val()) {
+                                popupDiv('pop-div','通知单不能为空');
+                                e.preventDefault();
+                            }
                         }
                     })
 				})
@@ -234,7 +243,7 @@
                                 <!--<input name="NewPhone" type="text" style="height: 20px;  line-height: 20px; vertical-align:middle;width:120px;margin-left:20px "/>-->
                             </ul>
                             <ul style="height: 30px;  line-height: 30px; vertical-align:middle;margin:0;" class="time">催费时间：
-                                <input name="PressTime"  style="height: 25px;  line-height: 25px; vertical-align:middle;width:115px "   disabled="true" type="text" id="time">
+                                <input name="PressTime"  style="height: 25px;  line-height: 25px; vertical-align:middle;width:115px "   type="text" id="time">
 
                             </ul>
 

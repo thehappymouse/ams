@@ -63,7 +63,7 @@ $(document).ready(function(){
 					'<td style="text-align:center">'+d+'</td>';
 					for (var n in model) {
 						if (model[n] == "CutCount" || model[n] == "PressCount" || model[n] == "Number") {
-							bodyTpl +='<td id="'+model[n]+'" title="'+number+'/'+s[i].YearMonth+'" style="text-decoration:underline;cursor:pointer;text-align:center">'+s[i][model[n]]+'</td>';
+							bodyTpl +='<td style="text-align: center"><span id="'+model[n]+'" title="'+number+'/'+s[i].YearMonth+'" style="text-decoration:underline;cursor:pointer;text-align:center">'+s[i][model[n]]+'</span></td>';
 						} else {
 							bodyTpl += '<td style="text-align:center">'+s[i][model[n]]+'</td>';
 						}

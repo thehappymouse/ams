@@ -315,7 +315,7 @@ class CustomerHelper extends HelperBase
             //TODO 导出时，将ArrearsCount 增加
             $row["AllArrearCount"] = $as->Customer->ArrearsCount;
             //TODO 该字段需要优化
-            $row["ArrearCount"] = Arrears::count("IsClean!=1 AND CustomerNumber=$as->CustomerNumber");
+//            $row["ArrearCount"] = Arrears::count("IsClean!=1 AND CustomerNumber=$as->CustomerNumber");
 
             $data[] = $row;
         }

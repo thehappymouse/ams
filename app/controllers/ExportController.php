@@ -11,6 +11,7 @@ class ExportController extends ControllerBase
 {
     public function initialize()
     {
+        parent::initialize();
         $this->view->disable();
         include_once(__DIR__ . "/../../app/library/PHPExcel/Classes/PHPExcel.php");
     }
@@ -131,7 +132,7 @@ class ExportController extends ControllerBase
 
         $objActSheet = $objPHPExcel->createSheet(1);
         $objActSheet->setTitle("班组情况");
-//        $this->onePress($objActSheet, $years, $teams);
+        $this->onePress($objActSheet, $years, $teams);
 
         $objPHPExcel->setActiveSheetIndex(0);
         $objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel2007');
@@ -147,8 +148,7 @@ class ExportController extends ControllerBase
     /**
      * 工作报表
      */
-    public
-    function ReportWorkAction()
+    public function ReportWorkAction()
     {
         list($teams, $users) = ReportHelper::Work($this->request->get());
         $objPHPExcel = new PHPExcel();
@@ -247,8 +247,7 @@ class ExportController extends ControllerBase
     /**
      * 预收转逾期 下载
      */
-    public
-    function AdvanceAction()
+    public function AdvanceAction()
     {
         $data = CustomerHelper::Advances($this->request->get());
         $head = array(
@@ -279,8 +278,7 @@ class ExportController extends ControllerBase
     /**
      * 电费回收报表
      */
-    public
-    function ReportChargeAction()
+    public function ReportChargeAction()
     {
         list($years, $data) = ReportHelper::Electricity($this->request->get());
 
@@ -444,8 +442,7 @@ class ExportController extends ControllerBase
     /**
      * 对账查询（财务）
      */
-    public
-    function reconciliationAction()
+    public function reconciliationAction()
     {
         $param = $this->request->get();
         $data = CountHelper::Reconciliation($param);
@@ -476,8 +473,7 @@ class ExportController extends ControllerBase
     /**
      * 催费明细查询
      */
-    public
-    function countPressAction()
+    public function countPressAction()
     {
         $param = $this->request->get();
         $param["PageSize"] = 10000;
@@ -508,8 +504,7 @@ class ExportController extends ControllerBase
     /**
      * 复电统计
      */
-    public
-    function ResetAction()
+    public function ResetAction()
     {
 
         $param = $this->request->get();
@@ -539,8 +534,7 @@ class ExportController extends ControllerBase
     /**
      * 停电统计
      */
-    public
-    function CountCutAction()
+    public function CountCutAction()
     {
         $param = $this->request->get();
         $param["PageSize"] = 10000;
@@ -569,8 +563,7 @@ class ExportController extends ControllerBase
     /**
      * 电费回收明细
      */
-    public
-    function CountChargesAction()
+    public function CountChargesAction()
     {
         $param = $this->request->get();
         $param["PageSize"] = 10000;
@@ -601,8 +594,7 @@ class ExportController extends ControllerBase
     /**
      * 已停电用户信息导出。 停电界面使用
      */
-    public
-    function CutAction()
+    public function CutAction()
     {
         $params = $this->request->get();
         $params["OnlyAlreadyCut"] = "true";
@@ -632,8 +624,7 @@ class ExportController extends ControllerBase
     /**
      * 欠费用户信息导出 (催费、停电、客户分类统计 界面查询）
      */
-    public
-    function reminderAction()
+    public function reminderAction()
     {
         $params = $this->request->get();
 
@@ -652,6 +643,7 @@ class ExportController extends ControllerBase
         $floor = "共：%s条记录，欠费用户：%s 位，停电用户：%s位，特殊用户：%s位";
         $floor = sprintf($floor, count($data), $countinfo["allCustomer"], $countinfo["cutCount"], $countinfo["specialCount"]);
 
-        ExcelImportUtils::arrayToExcel("客户分类统计", $headArr, $data, $floor);
+        $filename = ExcelImportUtils::arrayToExcel("客户分类统计", $headArr, $data, $floor, true);
+        $this->ajax->flushOk("/ams/public/" . $filename);
     }
 } 

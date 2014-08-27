@@ -34,6 +34,7 @@ $(document).ready(function(){
         groupData.Data = data;//排序
 		var SearchData = data+"&Page=1&PageSize="+PageSize;
 		G.GetAjax('get',SearchUrl,SearchData,SetTable,true);
+        groupData.init();
 	})
 
 	clickpage.SearchUrl = SearchUrl;
@@ -83,15 +84,13 @@ $(document).ready(function(){
 		var array = Array("抄表段编号", "用户编号", "用户名称", "用电地址", "电费年月", "电费金额", "催费时间", "催费方式", "结清标志");
 	
 		var model = Array("Segment", "CustomerNumber", "Name", "Address", "YearMonth", "Money", "PressTime", "PressStyle", "IsClean");
-		var modelcss = Array("text-align:center;width:80px", "text-align:center;width:80px", "text-align:center;width:70px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis",  "text-align:left;width:160px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis", "text-align:center;width:70px", "text-align:center;width:70px", "text-align:center;width:85px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis", "text-align:center;width:80px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis", "text-align:center;width:80px");
+		var modelcss = Array("text-align:center;width:100px", "text-align:center;width:100px", "text-align:center;width:70px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis",  "text-align:left;width:160px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis", "text-align:center;width:70px", "text-align:center;width:70px", "text-align:center;width:85px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis", "text-align:center;width:80px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis", "text-align:center;width:80px");
 		var total = value.TotalData.Count;
 		var Money = value.TotalData.Money;
 		var Phone = value.TotalData.Phone;
 		var Nofify = value.TotalData.Nofify;
 
 		SetArrearsTable('Arrears', v,array,title,model,false,modelcss,total,Money,Phone, Nofify);
-
-
 	}
 
 	//欠费信息表格
@@ -114,7 +113,7 @@ $(document).ready(function(){
 					'<td style="text-align:center">'+d+'</td>';
 					for (var n in model) {
 						if (model[n] == "CutCount" || model[n] == "PressCount" || model[n] == "CustomerNumber") {
-							bodyTpl +='<td id="'+model[n]+'" title="'+s[i].ID+'/'+number+'/'+s[i].YearMonth+'" style="text-decoration:underline;cursor:pointer;'+modelcss[n]+'">'+s[i][model[n]]+'</td>';
+							bodyTpl +='<td style="text-align: center"><span id="'+model[n]+'" title="'+s[i].ID+'/'+number+'/'+s[i].YearMonth+'" style="text-decoration:underline;cursor:pointer;'+modelcss[n]+'">'+s[i][model[n]]+'</span></td>';
 						} else {
 							if (model[n] == "IsClean") {
 								if (s[i][model[n]] == 1) {

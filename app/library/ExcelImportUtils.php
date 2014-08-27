@@ -179,7 +179,6 @@ class ExcelImportUtils
         return array_slice($sheetData, 1);
     }
 
-
     /**
      * 将数组生成表格，并下载
      * @param $fileName
@@ -187,7 +186,7 @@ class ExcelImportUtils
      * @param $data
      * @param $floor 表格底部的统统信息
      */
-    public static function arrayToExcel($fileName, $headArr, $data, $floor = false)
+    public static function arrayToExcel($fileName, $headArr, $data, $floor = false, $writefile = false)
     {
         if (empty($data) || !is_array($data)) {
             die("没有数据，无法导出");
@@ -195,7 +194,7 @@ class ExcelImportUtils
 
         $date = date("Y_m_d", time());
         $fileName .= "_{$date}.xls";
-        $fileName = iconv("UTF-8", "gb2312", $fileName);
+//        $fileName = iconv("UTF-8", "gb2312", $fileName);
 
         //创建新的PHPExcel对象
         $objPHPExcel = new PHPExcel();
@@ -242,12 +241,16 @@ class ExcelImportUtils
 
         $objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel2007');
         //脚本方式运行，保存在当前目录
-        //$objWriter->save($fileName);
-
-        // 输出文档到页面
-        header('Content-Type: application/vnd.ms-excel');
-        header('Content-Disposition: attachment;filename="' . $fileName . '"');
-        header('Cache-Control: max-age=0');
-        $objWriter->save("php://output");
+        if($writefile){
+            $objWriter->save($fileName);
+            return $fileName;
+        }
+        else {
+            // 输出文档到页面
+            header('Content-Type: application/vnd.ms-excel');
+            header('Content-Disposition: attachment;filename="' . $fileName . '"');
+            header('Cache-Control: max-age=0');
+            $objWriter->save("php://output");
+        }
     }
 } 

@@ -17,8 +17,13 @@
                 return;
             }
              var data = {Number:number,ID:ID,Drawn:drawn};
-            G.GetAjax('get',url,data,"",true);
+            G.GetAjax('get',url,data,alertMag);
         })
+
+        function alertMag()
+        {
+            reload();
+        }
     })
 
 </script>
