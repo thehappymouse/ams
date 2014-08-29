@@ -37,7 +37,7 @@ class ExportController extends ControllerBase
 
     /**
      * 拼接列，因为超过Z，使用AA,AB的形式
-     * @param $v
+     * @param int $v
      */
     private function getCol($col)
     {
@@ -118,8 +118,7 @@ class ExportController extends ControllerBase
     /**
      * 催费情况报表
      */
-    public
-    function ReportPressAction()
+    public function ReportPressAction()
     {
         list($years, $teams, $data) = ReportHelper::Press($this->request->get());
 
@@ -137,12 +136,16 @@ class ExportController extends ControllerBase
         $objPHPExcel->setActiveSheetIndex(0);
         $objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel2007');
 
+        $filename = "催费情况报表.xls";
+        $objWriter->save($filename);
+        $this->ajax->flushOk("/ams/public/" . $filename);
+
         //输出文档到页面
-        $fileName = iconv("UTF-8", "gb2312", "催费情况报表");
-        header('Content-Type: application/vnd.ms-excel');
-        header('Content-Disposition: attachment;filename="' . $fileName . '"');
-        header('Cache-Control: max-age=0');
-        $objWriter->save("php://output");
+//        $fileName = iconv("UTF-8", "gb2312", "催费情况报表");
+//        header('Content-Type: application/vnd.ms-excel');
+//        header('Content-Disposition: attachment;filename="' . $fileName . '"');
+//        header('Cache-Control: max-age=0');
+//        $objWriter->save("php://output");
     }
 
     /**
@@ -237,11 +240,16 @@ class ExportController extends ControllerBase
         $objPHPExcel->setActiveSheetIndex(0);
         $objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel2007');
 
-        $fileName = iconv("UTF-8", "gb2312", "每日工作报表");
-        header('Content-Type: application/vnd.ms-excel');
-        header('Content-Disposition: attachment;filename="' . $fileName . '"');
-        header('Cache-Control: max-age=0');
-        $objWriter->save("php://output");
+        $filename = "每日工作报表.xls";
+        $objWriter->save($filename);
+        $this->ajax->flushOk("/ams/public/" . $filename);
+
+
+//        $fileName = iconv("UTF-8", "gb2312", "每日工作报表");
+//        header('Content-Type: application/vnd.ms-excel');
+//        header('Content-Disposition: attachment;filename="' . $fileName . '"');
+//        header('Cache-Control: max-age=0');
+//        $objWriter->save("php://output");
     }
 
     /**
@@ -268,7 +276,9 @@ class ExportController extends ControllerBase
         $floor = sprintf($floor, $count, $money);
 
         try {
-            ExcelImportUtils::arrayToExcel("预收转逾期", $head, $data, $floor);
+            $filename = ExcelImportUtils::arrayToExcel("预收转逾期", $head, $data, $floor, true);
+
+            $this->ajax->flushOk("/ams/public/" . $filename);
         } catch (Exception $e) {
             $this->ajax->flushError($e->getMessage());
         }
@@ -306,9 +316,9 @@ class ExportController extends ControllerBase
         $col = ord("B");
         $index = 0;
         foreach ($data as $user) {
-            $one = chr($col);
-            $two = chr($col + 1);
-            $end = chr($col + 2);
+            $one = $this->getCol($col);
+            $two = $this->getCol($col + 1);
+            $end = $this->getCol($col + 2);
 
             $objActSheet->getStyle($one . "1")->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
             $objActSheet->setCellValue($one . "1", $user["User"]);
@@ -361,9 +371,9 @@ class ExportController extends ControllerBase
         $col = ord("B");
         $index = 0;
         foreach ($data as $user) {
-            $one = chr($col);
-            $two = chr($col + 1);
-            $end = chr($col + 2);
+            $one = $this->getCol($col);
+            $two = $this->getCol($col + 1);
+            $end = $this->getCol($col + 2);
 
             $objSheet2->getStyle($one . "1")->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
             $objSheet2->setCellValue($one . "1", $user["User"]);
@@ -397,12 +407,16 @@ class ExportController extends ControllerBase
         $objPHPExcel->setActiveSheetIndex(0);
         $objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel2007');
 
-        $fileName = iconv("UTF-8", "gb2312", "电费回收报表");
+        $filename = "电费回收报表.xls";
+        $objWriter->save($filename);
+        $this->ajax->flushOk("/ams/public/" . $filename);
+
+
         // 输出文档到页面
-        header('Content-Type: application/vnd.ms-excel');
-        header('Content-Disposition: attachment;filename="' . $fileName . '"');
-        header('Cache-Control: max-age=0');
-        $objWriter->save("php://output");
+//        header('Content-Type: application/vnd.ms-excel');
+//        header('Content-Disposition: attachment;filename="' . $fileName . '"');
+//        header('Cache-Control: max-age=0');
+//        $objWriter->save("php://output");
 
 
     }
@@ -433,7 +447,8 @@ class ExportController extends ControllerBase
         }
 
         try {
-            ExcelImportUtils::arrayToExcel("对账查询", $head, $data);
+            $filename = ExcelImportUtils::arrayToExcel("对账查询", $head, $data, true);
+            $this->ajax->flushOk("/ams/public/" . $filename);
         } catch (Exception $e) {
             $this->ajax->flushError($e->getMessage());
         }
@@ -464,7 +479,9 @@ class ExportController extends ControllerBase
 
         $floor = sprintf($floor, $count, $money);
         try {
-            ExcelImportUtils::arrayToExcel("财务对账查询", $head, $data, $floor);
+            $filename = ExcelImportUtils::arrayToExcel("财务对账查询", $head, $data, $floor, true);
+
+            $this->ajax->flushOk("/ams/public/" . $filename);
         } catch (Exception $e) {
             $this->ajax->flushError($e->getMessage());
         }
@@ -495,7 +512,9 @@ class ExportController extends ControllerBase
         $floor = sprintf($floor, $totalData["Phone"], $totalData["Nofify"], $totalData["Money"]);
 
         try {
-            ExcelImportUtils::arrayToExcel("催费明细查询", $head, $data, $floor);
+            $filename = ExcelImportUtils::arrayToExcel("催费明细查询", $head, $data, $floor, true);
+
+            $this->ajax->flushOk("/ams/public/" . $filename);
         } catch (Exception $e) {
             $this->ajax->flushError($e->getMessage());
         }
@@ -525,7 +544,9 @@ class ExportController extends ControllerBase
             $floor .= sprintf($f, $d["Year"], $d["Count"], $d["Money"]);
         }
         try {
-            ExcelImportUtils::arrayToExcel("复电统计", $head, $data, $floor);
+            $filename = ExcelImportUtils::arrayToExcel("复电统计", $head, $data, $floor, true);
+            $this->ajax->flushOk("/ams/public/" . $filename);
+
         } catch (Exception $e) {
             $this->ajax->flushError($e->getMessage());
         }
@@ -554,7 +575,9 @@ class ExportController extends ControllerBase
         }
 
         try {
-            ExcelImportUtils::arrayToExcel("停电统计", $head, $data, $floor);
+            $filename = ExcelImportUtils::arrayToExcel("停电统计", $head, $data, $floor, true);
+
+            $this->ajax->flushOk("/ams/public/" . $filename);
         } catch (Exception $e) {
             $this->ajax->flushError($e->getMessage());
         }
@@ -585,7 +608,9 @@ class ExportController extends ControllerBase
         $floor = sprintf($floor, $total["Count"], $total["Money"]);
 
         try {
-            ExcelImportUtils::arrayToExcel("电费回收明细", $head, $data, $floor);
+            $filename = ExcelImportUtils::arrayToExcel("电费回收明细", $head, $data, $floor, true);
+
+            $this->ajax->flushOk("/ams/public/" . $filename);
         } catch (Exception $e) {
             $this->ajax->flushError($e->getMessage());
         }
@@ -618,7 +643,8 @@ class ExportController extends ControllerBase
             $data[$key] = $row;
         }
 
-        ExcelImportUtils::arrayToExcel("客户分类统计", $headArr, $data);
+        $filename = ExcelImportUtils::arrayToExcel("客户分类统计", $headArr, $data, null, true);
+        $this->ajax->flushOk("/ams/public/" . $filename);
     }
 
     /**

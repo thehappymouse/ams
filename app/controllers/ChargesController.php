@@ -81,6 +81,7 @@ class ChargesController extends ControllerBase
             if ($customer) { //查询其欠费信息表
                 $arrears = array();
                 foreach ($customer->Arrears as $ea) {
+                    if($ea->IsClean == 1) continue;
                     $arrears[] = $ea->dump();
                 }
 
@@ -195,7 +196,7 @@ class ChargesController extends ControllerBase
         }
 
         //如果用户没有欠费信息，则将客户IsClean=1
-        if(Arrears::count("CustomerNumber=$customer AND IsClena=0") == 0){
+        if(Arrears::count("CustomerNumber=$customer AND IsClean=0") == 0){
             $customerModel->IsClean = 1;
         }
 
