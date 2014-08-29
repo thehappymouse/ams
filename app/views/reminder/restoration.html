@@ -40,12 +40,10 @@ $(document).ready(function(){
 		G.GetAjax('post',SearchUrl,SearchData,ShowTable,true);
 	})
 
-	$("#Arrears").on("click","[name=select]",function(v){
-		//var ID = v.currentTarget.defaultValue;
-        var ID =  checkbox();
-		$("[name=ID]").val(ID);
-		$("button:eq(1)").removeAttr("disabled")
-	})
+    var clickBox = new countMoney();//checkbox全点击对象
+    clickBox.moneyFun = false;
+    clickBox.allClick();
+    clickBox.singleClick();
 
 	$("body").keydown(function() {
 		var msg;
@@ -74,12 +72,12 @@ $(document).ready(function(){
 			if (jsonData.success) {
 				var data = $("form:eq(0)").serialize();
 				data = data+"&Page="+Page+"&PageSize="+PageSize;
-
 				G.GetAjax('post',SearchUrl,data,ShowTable);
 			} else {
 				popupDiv('pop-div',jsonData.msg);
+                return ;
 			}
-			$("button:eq(1)").attr("disabled","true");
+
 		}
 		
 	})
@@ -100,7 +98,7 @@ $(document).ready(function(){
 		Page = clickpage.ReturnPage();
 		var title = '欠费用户信息';
 		var headarray = Array("抄表段编号", "用户编号", "用户名称", "用电地址", "电费年月", "电费金额", "结清标志", "停电标志", "催费次数", "停电次数", "停电方式", "停电时间", "交费登记电话", "电能表号");
-		var model = Array("Segment", "CustomerNumber", "CustomerName", "Address", "YearMonth", "Money", "IsClean", "IsCut", "PressCount", "CutCount", "CutStyle", "CutTime", "Phone", "AssetNumber");
+		var model = Array("Segment", "CustomerNumber", "CustomerName", "Address", "YearMonth", "Money", "IsClean", "IsCut", "PressCount", "CutCount", "CutStyle", "CutTime", "LandlordPhone", "AssetNumber");
 		var modelcss = Array("text-align:center;width:90px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis", "text-align:center;width:80px", "text-align:center;width:70px",  "text-align:left;width:100px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis", "text-align:center;width:70px", "text-align:center;width:70px", "text-align:center;width:70px", "text-align:center;width:85px", "text-align:center;width:85px", "text-align:center;width:85px", "text-align:center;width:105px", "text-align:center;width:80px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis", "text-align:center;width:100px", "text-align:center;width:85px");
 		SetArrearsTable(total, value, headarray, title, model, modelcss);
 		//SetArrearsTable("","",headarray,title,model);
@@ -164,7 +162,6 @@ $(document).ready(function(){
 		        if (source.IsClean == "未结清") {
 		        	money += parseInt(source.Money);
 		        }
-		        
 			}
 			$("[name=Money]").val(money);
 		}
@@ -186,7 +183,7 @@ $(document).ready(function(){
 		var headTpl = '<div class="line ClientInfo" >'+title+'</div><div style="border:1px solid #009966;border-top:none;width:940px;height:auto;overflow:scroll;overflow-y:hidden"><table id="info" style="width:1300px;max-width:1300px">'+
 		    		'<thead>'+
 			    	'<tr style="font-size:15px">'+
-			    	'<th style="height:20px;width:20px"></th>';
+			    	'<th style="height:20px;width:20px"><input type="checkbox" /></th>';
 
     	for (var i in headarray) {
     		headmodel +='<th style="'+modelcss[i]+';text-align:center" >'+headarray[i]+'</th>';

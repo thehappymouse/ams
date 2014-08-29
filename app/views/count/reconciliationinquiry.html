@@ -93,12 +93,10 @@ $(document).ready(function(){
 							}
 							bodyTpl += '<td style="'+modelcss[n]+'"  >'+text+'</td>';
 						}
-						
 					}
 		        bodyTpl +='</tr>';
 		        d++;
 			}
-
 		}
 		
 
@@ -114,8 +112,7 @@ $(document).ready(function(){
     	for (var i in headarray) {
     		headmodel +='<th style="'+modelcss[i]+';text-align:center">'+headarray[i]+'</th>';
     	}
-		
-		
+
 		if (!th){
 			 tr = '<tr>'+
 			        '<td colspan="10" style="text-align:left" ><form name="excelform" id="excelform" action="/ams/export/AccountCheck" method="post" target="put_excel" >&nbsp;&nbsp;&nbsp;&nbsp;导出文件：&nbsp;&nbsp;<span  id="excel" style="cursor:pointer"><img  src="/ams/public/images/Excel.png" style="height:25px;width:25px"/></span>&nbsp;&nbsp;</form></td>'+

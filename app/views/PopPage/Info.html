@@ -9,12 +9,11 @@
 
 					var BuildUrl = "/ams/Customer/update"
 					$("#Arrears table tr:odd").addClass("InfoTr");
-					
-					$("#Arrears").on("click","[name=select]",function(v){
-						var ID = checkbox();
-						$("[name=ID]").val(ID);
-						$("button:eq(1)").removeAttr("disabled")
-					})
+
+                    var clickBox = new countMoney();//checkbox全点击对象
+                    clickBox.moneyFun = false;
+                    clickBox.allClick();
+                    clickBox.singleClick();
 
 					$("button:eq(0)").click(function(){
 						var updateUrl = "/ams/Customer/update"
@@ -171,7 +170,7 @@
 		    		<table id="info">
 		    			<thead>
 		    				<tr style="height:20px;width:30px">
-		    					<th ></th>
+		    					<th ><input type="checkbox" /></th>
 		    					<th style="width:138px">电费年月</th>
 		    					<th style="width:138px">电费金额</th>
 		    					<th style="width:138px">结清标志</th>

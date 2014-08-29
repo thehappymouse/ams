@@ -36,7 +36,7 @@
 
         <div class="pop-box-body">
 
-            <div style="background-color:white;width:200px;height:110px">
+            <div style="background-color:white;width:200px;height:120px">
                 <br/>
 
                 <div id="text" align="center"></div>

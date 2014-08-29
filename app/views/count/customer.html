@@ -77,7 +77,7 @@ $(document).ready(function(){
 		var headarray = Array("抄表段编号", "用户编号", "用户名称", "用电地址","房东电话" , "电费年月", "电费金额","费控标志", "结清标志", "停电标志", "催费次数", "停电次数" , "欠费笔数",  "累计欠费次数", "特殊客户", "租房客户");
 		var modelcss = Array("text-align:center;width:100px", "text-align:center;width:80px","text-align:center;width:70px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis",  "text-align:center;width:150px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis",  "text-align:center;width:100px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis", "text-align:center;width:80px", "text-align:center;width:80px", "text-align:center;width:85px", "text-align:center;width:90px", "text-align:center;width:90px",
                 "text-align:center;width:90px", "text-align:center;width:80px", "text-align:center;width:80px", "text-align:center;width:120px", "text-align:center;width:80px", "text-align:center;width:80px");
-		var model = Array("Segment", "CustomerNumber", "CustomerName", "Address", "LandlordPhone", "YearMonth", "Money", "IsControl", "IsClean", "IsCut", "PressCount", "CutCount", "ArrearCount", "AllArrearCount", "IsSpecial", "IsRent");
+		var model = Array("Segment", "CustomerNumber", "CustomerName", "Address", "LandlordPhone", "YearMonth", "Money", "IsControl", "IsClean", "IsCut", "PressCount", "CutCount", "AllArrearCount", "AllArrearCount", "IsSpecial", "IsRent");
 		SetArrearsTable('Arrears',value,headarray,title,model,false,modelcss,Total, info);
 	}
 

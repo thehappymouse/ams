@@ -12,6 +12,10 @@ $(document).ready(function(){
 	var url = "/ams/Info/TeamList";
 	G.GetAjax('get',url,data,DrownBox.SetAllSelect,true);
 
+    var clickBox = new countMoney();//checkbox全点击对象
+    clickBox.moneyFun = false;
+    clickBox.allClick();
+    clickBox.singleClick();
 	var SearchUrl = "/ams/reminder/SearchFee";
 	$("#Condition").on("change","select:eq(0)",function(v){
 		var id = $("select:eq(0)").val();
@@ -42,11 +46,7 @@ $(document).ready(function(){
 		G.GetAjax('post',SearchUrl,SearchData,ShowTable,true);
 	})
 
-	$("#Arrears").on("click","[name=select]",function(v){
-        var ID = checkbox();
-		$("[name=ID]").val(ID);
-		$("button:eq(1)").removeAttr("disabled")
-	})
+
 	$("iframe").load(function(v){
 		var Vdata = window.frames["frm_dealer"].document.documentElement.innerText;
 		if (Vdata) {
@@ -175,7 +175,7 @@ $(document).ready(function(){
 		var headTpl = '<div><div class="line ClientInfo" >'+title+'</div><table id="info" >'+
 		    		'<thead>'+
 			    	'<tr >'+
-			    	'<th ></th>';
+			    	'<th ><input type="checkbox" /></th>';
 
     	for (var i in headarray) {
     		headmodel +='<th style="'+modelcss[i]+';text-align:center;">'+headarray[i]+'</th>';

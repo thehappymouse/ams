@@ -1,10 +1,10 @@
 <script>
     $(document).ready(function(){
         var G = new AjaxFun();//获取ajax方法
-        $("input[name=box]").click(function(){
-            var ID = checkbox();
-            $("[name=ID]").val(ID);
-        })
+        var clickBox = new countMoney();//checkbox全点击对象
+        clickBox.moneyFun = false;
+        clickBox.allClick();
+        clickBox.singleClick();
         //撤销提交
         $("button:eq(0)").click(function(){
 
@@ -32,11 +32,11 @@
 </style>
 <br />
 <div class="line ClientInfo" >收费信息</div>
-<div class="TableCss">
+<div id="Arrears" class="TableCss">
     <table id="info">
         <thead>
         <tr >
-            <th></th>
+            <th><input name="box" type="checkbox"  /></th>
             <th >序号</th>
             <th>电费年月</th>
             <th>收费金额</th>
@@ -49,7 +49,7 @@
         <tbody>
         <?php  $i =1;foreach ($cs as $s) { ?>
         <tr>
-            <td><input name="box" type="checkbox" value="<?php echo $s->ID;?>" /></td>
+            <td><input name="select" type="checkbox" value="<?php echo $s->ID;?>" /></td>
             <td><?php  echo $i;			?></td>
             <td><?php echo $s->YearMonth;	?></td>
             <td><?php echo $s->Money; 	?></td>

@@ -1,7 +1,9 @@
 			<script type="text/javascript">
 
 			$(document).ready(function(){
-                var c =[];//存放欠费用户的欠费金额：ID:money
+                var clickBox = new countMoney();//checkbox全点击对象
+                clickBox.allClick();
+                clickBox.singleClick();
 			    var G = new AjaxFun();//获取ajax方法
 				var infourl = "/ams/Charges/Customer";
 
@@ -16,37 +18,17 @@
 				$("button:eq(1)").click(function(){
 					var number = $("td:eq(3)")[0].innerText;
 					var url = "/ams/Charges/Create";
-					//var check = checkbox('没有选择欠费信息');
-					var value = $("form").serialize()+'&Number='+number;
-					var val = {ID:number};
-					G.GetAjax('post',url,value);
-					setTimeout(function(){popupDiv('pop-div',"提交成功");$("button:eq(1)").removeAttr("disabled");G.GetAjax('get',infourl,val,SetTable)},900);
-
-					$("form")[0].reset();
-					$("button:eq(1)").attr("disabled","true")
-					//G.GetAjax('post',url,value);
-				})
-
-				$("#Arrears").on("click","[name=select]",function(v){
-                    var money = 0;
-					var ID = checkbox();
+                    var ID = checkbox();
                     if (ID == 0) {
                         $("button:eq(1)").attr("disabled","true");
-                    } else {
-                        var idArr = ID.split(",");
-                        if (idArr != 0) {
-                            for (var i in idArr) {
-                                if (c[idArr[i]] != undefined) {
-                                    money += parseInt(c[idArr[i]]);
-                                }
-                            }
-                            $("input[name=ID]").val(ID);
-                        }
-
-                        $("button:eq(1)").removeAttr("disabled");
                     }
+					var value = $("form").serialize()+'&Number='+number+'&ID='+ID;
+					var val = {ID:number};
+					G.GetAjax('post',url,value,null,false);
+					G.GetAjax('get',infourl,val,SetTable);
 
-                    $("input[name=Money]").val(money);
+					$("form")[0].reset();
+					//G.GetAjax('post',url,value);
 				})
 
 				//添加表格0268476438
@@ -56,19 +38,23 @@
 					var array = Array("电费年月","欠费金额","结清标志","催费次数","停电次数");
 					var model = Array("YearMonth","Money","IsClean","PressCount","CutCount");
 					var modelcss = Array("text-align:center", "text-align:center", "text-align:center", "text-align:center",  "text-align:center");
-					
+
 					if (value == null){
 						$("#info div").remove();
 						$("#Arrears div").remove();
 						$("form").css("display","none");
 						$("#tip").css("display","block");
-						//SetInfoTable();
-						//SetArrearsTable('','',array,title,model,modelcss);
-						return ;
+						return;
 					}
+
 					var v =  ReplaceArray(value);
 					var number = v.Number;
 					SetInfoTable(v);
+                    if (value['Arrears'] == "") {
+                        $("#Arrears div").remove();
+                        $("form").css("display","none");
+                        return;
+                    }
 					SetArrearsTable(number,v['Arrears'],array,title,model,modelcss);
 					$("form").css("display","block");
 				}
@@ -132,18 +118,18 @@
 					if (s) {//0268001535
 						for (var i in s) {
 							bodyTpl += '<tr style="height:22px">'+
-								'<td style="width:30px;text-align:center"><input name="select"  value="'+s[i].ID+'" type="checkbox" style="vertical-align:text-bottom;"  checked /td>';
+								'<td style="width:30px;text-align:center"><input name="select"  value="'+s[i].ID+'"  type="checkbox" style="vertical-align:text-bottom;"    />';
 								for (var n in model) {
 									if (model[n] == "CutCount" || model[n] == "PressCount" || model[n] == "CustomerNumber") {
 										bodyTpl +='<td id="'+model[n]+'" title="'+s[i].ID+'/'+number+'/'+s[i].YearMonth+'" style="text-decoration:underline;cursor:pointer;text-align:center">'+s[i][model[n]]+'</td>';
 									} else{
 										if (model[n] == "IsClean") {
 											if (s[i][model[n]] == 2) {
-												text = text = '<div  title="预收转逾期">预收转逾期</div>';
+												text = '<div  title="预收转逾期">预收转逾期</div>';
 											} else if (s[i][model[n]] == 1){
-												text = text = '<div  title="已结清">是</div>';
+												 text = '<div  title="已结清">是</div>';
 											} else {
-												text = text = '<div  title="未结清">否</div>';
+												 text = '<div  title="未结清">否</div>';
 											}
 										} else {
 											text = s[i][model[n]];
@@ -154,17 +140,16 @@
 					        bodyTpl +='</tr>';
 					        if (s[i].IsClean == 0) {
 					        	money += parseInt(s[i].Money);
-                                c[s[i].ID] = s[i].Money;
+                                allMoney[s[i].ID] = s[i].Money;
 					        }
 						}
-                        console.log(money);
 						$("input[name=Money]").val(money);
 					}
 
 					var headTpl = '<div><div class="line ClientInfo" >'+title+'</div><table id="info"  >'+
 					    		'<thead>'+
 						    	'<tr >'+
-						    	'<th   ></th>';
+						    	'<th   ><input name="allcheck" type="checkbox"/></th>';
 			    	for (var i in headarray) {
 			    		headmodel +='<th>'+headarray[i]+'</th>';
 			    	}
@@ -240,7 +225,7 @@
 
 					    </div>
 			
-					    <input name="ID" type="hidden" />
+
 					    <div class=" InputStyle" style="margin-left:15px;float:left;width:100px;*margin-top:5px">签订费控协议：</div>
 					    <div class=" TreeInput" style="margin-left:5px;float:left">
 					       <select name="IsControl" style="width:50px">
@@ -248,7 +233,8 @@
 									<option value="1">是</option>
 							</select>
 				    	</div>
-						<button type="button"  class="btn btn-success" style="*margin-top:2px;background-color:#009966" >收费</button>
+                        <input name="ID" type="hidden" />
+						<button type="button"  disabled class="btn btn-success" style="*margin-top:2px;background-color:#009966" >收费</button>
 					</div>
 			</div>
 			</form>	
