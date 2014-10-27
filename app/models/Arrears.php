@@ -48,11 +48,6 @@ class Arrears extends \Phalcon\Mvc\Model
      */
     public $PressCount;
 
-    /**
-     *
-     * @var integer
-     */
-    public $CutCount;
 
     /**
      *
@@ -88,7 +83,6 @@ class Arrears extends \Phalcon\Mvc\Model
 
         $this->PressCount = 0;
         $this->IsClean = 0;
-        $this->CutCount = 0;
         $this->IsCut = 0;
     }
 
@@ -140,8 +134,7 @@ class Arrears extends \Phalcon\Mvc\Model
             'CustomerName' => 'CustomerName', 
             'Money' => 'Money', 
             'PressCount' => 'PressCount', 
-            'CutCount' => 'CutCount', 
-            'Charge' => 'Charge', 
+            'Charge' => 'Charge',
             'IsClean' => 'IsClean', 
             'IsCut' => 'IsCut',
             'Segment' => 'Segment',

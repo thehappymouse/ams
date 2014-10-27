@@ -40,7 +40,9 @@
                             text:'导入',
                             handler:function(){
                                 infoSearch.getForm().submit({
-
+                                    success:function(){
+                                        alert("上传成功");
+                                    }
                                 })
                             }
                         }]

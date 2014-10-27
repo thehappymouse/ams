@@ -50,15 +50,16 @@ class LogHelper
 
     /**
      * 复电
-     * @param $arrearid
+     * @param $number
      * @param $success
      */
-    public function Reset($arrearid, $success)
+    public function Reset($number, $success)
     {
+        $c = Customer::findByNumber($number);
         $log = new Systemlog();
-        $arrear = Arrears::findFirst($arrearid);
+//        $arrear = Arrears::findFirst($arrearid);
         $log->Action = "复电";
-        $log->Data = $arrear->CustomerName . "|" . $arrear->CustomerNumber;
+        $log->Data = $c->Name . "|" . $c->Number;
         $log->Success = $success;
         $log->Result = $success ? "操作成功" : "操作失败";
         $log->UserID = $this->userid;

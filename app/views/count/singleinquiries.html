@@ -97,7 +97,7 @@ Ext.onReady(function () {
                 anchor:'95%'
             }),{
                 fieldLabel: '累计欠费次数',
-                name: 'ArrearsCount',
+                name: 'AllArrearCount',
                 anchor:'95%'
             }]
         },{
@@ -243,12 +243,14 @@ Ext.onReady(function () {
                         sortable: true,
                         align:"center",
                         dataIndex: 'PressCount'
-                    },{
-                        header: '停电次数',
-                        sortable: true,
-                        align:"center",
-                        dataIndex: 'CutCount'
-                    },{
+                    },
+//                    {
+//                        header: '停电次数',
+//                        sortable: true,
+//                        align:"center",
+//                        dataIndex: 'CutCount'
+//                    },
+                    {
                         header: '收费人',
                         sortable: true,
                         align:"center",

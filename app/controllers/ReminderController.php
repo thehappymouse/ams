@@ -82,7 +82,7 @@ class ReminderController extends ControllerBase
     public function SearchResetAction()
     {
         $params = $this->request->get();
-        $params["OnlyAlreadyCut"] = "true";
+        $params["PowerCutLogo"] = 1;
 
         $start = $params["FromData"];
         $end = $params["ToData"];
@@ -141,6 +141,7 @@ class ReminderController extends ControllerBase
     /**
      * 执行撤销催费
      * 2014-08-08 一次可以取消多个
+     * 2014-10-27 id变更为催费ID
      */
     public function cancelpressAction()
     {
@@ -150,21 +151,22 @@ class ReminderController extends ControllerBase
         $this->ajax->logData->Action = "撤销催费";
         foreach ($ids as $id) {
 
-            $arrear = Arrears::findFirst("ID=$id");
+            $press = Press::findFirst("ID=$id");
+            $arrear = Arrears::findFirst($press->Arrear);
+
             if ($arrear->PressCount > 0) {
                 $arrear->PressCount--;
                 $arrear->save();
             }
 
-            $press = Press::findFirst("Arrear=$id ORDER BY PressTime DESC");
-
-            if ($press->PressStyle == "通知单催费") { //删除文件
+            if ("通知单催费" == $press->PressStyle) { //删除文件
                 $root = "/opt/lampp/htdocs/ams";
                 $filename = $root . $press->Photo;
                 if (is_file($filename)) {
                     unlink($root . $press->Photo);
                 }
             }
+
             $r = $press->delete();
 
             if($r){
@@ -174,6 +176,7 @@ class ReminderController extends ControllerBase
                 var_dump($press->getMessages());
             }
 
+            CustomerHelper::SyncCustomerInfo($arrear->Customer);
             $this->ajax->logData->Data .= sprintf("撤销(%s)于(%s)的(%s)", $press->UserName, $press->PressTime, $press->PressStyle);
         }
         $this->ajax->flush();
@@ -252,6 +255,8 @@ class ReminderController extends ControllerBase
             } else {
                 var_dump($press->getMessages());
             }
+
+            CustomerHelper::SyncCustomerInfo($ar->Customer);
         }
 
 
@@ -285,11 +290,7 @@ class ReminderController extends ControllerBase
         foreach($ids as $id){
             $ll->Reset($id, $r);
         }
+        $this->ajax->flushOk();
 
-        if ($r) {
-            $this->ajax->flushOk();
-        } else {
-            $this->ajax->flushError("信息保存失败");
-        }
     }
 }

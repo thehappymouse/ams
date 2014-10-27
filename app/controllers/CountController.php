@@ -62,7 +62,7 @@ class CountController extends ControllerBase
 
             //如果停电，则查询停电方式
             if ($c->IsCut) {
-                $cut = Cutinfo::findFirst(array("CustomerNumber=:num:", "bind" => array("num" => $c->Number)));
+                $cut = Cutinfo::findFirst(array("CustomerNumber=:num: ORDER BY  CutTime Desc", "bind" => array("num" => $c->Number)));
                 $c->CutStyle = $cut->CutStyle;
             }
 

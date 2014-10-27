@@ -199,7 +199,7 @@ Ext.onReady(function(){
                 fields: reminderFields
             });
 
-    var sm = new Ext.grid.CheckboxSelectionModel();
+    var sm = new Ext.grid.CheckboxSelectionModel({singleSelect : true});
     var listView = new Ext.grid.EditorGridPanel(
             {
                 store: store,
@@ -240,11 +240,6 @@ Ext.onReady(function(){
                         align:"center",
                         width:200,
                         dataIndex: 'Address'
-                    }, {
-                        header: '电费年月',
-                        sortable: true,
-                        align:"center",
-                        dataIndex: 'YearMonth'
                     }, {
                         header: '电费金额',
                         sortable: true,
@@ -310,6 +305,18 @@ Ext.onReady(function(){
             lookInfo(record.data.CustomerNumber,0)
         }
     })
+    listView.getSelectionModel().on("selectionchange", function(sm){
+        if (listView.getSelectionModel().getSelections().length != 0) {
+            var type = Ext.getCmp('PhoneType').getValue();
+            var phone = "";
+            if (type == "房东电话") {
+                phone = listView.getSelectionModel().getSelections()[0].data.LandlordPhone;
+            } else {
+                phone = listView.getSelectionModel().getSelections()[0].data.RenterPhone;
+            }
+            Ext.getCmp('Phone').setValue(phone);
+        }
+    })
     listView.on("render",  function(p,e){
 
         /* p.canCel.setHandler(function(b, e){
@@ -354,15 +361,45 @@ Ext.onReady(function(){
             ,{
                 fieldLabel: '复电时间',
                 xtype:'datetimefield',
-                format: 'Y-m-d H:i',
+                format: 'Y-m-d H:i:s',
                 name:'ResetTime',
+                value:new Date().format('Y-m-d H:i:s'),
                 width: 151
             },{
-                fieldLabel: '复电电话',
-                xtype:'textfield',
-                name:'ResetPhone',
-                width: 151
-            }  ,{
+                xtype:'compositefield',
+                items:[
+                new QuietCombox({
+                    fieldLabel: '复电电话',
+                    displayField:'Text',
+                    valueField:'PhoneType',
+                    id:'PhoneType',
+                    hiddenName:'PhoneType',
+                    fields:['Text','PhoneType'],
+                    data   : [
+                        ['房东电话', '房东电话'],['房客电话', '房客电话']
+                    ],
+                    width: 151,
+                    listeners:{
+                        'select':function(){
+                            if (listView.getSelectionModel().getSelections().length != 0) {
+                                var type = Ext.getCmp('PhoneType').getValue();
+                                var phone = "";
+                                if (type == "房东电话") {
+                                    phone = listView.getSelectionModel().getSelections()[0].data.LandlordPhone;
+                                } else {
+                                    phone = listView.getSelectionModel().getSelections()[0].data.RenterPhone;
+                                }
+                                Ext.getCmp('Phone').setValue(phone);
+                            }
+                        }
+                    }
+                }),{
+                    xtype:'textfield',
+                    id:'Phone',
+                    name:'Phone',
+                    width: 151
+                }]
+            },{
                 style:'margin-left:90px',
                 width:100,
                 xtype:'button',
@@ -374,12 +411,13 @@ Ext.onReady(function(){
                     }
                     var ids = [];
                     Ext.each(listView.getSelectionModel().getSelections(), function (item) {
-                        ids.push(item.data.ID);
+                        ids.push(item.data.CustomerNumber);
                     });
                     var idString = ids.join(",");
                     submitForm.getForm().submit({
                         params : {ID : idString },
                         success:function(form,action){
+                            Ext.Msg.alert('提示','复电成功!');
                             listView.store.removeAll();
                             listView.store.reload()
                         },

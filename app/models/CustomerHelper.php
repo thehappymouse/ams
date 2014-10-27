@@ -8,6 +8,59 @@
  */
 class CustomerHelper extends HelperBase
 {
+    /**
+     * @param $number
+     */
+    public static function SyncCustomerByNumber($number)
+    {
+        self::SyncCustomerInfo(Customer::findByNumber($number));
+    }
+
+    /**
+     * @param Customer $customer
+     */
+    public static function SyncCustomerInfo($customer)
+    {
+        $money = 0;
+        $count = 0;
+        $presscount = 0;
+        $first = "";
+        $last = "";
+        //$moneyQuery = "SELECT SUM(Money) AS Money, COUNT(ID) AS ArrearCount, SUM(PressCount) FROM Arrears WHERE CustomerNumber = '0268004260' AND IsClean = 0";
+        $arrears = $customer->Arrears;
+        foreach ($arrears as $e) {
+            if ($e->IsClean != 1) {
+                $money += (int)$e->Money;
+                $count++;
+                $presscount += $e->PressCount; //已结清，不计算期催费次数，欠费笔数
+
+                if ($first == "") {
+                    $first = $e->YearMonth;
+                    $last = $first;
+                }
+
+                if ($e->YearMonth > $last) {
+                    $last = $e->YearMonth;
+                }
+                if ($e->YearMonth < $first) {
+                    $first = $e->YearMonth;
+                }
+            }
+        }
+
+        $customer->IsClean = 0;
+        //如果用户没有欠费信息，则将客户IsClean=1
+        if ($count == 0) {
+            $customer->IsClean = 1;
+        }
+        $customer->Money = $money;
+        $customer->ArrearsCount = $count;
+        $customer->PressCount = $presscount;
+        $customer->LastDate = $last;
+        $customer->FirstDate = $first;
+        $customer->AllArrearCount = count($arrears);
+        $customer->save();
+    }
 
     /**
      * 复电
@@ -20,7 +73,7 @@ class CustomerHelper extends HelperBase
 
         $ids = explode(",", $p->ID);
         foreach ($ids as $id) {
-            $cut = Cutinfo::findFirst("Arrear = $id");
+            $cut = Cutinfo::findFirst(array("CustomerNumber = :num: AND ResetTime IS NULL", "bind" => array("num" => $id)));
             if ($cut == null) {
                 continue;
             }
@@ -31,14 +84,17 @@ class CustomerHelper extends HelperBase
 
             $cut->ResetUser = $p->User;
             if ($cut->save()) {
-                $arrear = Arrears::findFirst($id);
-                $arrear->IsCut = 0;
-                $arrear->save();
-
-                $customer = Customer::findByNumber($arrear->CustomerNumber);
+//                $arrear = Arrears::findFirst($id);
+//                $arrear->IsCut = 0;
+//                $arrear->save();
+                
+                $customer = Customer::findByNumber($id);
                 $customer->IsCut = 0;
                 $customer->save();
                 $result = true;
+            }
+            else{
+                var_dump($cut->getMessages());
             }
         }
 
@@ -47,6 +103,7 @@ class CustomerHelper extends HelperBase
 
     /**
      * 停电  20140808 多记录同时停止
+     * 20141027 停电和用户挂勾
      * @param array $params
      * @return bool
      */
@@ -62,34 +119,26 @@ class CustomerHelper extends HelperBase
             $cut->CutStyle = $request->CutType;
             $cut->CutTime = $request->CutTime;
             $cut->Arrear = $id;
+//            $arrear = Arrears::findFirst($cut->Arrear);
 
-            $arrear = Arrears::findFirst($cut->Arrear);
-
-            $customer = Customer::findByNumber($arrear->CustomerNumber);
+            $customer = Customer::findFirst($id);
 
             $cut->CutUserName = $customer->SegUser;
             $cut->CustomerNumber = $customer->Number;
-            $cut->Segment = $arrear->Segment;
-            $cut->YearMonth = $arrear->YearMonth;
-            $cut->Money = $arrear->Money;
-
+            $cut->Segment = $customer->Segment;
+            $cut->Money = $customer->Money;
             $r = $cut->save();
 
-
             if ($r) {
-                $arrear->CutCount = (int)$arrear->CutCount + 1;
-                $arrear->IsCut = 1;
-                $arrear->save();
-
                 $customer->IsCut = 1;
+                $customer->CutCount += 1;
                 $customer->save();
                 $success = true;
-
             } else {
                 var_dump($cut->getMessages());
             }
+            self::SyncCustomerInfo($customer);
         }
-
         return array($success, $ids);
     }
 
@@ -145,10 +194,10 @@ class CustomerHelper extends HelperBase
         list($total, $data, $conditions, $param) = self::ArrearsInfo($params);
 
         $builder = parent::getModelManager()->createBuilder();
-        $result = $builder->columns(array("COUNT( DISTINCT CustomerNumber) as Count, SUM(IsCut) as CutCount"))
+        $result = $builder->columns(array("COUNT( DISTINCT CustomerNumber) as Count"))
             ->from("Arrears")
             ->andWhere($conditions)
-            ->getQuery()->execute($param)->getFirst();
+            ->getQuery()->execute($param)->getFirst();exit;
         $allCustomer = $result->Count;
         $cutCount = $result->CutCount;
 
@@ -184,16 +233,10 @@ class CustomerHelper extends HelperBase
         $data = array();
         $param = array();
 
-        $count_query = "select count(A.ID) as Count from Arrears as A right join Customer as B on A.CustomerNumber = B.Number where ";
-
-        $query = "select A.ID, A.CustomerName, A.Segment, A.CustomerNumber, B.Address, B.IsCut,
-                        A.YearMonth, A.Money, A.PressCount, B.CutCount, B.Name from Arrears as A
-                    left join Customer as B on A.CustomerNumber = B.Number where ";
-
-        $conditions = "1 = 1 "; 
+        $conditions = " 1=1 ";
 
         if ($p->CustomerNumber) {
-            $conditions .= " AND CustomerNumber = :Customer:";
+            $conditions .= " AND Number = :Customer:";
             $param["Customer"] = $p->CustomerNumber;
         } else {
             if ($p->Number) {
@@ -204,88 +247,95 @@ class CustomerHelper extends HelperBase
                         $str = DataUtil::GetSegmentsStrByUid($p->Name);
                     }
 
-                    $conditions .= " AND A.Segment in ($str)";
+                    $conditions .= " AND Segment in ($str)";
                 } else {
-                    $conditions .= " AND A.Segment = :segment:";
+                    $conditions .= " AND Segment = :segment:";
                     $param["segment"] = $p->Number;
                 }
             }
-        }
 
-        //电费年月。其它条件应注意修改关键字
-        if ($p->FromData && $p->ToData) {
-            $conditions .= " AND (YearMonth BETWEEN :start: AND :end:)";
-            $param["start"] = $p->FromData;
-            $param["end"] = $p->ToData;
-        }
-
-        //是否停电
-        if ($p->PowerCutLogo != null && $p->PowerCutLogo != 2) {
-            $conditions .= " AND B.IsCut = :IsCut:";
-            $param["IsCut"] = $p->PowerCutLogo;
-        }
-
-        //是否结清
-        if ($p->IsClean != NULL && $p->IsClean != 2) {
-            $conditions .= " AND A.IsClean = :IsClean:";
-            $param["IsClean"] = $p->IsClean;
-        }
-
-
-        //欠费金额
-        if ($p->ArrearsValue && $p->ArrearsValue > 0) {
-
-            if ($p->Arrears == 1) {
-                $word = " >= ";
-            } else {
-                $work = " < ";
+            //电费年月查询
+            if ($p->FromData && $p->ToData) {
+                $conditions .= " AND  (FirstDate >= :start: AND LastDate <= :end:)";
+                $param["start"] = $p->FromData;
+                $param["end"] = $p->ToData;
             }
-            $conditions .= " AND Money $word :money:";
-            $param["money"] = $p->ArrearsValue;
+
+            //电话有效   ['全部', '2'],['是', '1'],['否', '0']PhoneEffective
+            if ($p->PhoneEffective != null && $p->PhoneEffective != 2) {
+                if ($p->PhoneEffective == 1) {
+                    $conditions .= ' AND (LandlordPhone !=""  OR RenterPhone != "")';
+                } else {
+                    $conditions .= ' AND (LandlordPhone = "" AND RenterPhone ="")';
+                }
+            }
+            //是否停电
+            if ($p->PowerCutLogo != null && $p->PowerCutLogo != 2) {
+                $conditions .= " AND IsCut = :IsCut:";
+                $param["IsCut"] = $p->PowerCutLogo;
+            }
+
+            //是否结清
+            if ($p->IsClean != NULL && $p->IsClean != 2) {
+                $conditions .= " AND IsClean = :IsClean:";
+                $param["IsClean"] = $p->IsClean;
+            }
+
+
+            //欠费金额
+            if ($p->ArrearsValue && $p->ArrearsValue > 0) {
+
+                if ($p->Arrears == 1) {
+                    $word = " >= ";
+                } else {
+                    $work = " < ";
+                }
+                $conditions .= " AND Money $word :money:";
+                $param["money"] = $p->ArrearsValue;
+            }
+            //催费次数
+            if ($p->ReminderFeeValue && (int)$p->ReminderFeeValue > 0) {
+                if ($p->ReminderFee == 1) $word = ">=";
+                else $word = "<";
+                $conditions .= " AND PressCount $word :PressCount:";
+                $param["PressCount"] = $p->ReminderFeeValue;
+            }
+
+            //停电次数
+            if ($p->PowerOutagesValue && (int)$p->PowerOutagesValue > 0) {
+                $word = ($p->PowerOutages == 1) ? ">=" : "<";
+
+                $conditions .= " AND CutCount $word :CutCount:";
+                $param["CutCount"] = $p->PowerOutagesValue;
+            }
+
+            //费控标志
+            if ($p->IsControl != null && $p->IsControl != 2) {
+                $conditions .= " AND IsControl = :IsControl:";
+                $param["IsControl"] = $p->IsControl;
+            }
+
+            //是否租房  2 全部。 1 租。0 非租
+            if ($p->IsRent != null && $p->IsRent != 2) {
+                $conditions .= " AND IsRent = :IsRent:";
+                $param["IsRent"] = $p->IsRent;
+            }
         }
 
-        //催费次数
-        if ($p->ReminderFeeValue && (int)$p->ReminderFeeValue > 0) {
-            if ($p->ReminderFee == 1) $word = ">=";
-            else $word = "<";
-            $conditions .= " AND PressCount $word :PressCount:";
-            $param["PressCount"] = $p->ReminderFeeValue;
-        }
-
-        //停电次数
-        if ($p->PowerOutagesValue && (int)$p->PowerOutagesValue > 0) {
-            $word = ($p->PowerOutages == 1) ? ">=" : "<";
-
-            $conditions .= " AND B.CutCount $word :CutCount:";
-            $param["CutCount"] = $p->PowerOutagesValue;
-        }
-
-        //费控标志
-        if($p->IsControl != null && $p->IsControl != 2){
-            $conditions .= " AND B.IsControl = :IsControl:";
-            $param["IsControl"] = $p->IsControl;
-        }
-
-        //是否租房  2 全部。 1 租。0 非租
-        if($p->IsRent != null && $p->IsRent != 2){
-            $conditions .= " AND B.IsRent = :IsRent:";
-            $param["IsRent"] = $p->IsRent;
-        }
 
         $conditions_mini = $conditions;
         $conditions .= " limit $p->start, $p->limit";
 
-        $query .= $conditions;
-        $results = parent::getModelManager()->executeQuery($query, $param);
 
+        $results = Customer::find(array($conditions, "bind" => $param));
         foreach ($results as $rs) {
-            $data[] = (array)$rs;
+            $d = $rs->dump();
+            $d["CustomerName"] = $rs->Name;
+            $d["CustomerNumber"] = $rs->Number;
+            $data[] = $d;
         }
 
-        $results = parent::getModelManager()->executeQuery($count_query . $conditions_mini, $param)->getFirst();
-        $total = $results->Count;
-
-
+        $total = Customer::count(array($conditions_mini, "bind" => $param));
         return array($total, $data, $conditions_mini, $param);
     }
 } 

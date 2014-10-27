@@ -42,6 +42,8 @@ Ext.onReady(function () {
                                 var text = Ext.decode(action.response.responseText);
                                 Ext.getCmp('LandlordPhone').setValue(text.data.LandlordPhone);
                                 Ext.getCmp('RenterPhone').setValue(text.data.RenterPhone);
+                                Ext.getCmp('IsRent').setValue(text.data.IsRent);
+                                Ext.getCmp('IsControl').setValue(text.data.IsControl);
                                 listView.store.removeAll();
                                 listView.store.load({
                                     params : {ID : number },
@@ -191,11 +193,6 @@ Ext.onReady(function () {
                     align:"center",
                     sortable: true
                 }, {
-                    header: '停电次数',
-                    sortable: true,
-                    align:"center",
-                    dataIndex: 'CutCount'
-                }, {
                     header: '结清标志',
                     sortable: true,
                     align:"center",
@@ -211,7 +208,7 @@ Ext.onReady(function () {
                     header: '催费次数',
                     sortable: true,
                     align:"center",
-                    dataIndex: 'CutCount'
+                    dataIndex: 'PressCount'
                 }]
         });
     listView.on("render",  function(p,e){
@@ -273,6 +270,7 @@ Ext.onReady(function () {
                 displayField:'Text',
                 hiddenName:'IsControl',
                 valueField:'IsControl',
+                id:'IsControl',
                 fields:['Text','IsControl'],
                 data   : [['是', '1'],['否', '0']],
                 width: 151
@@ -295,11 +293,12 @@ Ext.onReady(function () {
                             })
                             listView.store.removeAll();
                             listView.store.reload();
-                            listView.store.load({
+                            /*listView.store.load({
                                 params : {ID : number },
                                 scope: store,
                                 add: false
-                            })
+                            })*/
+                            Ext.Msg.alert('提示','收费成功');return;
                         },
                         failure:function(form,action){
                             var text = Ext.decode(action.response.responseText);
@@ -316,6 +315,7 @@ Ext.onReady(function () {
                 fieldLabel: '是否租房',
                 displayField:'Text',
                 valueField:'IsRent',
+                id:'IsRent',
                 hiddenName:'IsRent',
                 fields:['Text','IsRent'],
                 data   : [['是', '1'],['否', '0']],

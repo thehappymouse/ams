@@ -348,11 +348,6 @@ Ext.onReady(function(){
                         width:200,
                         dataIndex: 'Address'
                     }, {
-                        header: '电费年月',
-                        sortable: true,
-                        align:"center",
-                        dataIndex: 'YearMonth'
-                    }, {
                         header: '电费金额',
                         sortable: true,
                         align:"center",
@@ -470,7 +465,7 @@ Ext.onReady(function(){
                         align:"center",
                         dataIndex: 'UserName'
                     }, {
-                        header: '收费人时间',
+                        header: '收费时间',
                         sortable: true,
                         align:"center",
                         dataIndex: 'Time'
@@ -496,13 +491,14 @@ Ext.onReady(function(){
             });
             var  idString = ids.join(",");
              if (ids.length == 0) {
-             Ext.Msg.alert('提示','请选择抄表段编号！');
-             return;
+                 Ext.Msg.alert('提示','请选择抄表段编号！');
+                 return;
              }
             Ext.Ajax.request({
                 url:'/ams/Charges/Cancel',
                 params : {ID : idString, Number:number},
                 success:function(){
+                    Ext.Msg.alert('提示','撤销成功！');
                     listView.store.removeAll();
                     listView.store.reload();
                     freeView.store.removeAll();

@@ -9,7 +9,7 @@ Ext.onReady(function(){
     });
     /*三个动态框*/
     var teamCombox = new SettCombbox({
-        url:'/ams/Info/TeamList?ID=1&Type=1&All=1',
+        url:'/ams/Info/TeamList?ID=1&Type=1&All=0',
         fieldLabel: '管理班组',
         anchor:'95%',
         id:'team',
@@ -343,12 +343,14 @@ Ext.onReady(function(){
                         align:"center",
                         width:200,
                         dataIndex: 'Address'
-                    }, {
-                        header: '电费年月',
-                        sortable: true,
-                        align:"center",
-                        dataIndex: 'YearMonth'
-                    }, {
+                    },
+//                    {
+//                        header: '欠费笔数',
+//                        sortable: true,
+//                        align:"center",
+//                        dataIndex: 'ArrearsCount'
+//                    },
+                    {
                         header: '电费金额',
                         sortable: true,
                         align:"center",

@@ -101,6 +101,7 @@ class ExcelImportUtils
         $now = date("Y-m-d H:i:s");
         if (null == $c) {
             $c = new Customer();
+            $c->initialize();
             $c->Name = $row["Name"];
             $c->Number = $row["Number"];
             $c->Address = $row["Address"];
@@ -109,13 +110,16 @@ class ExcelImportUtils
             $c->SegUser = $row["SegUser"];
             $c->CreateTime = $now;
             $c->LandlordPhone = $row["Phone"];
-            $c->IsClean = 0;
-            $c->IsControl = 0;
-            $c->IsRent = 0;
-            $c->IsClean = 0;
-
-            $c->save();
         }
+
+        $r = $c->save();
+
+        if(!$r) {
+            $msg  = $c->getMessages();
+            var_dump($msg[0]->getMessage());
+        }
+
+        CustomerHelper::SyncCustomerInfo($c);
         return $c;
     }
 
@@ -144,11 +148,12 @@ class ExcelImportUtils
             $a->CutCount = 0;
             $a->IsCut = 0;
 
-
             $arr = array(
                 "Name" => $row["C"], "Segment" => $row["F"], "SegmentName" => "",
                 "SegUser" => $row["G"], "Number" => $row["B"], "Phone" => $row["H"],
                 "Balance" => 0, "Address" => $row["D"]);
+
+            self::saveSegment($arr);
 
             try {
 
@@ -159,11 +164,7 @@ class ExcelImportUtils
                     }
                 }
 
-                $c = self::saveCustomer($arr);
-                if ($c != null) {
-                    $c->ArrearsCount = $c->ArrearsCount + 1;
-                }
-                self::saveSegment($arr);
+                self::saveCustomer($arr);
 
             } catch (PDOException $e) {
                 var_dump($e->getMessage());

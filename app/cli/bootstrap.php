@@ -37,7 +37,7 @@ $loader->register();
 $config = new \Phalcon\Config(array(
     'database' => array(
         'adapter' => 'Mysql',
-        'host' => '192.168.1.7',
+        'host' => '192.168.1.5',
         'username' => 'power',
         'password' => 'power_2014',
         'dbname' => 'power',

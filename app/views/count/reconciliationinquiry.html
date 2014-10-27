@@ -2,7 +2,7 @@
 Ext.onReady(function(){
     /*二个动态框*/
     var teamCombox = new SettCombbox({
-        url:'/ams/Info/TeamList?ID=1&Type=2&All=1',
+        url:'/ams/Info/TeamList?ID=1&Type=2&All=0',
         fieldLabel: '营业班组',
         anchor:'95%',
         id:'team',
@@ -108,6 +108,13 @@ Ext.onReady(function(){
                                 var data = infoSearch.getForm().getValues();
                                 listView.store.load({
                                     params : data,
+                                    callback:function(v){
+                                        if (v.length == 0) {
+                                            Ext.MessageBox.alert('提示',"此班组下没有数据");
+                                            listView.store.removeAll();
+                                            totalView.store.removeAll();
+                                        }
+                                    },
                                     add: false
                                 });
                                 totalView.store.load({

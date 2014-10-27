@@ -82,7 +82,7 @@ class Security extends Phalcon\Mvc\User\Plugin
             "countsearch" => array("reconciliationinquiry", "reconciliation", "charges", "press", "cut", "reset", "customer"),
             "jpg" => array("singlebar", "arrarscount", "cutcount", "arrarsmonth", "bar", "line", "pie"),
             "systemlog" => array("index", "list"),
-            "poppage" => array("reminder", "powercut", "info", "modifyuser", "reminderfee", "cancel"),
+            "poppage" => array("reminder", "powercut", "info", "modifyuser", "reminderfee", "userinfo", "cancel"),
             "manager" => array("index", "userlist", "grouplist", "groupdel", "userdel", "build", "buildajax", "user", "group", "groupbuild", "systemlog", "useredit", "getgroup", "groupbuildajax"),
             "customer" => array("index", "update"),
             "export" => array("reportpress", "reportwork", "advance", "reportcharge", "accountcheck", "reconciliation", "press", "reset", "countcut", "countcharges", "cut", "reminder"),
@@ -94,7 +94,7 @@ class Security extends Phalcon\Mvc\User\Plugin
         $materResource = array(
             "site" => array("index", "index2"),
             "index" => array("message", "index"),
-            "poppage" => array("reminder", "powercut", "info", "reminderfee", "cancel"),
+            "poppage" => array("reminder", "powercut", "info", "userinfo", "reminderfee", "cancel"),
             "info" => array("teamlist", "userlist", "segmentlist"),
             "export" => array("reportpress", "reportwork", "advance", "reportcharge", "accountcheck", "reconciliation", "press", "reset", "countcut", "countcharges", "cut", "reminder"),
             "count" => array("press", "cut", "reset", "customer"),

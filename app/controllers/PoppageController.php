@@ -68,7 +68,6 @@ class  PopPageController extends ControllerBase
             }
         }
 
-        $c->ArrearsCount = Arrears::count("CustomerNumber=$number");
         //停电方式
         if($c->IsCut == 1) {
             $cutInfo = Cutinfo::findFirst("CustomerNumber=$number");
@@ -91,13 +90,11 @@ class  PopPageController extends ControllerBase
     {
         $number = $this->request->get("Number");
 
-        $Arrears = Arrears::find("CustomerNumber=$number");
-        $n = Arrears::count("CustomerNumber=$number");
+        $Arrears = Arrears::find("IsClean = 0 AND CustomerNumber=$number");
         $data = array();
         foreach($Arrears as $c){
             $data[] = $c->dump();
         }
-        $this->ajax->total = $n;
         $this->ajax->flushData($data);
     }
 

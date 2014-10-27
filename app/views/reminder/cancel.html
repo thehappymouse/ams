@@ -303,7 +303,7 @@ Ext.onReady(function(){
                 fields: ArrarsinfoFields
             });
 
-     var sm = new Ext.grid.CheckboxSelectionModel();
+     var sm = new Ext.grid.CheckboxSelectionModel({singleSelect : true});
     var listView = new Ext.grid.EditorGridPanel(
             {
                 store: store,
@@ -317,7 +317,7 @@ Ext.onReady(function(){
                 viewConfig: {forceFit:true},
                 reserveScrollOffset: true,
                 tbar: [{
-                    text: '撤销',
+                    text: '撤销催费',
                     ref:'../del',
                     iconCls: 'del'
                 }],
@@ -349,11 +349,6 @@ Ext.onReady(function(){
                         sortable: true,
                         align:"center",
                         dataIndex: 'Address'
-                    }, {
-                        header: '电费年月',
-                        sortable: true,
-                        align:"center",
-                        dataIndex: 'YearMonth'
                     }, {
                         header: '电费金额',
                         sortable: true,
@@ -427,21 +422,125 @@ Ext.onReady(function(){
                  Ext.Msg.alert('提示','请选择用户！');
                  return;
              }
-             var ids = [];
-             Ext.each(p.getSelectionModel().getSelections(), function (item) {
-                 ids.push(item.data.ID);
-             });
-             var idString = ids.join(",");
-             Ext.Ajax.request({
+             var ids = p.getSelectionModel().getSelections()[0].data.CustomerNumber;
+             freeView.store.load({
+                 params : {Number : ids },
+                 add: false
+             })
+             win.show();
+             /*Ext.Ajax.request({
                  url:'/ems/reminder/cancelpress',
                  params:{ID : idString },
                  success:function(){
                      listView.store.removeAll();
                      listView.store.reload();
                  }
-             })
+             })*/
          })
+    });
+
+    var  dm = new Ext.grid.CheckboxSelectionModel();
+    var freeView = new Ext.grid.GridPanel(
+        {
+            store: new Ext.data.JsonStore({
+                url: '/ams/PopPage/ReminderFee',
+                root: 'data',
+                fields: arrarsFreeFields
+            }),
+            multiSelect: true,
+            stripeRows: true,
+            region: 'center',
+            sm: dm,
+            height: 300,
+            emptyText: '没有数据',
+            reserveScrollOffset: true,
+            tbar: [{
+                text: '撤销',
+                ref:'../cancel',
+                iconCls: 'del'
+            }],
+            columns: [
+                dm,{
+                    hidden:true,
+                    dataIndex: 'ID'
+                },{
+                    header: '催费时间',
+                    width: 160,
+                    sortable: true,
+                    align:"center",
+                    dataIndex: 'PressTime'
+                }, {
+                    header: '抄表员',
+                    dataIndex: 'UserName',
+                    width: 120,
+                    align:"center",
+                    sortable: true
+                }, {
+                    header: '催费方式',
+                    sortable: true,
+                    align:"center",
+                    dataIndex: 'PressStyle'
+                }, {
+                    header: '催费电话',
+                    sortable: true,
+                    align:"center",
+                    dataIndex: 'Phone'
+                }, {
+                    header: '催费照片',
+                    sortable: true,
+                    align:"center",
+                    dataIndex: 'Photo',
+                    renderer:function(v){
+                        if (v != "") {
+                            return "<a href='"+v+"'>查看</a>";
+                        }
+                    }
+                }]
+        });
+    freeView.on("render",  function(p,e){
+
+        p.cancel.setHandler(function(b, e){
+
+            if (freeView.getSelectionModel().getSelections().length == 0) {
+                Ext.Msg.alert('提示','请选择所要撤销的催费条目！');
+                return;
+            }
+            var ids = [];
+            Ext.each(freeView.getSelectionModel().getSelections(), function (node) {
+                ids.push(node.get("ID"));
+            });
+            var  idString = ids.join(",");
+            Ext.Ajax.request({
+                url:'/ams/reminder/cancelpress',
+                params : {ID : idString},
+                success:function(){
+                    Ext.MessageBox.alert("提示", "撤销成功");
+                    listView.store.removeAll();
+                    listView.store.reload();
+                    freeView.store.removeAll();
+                    freeView.store.reload();
+                },
+                failure:function(){
+                    Ext.MessageBox.alert("提示", "撤销失败")
+                }
+            })
+        })
     })
+    var win = new Ext.Window({
+        layout:'fit',
+        width:500,
+        height:300,
+        closeAction:'hide',
+        plain: true,
+        items:[freeView],
+        buttons: [{
+            text: '关闭',
+            handler: function(){
+                win.hide();
+            }
+        }]
+    });
+
 
     var infoPanel = new Ext.TabPanel({
         labelWidth: 85,

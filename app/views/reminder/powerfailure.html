@@ -338,12 +338,7 @@ Ext.onReady(function(){
                         width:200,
                         align:"center",
                         dataIndex: 'Address'
-                    }, {
-                        header: '电费年月',
-                        sortable: true,
-                        align:"center",
-                        dataIndex: 'YearMonth'
-                    }, {
+                    },  {
                         header: '电费金额',
                         sortable: true,
                         align:"center",
@@ -434,7 +429,7 @@ Ext.onReady(function(){
         ,{
             fieldLabel: '停电时间',
             xtype:'datetimefield',
-            format: 'Y-m-d H:i',
+            format: 'Y-m-d H:i:s',
             name:'CutTime',
             value:new Date().format('Y-m-d H:i:s'),
             width: 151
@@ -457,7 +452,7 @@ Ext.onReady(function(){
                     ids.push(item.data.ID);
                 });
                 if (cut) {
-                    Ext.MessageBox.alert('提示','有已停电年月！');
+                    Ext.MessageBox.alert('提示','有已停电条目！请重新选择');
                     return;
                 }
                 var idString = ids.join(",");
@@ -466,6 +461,7 @@ Ext.onReady(function(){
                     success:function(form,action){
                         listView.store.removeAll();
                         listView.store.reload();
+                        Ext.Msg.alert('提示','复电成功');return;
                     },
                     failure:function(form,action){
                         var text = Ext.decode(action.response.responseText);

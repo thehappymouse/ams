@@ -43,7 +43,7 @@ class Customer extends \Phalcon\Mvc\Model
      *
      * @var double
      */
-    public $ArrearsMoney;
+    public $Money;
 
     /**
      *
@@ -107,6 +107,12 @@ class Customer extends \Phalcon\Mvc\Model
 
     /**
      *
+     * @var integer
+     */
+    public $ArrearsCount;
+
+    /**
+     *
      * @var string
      */
     public $SegUser;
@@ -129,6 +135,7 @@ class Customer extends \Phalcon\Mvc\Model
      */
     public $AssetNumber;
 
+
     /**
      * Initialize method for model.
      */
@@ -138,13 +145,20 @@ class Customer extends \Phalcon\Mvc\Model
         $this->hasMany("Number", "Arrears", "CustomerNumber");
         $this->hasMany("Number", "Charge", "CustomerNumber");
 
-        $this->IsRent = 0;
-        $this->IsCut = 0;
-        $this->IsClean = 0;
-        $this->CanCut = 0;
-        $this->IsControl = 0;
-        $this->IsSpecial = 0;
-        $this->CutStyle="";
+        $c = $this;
+        $c->IsCut = 0;
+        $c->ArrearsCount = 0;
+        $c->CutCount = 0;
+        $c->IsClean = 0;
+        $c->IsControl = 0;
+        $c->Money = 0;
+        $c->IsRent = 0;
+        $c->RenterPhone = "";
+
+        $c->CanCut = 0;
+        $c->IsSpecial = 0;
+        $c->CutStyle="";
+        $c->PressCount = 0;
     }
 
     /**
@@ -163,6 +177,23 @@ class Customer extends \Phalcon\Mvc\Model
      */
     public $PressCount;
 
+    /**
+     *
+     * @var string
+     */
+    public $FirstDate;
+    /**
+     *
+     * @var string
+     */
+    public $LastDate;
+
+    /**
+     *
+     * @var integer
+     */
+    public $AllArrearCount;
+
     public function getTeamName()
     {
         $user = User::findFirst(array("Name=:name:", "bind" => array("name" => $this->SegUser)));
@@ -173,6 +204,16 @@ class Customer extends \Phalcon\Mvc\Model
         else {
             return "";
         }
+    }
+
+    /**
+     * 根据编号查找客户
+     * @param $number
+     * @return Customer
+     */
+    public static  function findByNumber($number)
+    {
+        return self::findFirst(array("Number=:num:", "bind" => array("num" => $number)));
     }
 
     /**
@@ -187,7 +228,7 @@ class Customer extends \Phalcon\Mvc\Model
             'Number' => 'Number', 
             'Address' => 'Address', 
             'Balance' => 'Balance', 
-            'ArrearsMoney' => 'ArrearsMoney', 
+            'Money' => 'Money', 
             'IsRent' => 'IsRent', 
             'LandlordPhone' => 'LandlordPhone', 
             'RenterPhone' => 'RenterPhone', 
@@ -204,6 +245,9 @@ class Customer extends \Phalcon\Mvc\Model
             'AssetNumber' => 'AssetNumber', 
             'ArrearsCount' => 'ArrearsCount', 
             'CutCount' => 'CutCount', 
+            'LastDate' => 'LastDate',
+            'FirstDate' => 'FirstDate',
+            'AllArrearCount' => 'AllArrearCount',
             'PressCount' => 'PressCount'
         );
     }

@@ -137,6 +137,7 @@ class ChargesController extends ControllerBase
     /**
      * 收费动作。
      * 收费记录与欠费记录应一一对应。 每个月都有记录
+     * 重新计算客户的欠费金额和笔数
      */
     public function CreateAction()
     {
@@ -219,17 +220,11 @@ class ChargesController extends ControllerBase
             }
         }
 
-        //如果用户没有欠费信息，则将客户IsClean=1
-        if (Arrears::count("CustomerNumber=$customer AND IsClean=0") == 0) {
-            $customerModel->IsClean = 1;
-        }
-
         if (!$customerModel->save()) {
             var_dump($customerModel->getMessages());
         }
 
         try {
-
             //发送消息到对应的抄表员，以便去复电。 根据客户编码，查找抄表段->抄表员和班长，写信
             $msg = new Message();
             $msg->ToUserID = $segment->UserID;
@@ -254,6 +249,7 @@ class ChargesController extends ControllerBase
             $log->save();
         }
 
+        CustomerHelper::SyncCustomerInfo($customerModel);
 
         if ($errorCount == 0) {
             $this->ajax->flushOk();
@@ -269,10 +265,9 @@ class ChargesController extends ControllerBase
     {
         $this->view->disable();
         $params = $this->request->get();
-        $params["IsClean"] = 1;
+//        $params["IsClean"] = 1;
 
         list($total, $data, $conditions, $param) = CustomerHelper::ArrearsInfo($params);
-
         $this->ajax->total = $total;
         $this->ajax->flushData($data);
     }
@@ -315,9 +310,8 @@ class ChargesController extends ControllerBase
                 $logd .= "|" . $a->YearMonth . "|￥" . $a->Money;
             }
         }
-        $customerModel = Customer::findByNumber($customer);
-        $customerModel->IsClean = 0;
-        $customerModel->save();
+
+        CustomerHelper::SyncCustomerByNumber($customer);
 
         $this->ajax->logData->Data .= $name . "|" . $customer . $logd;
 
