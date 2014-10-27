@@ -264,6 +264,7 @@ class CountHelper extends HelperBase
         $tid = $p->get("Team");
         $uid = $p->get("Name");
         $time = $p->get("FromData");
+        $end = $p->get("ToData");
         $data = array();
         if(User::IsAllUsers($uid)){
             $users = User::find("TeamID = $tid");
@@ -274,7 +275,7 @@ class CountHelper extends HelperBase
             $uid = "'" . implode("','", $uid) . "'";
         }
 
-        $cs = Charge::find(array("UserID IN ($uid) AND Time <= :time:", "bind" => array("time" => $time)));
+        $cs = Charge::find(array("UserID IN ($uid) AND (Time BETWEEN :start: AND :end:)", "bind" => array("start" => $time, "end" => $end)));
 
         foreach ($cs as $c) {
             $customer = Customer::findByNumber($c->CustomerNumber);
@@ -285,6 +286,7 @@ class CountHelper extends HelperBase
             $data[] = $row;
         }
 
+
         $total = array();
         // UserID = 7 可更换为  ChargeTeam=3 统计这个组的
         $results = parent::getModelManager()->executeQuery("SELECT
@@ -293,8 +295,9 @@ class CountHelper extends HelperBase
                                                             SUM(Money) AS Money,
                                                             SUM(IsControl) AS ControlCount,
                                                             COUNT(ManageTeam) AS ChargeCount
-                                                            FROM Charge WHERE UserID IN( $uid ) AND Time < '$time'
+                                                            FROM Charge WHERE UserID IN( $uid ) AND (Time BETWEEN '$time' and '$end')
                                                             GROUP BY ManageTeam , Year ORDER BY ManageTeam, Year");
+
 
         foreach ($results as $r) {
             $r->Team = Team::findFirst($r->ManageTeam)->Name;
@@ -314,10 +317,11 @@ class CountHelper extends HelperBase
         $p = new RequestParams($params);
         $gid = $p->get("Team");
         $time = $p->get("FromData");
+        $end = $p->get("ToData");
 
         $total = array();
 
-        $condation = " WHERE Time < '$time' ";
+        $condation = " WHERE (Time BETWEEN '$time' and '$end') ";
         if($gid != -1){
             $condation .= "AND ChargeTeam = $gid";
         }

@@ -18,6 +18,10 @@ class CustomerController extends ControllerBase
     public function updateAction()
     {
         $customer = Customer::findFirst($this->request->get("ID"));
+        if(!$customer){
+            $this->ajax->flushError("客户不存在");
+        }
+
         $customer->Name = $this->request->get("Name");
         $customer->Address = $this->request->get("Address");
         $customer->IsControl = $this->request->get("IsControl");

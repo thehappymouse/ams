@@ -1,143 +1,174 @@
 <script type="text/javascript">
-	$(document).ready(function(){
-				var G = new AjaxFun();//获取ajax方法
-				var data = {ID:"1"};
-				var Url = "/ams/manager/GroupList";
-				G.GetAjax('post',Url,data,ShowTable);
-				//ShowTable();
+Ext.onReady(function(){
 
-				$("#Arrears").on("click", "button", function(v){
-					
-					var id = v.currentTarget.name;
-					
-					var data = {ID:id};
-					var delUrl = "/ams/manager/GroupDel";
-					G.GetAjax('post',delUrl,data,ShowTable);
-					G.GetAjax('post',Url,data,ShowTable);
-			
-				})
+     del = function (value) {
+          Ext.Msg.confirm('提示','是否删除此班级',function(btn){
+              if(btn == 'no') {
+                  return;
+              } else {
+                  Ext.Ajax.request({
+                      url:'/ams/manager/GroupDel',
+                      params:{ID:value},
+                      success:function(){
+                          listView.store.reload();
+                      }
+                  })
+              }
+          })
+    }
+    var store = new Ext.data.JsonStore(
+            {
+                url: '/ams/Manager/GroupList',
+                root: 'data',
+                autoLoad:true,
+                totalProperty: 'total',
+                baseParams: {
+                    start: 0,
+                    limit: 5
+                },
+                fields: ['ID','Name','TypeName','Type']
+            });
 
-				function ShowTable(value)
-				{
-					
-					var headarray = Array("序号", "班组", "职责", "操作");
-					var model = Array("#", "Name", "TypeName", "Manager");
+    var listView = new Ext.grid.EditorGridPanel(
+            {
+                store: store,
+                multiSelect: true,
+                title: '班组管理',
+                stripeRows: true,
+                region: 'center',
+                autoHeight:true,
+                emptyText: '没有数据',
+                viewConfig: {forceFit:true},
+                reserveScrollOffset: true,
+                columns: [
+                    {
+                        header: '班组',
+                        align:"center",
+                        sortable: true,
+                        dataIndex: 'Name'
+                    }, {
+                        header: '职责',
+                        dataIndex: 'TypeName',
+                        align:"center",
+                        sortable: true,
+                        editor:new Ext.form.TextField({
+                            allowBlank:false
+                        })
+                    },{
+                        header: '操作',
+                        align:"center",
+                        dataIndex: 'ID',
+                        renderer: function (value, cellmeta) {
+                            return "<a href='#' onclick=del('"+value+"')>删除</a>"
+                        }
+                    }],
+                bbar: new Ext.PagingToolbar({
+                    pageSize: 5,
+                    store: store,
+                    displayMsg: "显示{0}条到{1}条记录，总共{2}条记录",
+                    emptyMsg: "没有数据记录",
+                    displayInfo: true
+                })
+            });
+    listView.on("render",  function(p,e){
 
-					var modelcss = Array("text-align:center",  "text-align:center",  "text-align:center", "text-align:center");
+        /* p.canCel.setHandler(function(b, e){
+         if (p.getSelectionModel().getSelections().length == 0) {
+         Ext.Msg.alert('提示','请选择用户！');
+         return;
+         }
+         })*/
+    })
 
-					SetArrearsTable(value,headarray,model,modelcss);
-					
-				}
+    var infoPanel = new Ext.TabPanel({
+        labelWidth: 85,
+        activeTab: 0,
+        plain:true,
+        defaults:{autoScroll: true},
+        items:[
+            listView
+        ]
+    });
 
-				//，s数据是填充表格的数据，headarray是表头, modelcss是model的css样式
-				function SetArrearsTable(s,headarray,model,modelcss)
-				{
-					var bodyTpl = "";
-					var headmodel = "";
-					var money = 0;
-					
-					var t= 1;
-					if (s) {
-						for (var i in s) {
-							var source = ReplaceArray(s[i]);
-							bodyTpl += '<tr style="height:20px">';
-								for (var n in model) {
-									if (model[n] == "#") {
-										bodyTpl +='<td style="'+modelcss[n]+'">'+t+'</td>';
-									} else if(model[n] == "Manager"){
+    var submitForm = new Ext.FormPanel({
+        labelWidth: 85,
+        defaults:{
+            border: false
+        },
+        url:'/ams/manager/GroupBuildAjax',
+        title: '班组创建',
+        style: 'margin-top:6px;margin-left:20px',
+        labelAlign: 'right',
+        layout: 'form',
+        items: [{
+            fieldLabel: '班组名',
+            xtype: 'textfield',
+            name:'Team',
+            allowBlank:false,
+            width: 151
+        },new QuietCombox({
+            fieldLabel: '职责',
+            displayField:'Text',
+            hiddenName:'Duty',
+            valueField:'Duty',
+            fields:['Text','Duty'],
+            data   : [['抄表', '1'],['收费', '2']],
+            width: 151
+        }) ,{
+            style:'margin-left:90px',
+            width:100,
+            xtype:'button',
+            text:'收费',
+            handler:function(){
+                if (!submitForm.getForm().isValid()){
+                    Ext.MessageBox.alert('提示','请正确填写表单');
+                    return;
+                }
+                submitForm.getForm().submit({
+                    success:function(v,action){
+                        var re = Ext.decode(action.response.responseText);
+                        if (re.success) {
+                            Ext.MessageBox.alert('提示','创建成功');
+                            listView.store.reload();
+                        }
+                    },
+                    failure:function(v,action) {
+                            Ext.MessageBox.alert('提示','创建失败');
+                    }
+                })
+            }
+        }]
+    })
 
-										bodyTpl +='<td  style="'+modelcss[n]+'"><button  name="'+source.ID+'" value="'+source.ID+'" class="btn btn-success" style="background-color:#009966;height:20px;padding:1px 12px 2px 12px;">删除</button></td>';
-									} else if(model[n] == "Name"){
-										bodyTpl += '<td  style="'+modelcss[n]+'">'+source[model[n]]+'</td>';
-									} else {
-										bodyTpl += '<td style="'+modelcss[n]+'">'+source[model[n]]+'</td>';
-									}
-									
-								}
-							t++;
-					        bodyTpl +='</tr>';
+    var submmitTab = new Ext.TabPanel({
+        labelWidth: 85,
+        activeTab: 0,
+        height:115,
+        plain:true,
+        style: 'margin-top:15px',
+        defaults:{autoScroll: true},
+        items:[
+            submitForm
+        ]
+    });
+    var formpanels = new Ext.Panel({
+        region: 'center',
+        fileUpload: true,
+        autoScroll: true,
+        bodyStyle: "padding:20px;",
+        items: [
+            infoPanel,
+            submmitTab
+        ]
+    });
 
-						}
-					}
-					
 
-
-					var headTpl = '<div><table id="info" >'+
-					    		'<thead>'+
-						    	'<tr >';
-
-			    	for (var i in headarray) {
-			    		headmodel +='<th >'+headarray[i]+'</th>';
-			    	}
-					            
-
-				    
-				    var footTpl = '</tr></tbody></table></div>';
-				    var tpl = headTpl+headmodel+'</tr></thead><tbody>'+bodyTpl+footTpl;
-				    $("#Arrears div").remove();
-
-				    $("#Arrears").append(tpl);
-
-					$("#Arrears table tr:odd").addClass("InfoTr");
-					$("#Entry").css("display","block");
-
-				}
-	})
+    new Ext.Viewport(
+    {
+        layout: 'border',
+        items: [
+            formpanels
+        ]
+    });
+})
 </script>
-<br />
-<div class="line ClientInfo" >班组管理</div>
-<div id="Arrears" class="TableCss">
-	<div></div>
-</div>
-<script type="text/javascript">
-  $(document).ready(function(){
-    var G = new AjaxFun();
-      var url = "/ams/manager/GroupBuildAjax";
-    
-
-      $("#SubmitButtun").click(function(){
-      		
-      		if ($("#Team").val() == "") {
-                var TeamTpl = "班组名没有填写";
-                TeamTpl = '<span style="color:red">'+TeamTpl+'</span>';
-                $("#team span").remove();
-                $("#team").append(TeamTpl);
-                return;
-           }
-      		
-      		var data = $("form").serialize();
-          	G.GetAjax('post',url,data, reload);
-      })
-  })
-</script>
-<br />
-
-<div class="line ClientInfo" >班组创建</div>
-<div style="border:1px solid #009966;height:135px">
-	<br />
-	<form class="form-horizontal" style="margin-left:-90px">
-	  <div class="control-group">
-	    <label class="control-label" for="Team">班组名：</label>
-	    <div id="team" class="controls">
-	      <input name="Team" type="text" style="width:203px;height:23px" id="Team" placeholder="班组名">
-	      <span></span>
-	    </div>
-	  </div>
-	  <div class="control-group">
-	    
-	        <label class="control-label" for="inputPassword">职&nbsp;&nbsp;责：</label>
-	          <div class="controls">
-	              <select name="Duty" style="width:205px;height:25px">
-	                  <option value="1">抄表</option>
-	                  <option value="2">收费</option>
-	              </select>
-	          </div>
-
-	  </div>
-	  <div class="control-group">
-	        <div class="controls">
-	          <button id="SubmitButtun" type="button" class="btn btn-success" style="background-color:#009966">创建班组</button>
-	        </div>
-	  </div>
-	</form>
-<br/><br/><br/><br/>

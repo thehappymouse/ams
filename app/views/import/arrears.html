@@ -1,69 +1,77 @@
 <script>
-$(document).ready(function(){
-    var fileupload = new ApcFile();
-    fileupload.url ="/ams/import/progress";
-    fileupload.progress_key = $("#progress_key").val();
+    Ext.onReady(function(){
 
-    $("iframe").load(function(v){
-        
-        var innerhtml = window.frames["frm_dealer"].document.documentElement.innerText;
-        if (innerhtml) 
+        var infoSearch = new Ext.FormPanel({
+            title: '每月欠费数据导入',
+            defaults:{
+                border: false,
+                allowBlank: false,
+                msgTarget: 'side'
+            },
+            fileUpload: true,
+            labelWidth: 125,
+            labelAlign: 'right',
+            style: 'padding-top:10px',
+            url:'/ams/import/progress',
+            layout:'column',
+            items: [{
+                columnWidth:.6,
+                layout: 'form',
+                items: [
+                    {
+                        xtype:'textfield',
+                        allowBlank:false,
+                        fieldLabel:'欠费数据',
+                        inputType:'file',
+                        name:'fileName'
+                    },{
+                        xtype: 'compositefield',
+                        items:[{
+                            xtype:'displayfield',
+                            fieldLabel:'欠费数据文件模板下载'
+                        },{
+                            html:'<img style="cursor:pointer" src="../images/icons/excel.png"/>'
+                        }]
+                    },{
+                        xtype: 'compositefield',
+                        items:[{xtype:'hidden'},{
+                            width:100,
+                            xtype:'button',
+                            text:'导入',
+                            handler:function(){
+                                infoSearch.getForm().submit({
+
+                                })
+                            }
+                        }]
+                    }]
+            }]
+        });
+
+        var searchTab = new Ext.TabPanel({
+            activeTab: 0,
+            height:115,
+            plain:true,
+            defaults:{autoScroll: true},
+            items:[
+                infoSearch
+            ]
+        });
+        var formpanels = new Ext.Panel({
+            region: 'center',
+            fileUpload: true,
+            autoScroll: true,
+            bodyStyle: "padding:20px;",
+            items: [
+                searchTab
+            ]
+        });
+        new Ext.Viewport(
         {
-            var jsonData = eval('('+innerhtml+')');
-            popupDiv('pop-div',jsonData.msg,'',true);
-        }
+            layout: 'border',
+            items: [
+                formpanels
+            ]
+        });
     })
-
-            } else {
-                $("button:eq(0)").removeAttr("disabled");
-            }
-        } else {
-          
-                popupDiv('pop-div',"你没有上传文件");
-        }
-        
-    })
-
-    
- 
-    start =function ()
-    {
-       fileupload.startProgress()
-    }
-})
-
-
 </script>
-<br />
-<iframe name="frm_dealer" style="display:none"></iframe>
-<form action="ArrearsUpload" method="post" enctype="multipart/form-data" target="frm_dealer">
-    <div class="line ClientInfo" style="font-size:15px;width:130px">每月欠费数据导入</div>
-    <div style="border:1px solid #009966;height:130px">
-        <div class=" mt_20" style="width:100%;height:25px;margin-top:15px">
-            <div class=" InputStyle" style="margin-left:10px;float:left;*margin-top:10px;">欠费数据：</div>
-            <div class=" TreeInput" style="margin-left:5px;float:left;margin-top:-5px">
-                    <input type="hidden" name="APC_UPLOAD_PROGRESS"    id="progress_key"  value="<?php echo uniqid(mt_srand()); ?>" />  
-                    <input name="File1" type="file" style="height:25px;line-height: 25px; vertical-align:middle;width：115px ;margin-top:2px;*margin-top:12px"  />
-
-            </div>
-        </div>
-        <div class=" mt_20" style="width:100%;height:20px;*margin-top:20px">
-
-            <div class=" " style="margin-left:10px;float:left">欠费数据文件模板下载：</div>
-            <div style="margin-left:5px;float:left;cursor:pointer">
-              <a style="color:#333" href="/ams/public/download/模板-欠费明细.xls"><img  src="/ams/public/images/Excel.png" style="height:16px;width:16px"/></a>
-            </div>
-        </div>
-        <br/>
-        <button style="margin-left:100px;background-color:#009966;*margin-top:-8px"  disabled type="submit" onclick="window.start();return true;" class="btn LeftButton  btn-success">提交</button>
-    </div>
-</form>
-<div id="progressouter" style=  
-   "width: 940px; height: 20px; border: 1px solid #009966; display:none;">  
-   <div id="progressinner" style=  
-       "position: relative; height: 20px; background-color: #009966; width: 0%; ">  
-   </div>  
-</div>  
-<br />  
-<div id='showNum'></div><br>  
-<!--<div id='showInfo'></div><br>--> 

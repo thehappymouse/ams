@@ -1,197 +1,316 @@
-<script type="text/javascript">
-$(document).ready(function(){
-	var G = new AjaxFun();
-	$("#time").val(CurrentTime);
-	var DrownBox = new DropDownBox();//获取三级下拉框
-
-	var excel = new ExportExcel();
-	excel.url = "/ams/export/AccountCheck";
-	excel.exportTo();
-
-	DrownBox.select = {"Team":"#team", "Name":"#name"};
-
-	var Getdata = {ID:"1",Type:"2"};
-	var url = "/ams/Info/TeamList";
-	G.GetAjax('get', url, Getdata, DrownBox.SetAllSelect, true);
-
-	$("#team").on("change","select:eq(0)",function(v){
-		var id = $("select:eq(0)").val();
-		var data = {ID:id,Type:"Name"};
-		var url = "/ams/Info/UserList";
-		G.GetAjax('get', url, data, DrownBox.SetAllSelect, true);
-
-	})
-
-	$("button:eq(0)").click(function(){
-		data = $("form:eq(0)").serialize();
-		excel.Todata = data;
-		var url = "/ams/CountSearch/ReconciliationInquiry";
-		G.GetAjax('post', url, data, SetTable,true);
-	})
+<script>
+Ext.onReady(function(){
+    /*二个动态框*/
+    var teamCombox = new SettCombbox({
+        url:'/ams/Info/TeamList?ID=1&Type=2&All=1',
+        fieldLabel: '营业班组',
+        anchor:'95%',
+        id:'team',
+        hiddenName:'Team',
+        autoLoad:true
+    });
+    var peopleCombox = new SettCombbox({
+        url:'/ams/Info/UserList',
+        fieldLabel: '营业员',
+        anchor:'95%',
+        hiddenName:'Name',
+        id:'people'
+    });
 
 
-	//添加表格
-	function SetTable(value) 
-	{
-		var v =  ReplaceArray(value.charges,true);
-		if (v.length == 0){
-			$("#Arrears div").remove();
-			$("#total div").remove();
-			$("#tip").css("display","block");
-			return;
-		}
-	
-		var title = '收费明细';
-		var array = Array("收费时间", "用户编号", "用户名称", "电费年月", "电费金额", "收费人", "交费登记电话", "登记租房户信息", "签订费控");
-		var model = Array("Time", "CustomerNumber", "CustomerName", "YearMonth", "Money", "UserName", "LandlordPhone", "IsRent", "IsControl");
-		var modelcss = Array("text-align:center;width:140px", "text-align:center;width:80px", "text-align:center;width:70px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis",  "text-align:center;width:60px;", "text-align:center;width:60px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis", "text-align:center;width:60px", "text-align:center;width:95px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis", "text-align:center;width:105px", "text-align:center;width:60px");
-		SetArrearsTable('Arrears',v,array,title,model,false,modelcss);
+    //监听store加载
+    function comboxLoad(aCombox, bCombox, url)
+    {
+        aCombox.store.on('load',function(){
+            bCombox.store.load({
+                url: url,
+                params: {
+                    ID: aCombox.store.getAt(0).data.ID
+                }
+            });
+        });
+    }
+    //监听combox选择事件
+    function comSelect(aCombox, bCombox, url)
+    {
+        aCombox.on("select",function(combo){
+            bCombox.reset();
+            bCombox.store.load({
+                url: url,
+                params: {
+                    ID: combo.value
+                }
+            });
+        })
+    }
+    comboxLoad(teamCombox, peopleCombox, "/ams/Info/UserList");
+    comSelect(teamCombox, peopleCombox, "/ams/Info/SegmentList");
+    var infoSearch = new Ext.FormPanel({
+        title: '查询条件',
+        defaults:{
+            border: false
+        },
+        labelAlign: 'right',
+        style: 'padding-top:10px',
+        url:'/ams/Charges/SearchFee',
+        layout:'column',
+        items: [{
+            columnWidth:.25,
+            layout: 'form',
+            defaults:{
+                xtype: 'textfield'
+            },
+            items: [
+                teamCombox
+                ,{
+                    xtype: 'compositefield',
+                    fieldLabel: '收费时间',
+                    defaults:{
+                        xtype: 'datefield'
+                    },
+                    items:[
+                        {
+                            xtype:'datetimefield',
+                            format: 'Y-m-d H:i',
+                            value:new Date(new Date()-7*24*60*60*1000),
+                            name:'FromData',
+                            width: 82
+                        },{
+                            xtype: 'displayfield',
+                            value: '至: '
+                        },{
+                            xtype:'datetimefield',
+                            format: 'Y-m-d H:i',
+                            name:'ToData',
+                            value:new Date().format('Y-m-d H:i:s'),
+                            width: 82
+                        }]
+                }]
+        },{
+            columnWidth:.25,
+            layout: 'form',
+            defaults:{
+                xtype: 'textfield'
+            },
+            items: [
+                peopleCombox
+                ,{
+                    xtype: 'compositefield',
+                    items:[
+                        {
+                            xtype: 'hidden'
+                        },{
+                            width:100,
+                            xtype:'button',
+                            text:'查询',
+                            handler:function(){
+                                //var number = Ext.getCmp('searchNumber').getValue();
+                                var data = infoSearch.getForm().getValues();
+                                listView.store.load({
+                                    params : data,
+                                    add: false
+                                });
+                                totalView.store.load({
+                                    params : data,
+                                    add: false
+                                });
+                            }
+                        }]
+                }]
+        }]
+    });
+    var searchPanel = new Ext.TabPanel({
+        labelWidth: 85,
+        activeTab: 0,
+        height:100,
+        plain:true,
+        defaults:{autoScroll: true},
+        items:[
+            infoSearch
+        ]
+    });
 
-		var t =  ReplaceArray(value.Total,true);
-		var title = '汇总信息';
-		var array = Array("电费年份", "管理班组", "收费笔数", "收费金额", "签订费控数", "登记电话");
-		var model = Array("Year", "Team", "ChargeCount", "Money", "ControlCount", "Phone");
-		var modelcss = Array("text-align:center;width:155px", "text-align:center;width:155px", "text-align:center;width:155px",  "text-align:center;width:155px;", "text-align:center;width:155px", "text-align:center;width:155px", "text-align:center;width:155px");
-		SetArrearsTable('total',t,array,title,model,true,modelcss);
-	}
+    var store = new Ext.data.JsonStore(
+            {
+                id: 'tvliststore',
+                url: '/ams/CountSearch/ReconciliationInquiry',
+                root: 'data',
+                fields: chargesMoneyFields
+            });
 
-	//欠费信息表格
-	//代表 select是选择器，number用户编号，s数据是填充表格的数据，headarray是表头,title是表格上的标题
-	function SetArrearsTable(select,s,headarray,title,model,th,modelcss)
-	{
-		var bodyTpl = "";
-		var headmodel = "";
-		var tr = "";
-		var money = 0;
-		var text = "";
-		var d = 1;
-		if (s) {
-			for (var i in s) {
-				var number = s[i].CustomerNumber;
-				bodyTpl += '<tr style="height:20px">';
-					if (select == "Arrears") {
-						bodyTpl += '<td style="text-align:center">'+d+'</td>';
-					}
-					
-					for (var n in model) {
-						if (model[n] == "CutCount" || model[n] == "PressCount" || model[n] == "CustomerNumber") {
-							bodyTpl +='<td style="text-align: center"><span id="'+model[n]+'" title="'+s[i].ID+'/'+number+'/'+s[i].YearMonth+'" style="text-decoration:underline;cursor:pointer;'+modelcss[n]+'">'+s[i][model[n]]+'</span></td>';
-						} else  {
-							if (model[n] == "IsRent" || model[n] == "IsControl") {
-								if (s[i][model[n]] == "0") {
-									text = "否";
-								} else if(s[i][model[n]] == 1) {
-									text = "是";
-								} else if(s[i][model[n]] == 2){
-									text = "全部";
-								}
-							
-							} else if (model[n] == "CustomerName" || model[n] == "UserName"){
-								text = '<div title="'+text+'" style="'+modelcss[n]+'">'+s[i][model[n]]+'</div>';
-							} else {
-								text = s[i][model[n]];
-							}
-							bodyTpl += '<td style="'+modelcss[n]+'"  >'+text+'</td>';
-						}
-					}
-		        bodyTpl +='</tr>';
-		        d++;
-			}
-		}
-		
+    var listView = new Ext.grid.GridPanel(
+            {
+                store: store,
+                multiSelect: true,
+                title: '收费明细',
+                stripeRows: true,
+                region: 'center',
+                autoHeight:true,
+                emptyText: '没有节目',
+                reserveScrollOffset: true,
+                viewConfig: {forceFit:true},
+                columns: [
+                    {
+                        header: '收费时间',
+                        sortable: true,
+                        align:"center",
+                        dataIndex: 'Time'
+                    }, {
+                        header: '用户编号',
+                        dataIndex: 'CustomerNumber',
+                        align:"center",
+                        sortable: true,
+                        renderer:function(v){
+                            return "<a href='#'>"+v+"</a>";
+                        }
+                    }, {
+                        header: '用户名称',
+                        sortable: true,
+                        align:"center",
+                        dataIndex: 'CustomerName'
+                    }, {
+                        header: '电费年月',
+                        sortable: true,
+                        align:"center",
+                        dataIndex: 'YearMonth'
+                    }, {
+                        header: '电费金额',
+                        sortable: true,
+                        align:"center",
+                        dataIndex: 'Money'
+                    },{
+                        header: '收费人',
+                        sortable: true,
+                        align:"center",
+                        dataIndex: 'UserName'
+                    },{
+                        header: '交费登记电话',
+                        sortable: true,
+                        align:"center",
+                        dataIndex: 'LandlordPhone'
+                    },{
+                        header: '登记租房户信息',
+                        sortable: true,
+                        align:"center",
+                        dataIndex: 'IsRent'
+                    },{
+                        header: '签订费控',
+                        sortable: true,
+                        align:"center",
+                        dataIndex: 'IsControl',
+                        renderer:function(v) {
+                            if (v == 1) {
+                                return '是';
+                            } else {
+                                return '否';
+                            }
+                        }
+                    }],
+                bbar: [{
+                    text: 'excel',
+                    ref:'../canCel',
+                    iconCls: 'excel'
+                }]
+            });
 
+    listView.on('cellclick', function (grid, rowIndex, columnIndex, e) {
+        var record = grid.getStore().getAt(rowIndex);
+        var columnName = grid.getColumnModel().getDataIndex(columnIndex);
+        if( columnName == 'CustomerNumber'){
+            lookInfo(record.data.CustomerNumber,0)
+        }
+    })
+    var totalStore = new Ext.data.JsonStore(
+            {
+                id: 'tvliststore',
+                url: '/ams/CountSearch/ReconciliationInquiryList',
+                root: 'data',
+                fields: chargesMoneyFields
+            });
 
-		var headTpl = '<div><div class="line ClientInfo" >'+title+'</div><table id="info" " >'+
-		    		'<thead>'+
-			    	'<tr style="height:20px">';
-    	if (select == "Arrears") {
-			headTpl +='<th style="width:60px">序号</th>';
-		}
-			    	
+    var totalView = new Ext.grid.GridPanel(
+            {
+                store: totalStore,
+                multiSelect: true,
+                title: '汇总信息',
+                stripeRows: true,
+                region: 'center',
+                autoHeight:true,
+                emptyText: '没有节目',
+                reserveScrollOffset: true,
+                viewConfig: {forceFit:true},
+                columns: [
+                    {
+                        header: '电费年份',
+                        sortable: true,
+                        align:"center",
+                        dataIndex: 'Year'
+                    }, {
+                        header: '管理班组',
+                        dataIndex: 'Team',
+                        align:"center",
+                        sortable: true
+                    }, {
+                        header: '收费笔数',
+                        sortable: true,
+                        align:"center",
+                        dataIndex: 'ChargeCount'
+                    }, {
+                        header: '收费金额',
+                        sortable: true,
+                        align:"center",
+                        dataIndex: 'Money'
+                    }, {
+                        header: '签订费控数',
+                        sortable: true,
+                        align:"center",
+                        dataIndex: 'ControlCount'
+                    },{
+                        header: '登记电话',
+                        sortable: true,
+                        align:"center",
+                        dataIndex: 'Phone'
+                    }]
+            });
+    var moneyTab = new Ext.TabPanel({
+        labelWidth: 85,
+        activeTab: 0,
+        plain:true,
+        style: 'margin-top:15px',
+        defaults:{autoScroll: true},
+        items:[
+            listView
+        ]
+    });
 
-    	for (var i in headarray) {
-    		headmodel +='<th style="'+modelcss[i]+';text-align:center">'+headarray[i]+'</th>';
-    	}
+    var totalTab = new Ext.TabPanel({
+        labelWidth: 85,
+        activeTab: 0,
+        plain:true,
+        style: 'margin-top:15px',
+        defaults:{autoScroll: true},
+        items:[
+            totalView
+        ]
+    });
 
-		if (!th){
-			 tr = '<tr>'+
-			        '<td colspan="10" style="text-align:left" ><form name="excelform" id="excelform" action="/ams/export/AccountCheck" method="post" target="put_excel" >&nbsp;&nbsp;&nbsp;&nbsp;导出文件：&nbsp;&nbsp;<span  id="excel" style="cursor:pointer"><img  src="/ams/public/images/Excel.png" style="height:25px;width:25px"/></span>&nbsp;&nbsp;</form></td>'+
-			     '</tr>';
-		}   
-    	
-	    var footTpl = tr + '</tr></thead><tbody></tbody></table></div>';
-
-	    var tpl = headTpl+headmodel+bodyTpl+footTpl;
-	    
-	    var selected = "#"+select;
-	    $(selected+" div").remove();
-
-	    $(selected).append(tpl);
-	  
-		$(selected+" table tr:even").addClass("InfoTr");
-		$("#tip").css("display","none");
-		$(selected+" table tr:eq(0)").removeClass("InfoTr");
-	}
-
-	
-	/*$("#Arrears").on("click","#excel",function(){
-		var url = "/ams/export/AccountCheck?"+data;
-		document.forms["excelform"].action = url;
-		document.forms["excelform"].submit(); 
-	})*/
+    var allPanel = new Ext.Panel({
+        region: 'center',
+        fileUpload: true,
+        autoScroll: true,
+        bodyStyle: "padding:20px;",
+        items: [
+            searchPanel,
+            moneyTab,
+            totalTab
+        ]
+    });
+    new Ext.Viewport(
+    {
+        layout: 'border',
+        items: [
+            allPanel
+        ]
+    });
 })
-
-
 </script>
-
-
-<link rel="stylesheet" href="/ams/css/jquery-ui.css">
-<script src="/ams/js/jquery-ui.js"></script>
-<script src="/ams/js/jquery-ui-timepicker-addon.js"></script>
-<link rel="stylesheet" type="text/css" href="/ams/css/jquery-ui-timepicker-addon.css">
-<script src="/ams/js/jquery-ui-date.js"></script>
-<div>
-	<br />
-	<div   class="line ClientInfo" >查询条件</div>
-	<div style="border:1px solid #009966;height:130px;*height:140px">
-
-		<div style="margin-left:12px;margin-top:15px">
-			<form>
-				<div>
-
-						<span >营<div class="full"></div>业<div class="full"></div>班<div class="full"></div>组：</span>
-						<span id="team">
-							
-						</span>
-						&nbsp;&nbsp;&nbsp;
-						<span >营业员：</span>
-						<span id="name">
-
-						</span>
-				</div>
-
-                <div style="margin-top:15px;*margin-left:-2px">
-                    <span >收费时间至：</span>
-                    <input  name="FromData" style="width:120px;" type="text" id="time" />
-                    &nbsp;&nbsp;<div style="display:inline;margin-left:16px;margin-left:10px\0;*margin-left:7px"></div><span >至</span>&nbsp;&nbsp;
-                    <input  name="ToData" style="width:120px;margin-left:-1px;margin-left:5px\0;*margin-left:8px" type="text" id="Totime" />
-                </div>
-			</form>
-			<button  type="button" class="btn btn-success LeftButton" style="background-color:#009966;margin-top:-10px" >查询</button>
-		</div>
-	</div>
-
-</div>
-<div id="tip" style="color:red;margin-left:12px;display:none;margin-top:4px">
-				当前查询没有数据
-	</div>
-<br />
-<div id="Arrears" class="TableCss">
-	<div></div>
-</div>
-<iframe name="put_excel" style="display:none"></iframe>
-<style> .TableCss table td{text-align:center;}</style>
-<br />
-<div id="total" class="TableCss">
-		<div></div>
-</div><br /><br /><br /><br />

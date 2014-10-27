@@ -1,239 +1,272 @@
-<script type="text/javascript">
-$(document).ready(function(){
-	var G = new AjaxFun();
-
-	var clickpage = new ClickPage(G,SetTable);//分页
-    var groupData = new Grouping(G,SetTable);//排序
-	var excel = new ExportExcel();
-	excel.url = "/ams/export/CountCharges";
-	excel.exportTo();
-
-	var DrownBox = new DropDownBox()//获取三级下拉框
-	DrownBox.select = {"Team":"#team", "Name":"#name"};
-
-	var Getdata = {ID:"1",Type:"1"};
-	var url = "/ams/Info/TeamList";
-	G.GetAjax('get', url, Getdata, DrownBox.SetAllSelect, true);
-
-	$("#team").on("change","select:eq(0)",function(v){
-
-		var id = $("select:eq(0)").val();
-		var data = {ID:id,Type:"Name"};
-		var url = "/ams/Info/UserList";
-		G.GetAjax('get', url, data, DrownBox.SetAllSelect, true);
-
-	})
-
-	SearchUrl = "/ams/CountSearch/charges";
-	$("button:eq(0)").click(function(){
-		data = $("form:eq(0)").serialize();
-		excel.Todata = data;
-		clickpage.Data = data;
-        groupData.Data = data;//排序
-		var SearchData = data+"&Page=1&PageSize="+PageSize;
-		G.GetAjax('get', SearchUrl, SearchData, SetTable,true);
-        groupData.init();
-	})
-
-	
-	clickpage.SearchUrl = SearchUrl;
-	Page = clickpage.ReturnPage();
-	clickpage.PageClick();
-    groupData.Url = SearchUrl;//排序
-    groupData.clickFun();//排序
-
-	$("body").keydown(function() {
-		var msg;
-				if (event.keyCode == "13") {
-					if ($("[name=Num]").focus()) {
-						Page = $("[name=Num]").val();
-
-						if (Page>PageNumber || Page<1) {
-							msg = "总共只有"+PageNumber+"页。没有第"+Page+"页！";
-							popupDiv('pop-div',msg);
-							Page =1;
-						}
-						var Searchdata = data+"&Page="+Page+"&PageSize="+PageSize;
-						clickpage.Page = Page;
-						G.GetAjax('post',SearchUrl,Searchdata,SetTable);
-					}
-				}
-  	})
+<script>
+Ext.onReady(function(){
+/*二个动态框*/
+var teamCombox = new SettCombbox({
+    url:'/ams/Info/TeamList?ID=1&Type=2&All=1',
+    fieldLabel: '营业班组',
+    anchor:'95%',
+    id:'team',
+    hiddenName:'Team',
+    autoLoad:true
+});
+var peopleCombox = new SettCombbox({
+    url:'/ams/Info/UserList',
+    fieldLabel: '营业员',
+    anchor:'95%',
+    hiddenName:'Name',
+    id:'people'
+});
 
 
-	//添加表格
-	function SetTable(value) 
-	{
-		if (value.Data.length == 0){
-			$("#info div").remove();
-			$("#Arrears div").remove();
-			$("#Entry").css("display","none");
-			$("#tip").css("display","block");
-			return ;
-		}
-		Page = clickpage.ReturnPage();
-		var v =  ReplaceArray(value.Data,true);
-		
-		var title = '汇总信息';
-		var array = Array("抄表段编号", "用户编号", "用户名称", "用电地址", "电费年月", "电费金额", "收费时间", "收费人", "交费电话", "租房户信息");
-		var model = Array("Segment", "CustomerNumber", "Name", "Address", "YearMonth", "Money", "Time", "UserName", "LandlordPhone", "IsRent");
-		var modelcss = Array("text-align:center;width:100px", "text-align:center;width:100px", "text-align:center;width:70px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis",  "text-align:left;width:130px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis", "text-align:center;width:70px", "text-align:center;width:70px", "text-align:center;width:85px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis", "text-align:center;width:60px", "text-align:center;width:70px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis","text-align:center;width:90px");
-		var total = value.TotalData.Count;
-		var Money = value.TotalData.Money;
-		SetArrearsTable('Arrears',v,array,title,model,false,modelcss,Money,total);
-	}
-
-	//欠费信息表格
-	//代表 select是选择器，number用户编号，s数据是填充表格的数据，headarray是表头,title是表格上的标题
-	function SetArrearsTable(select,s,headarray,title,model,th,modelcss,Money,total)
-	{	
-		 PageNumber = Math.ceil(total/PageSize);
-		var s =  ReplaceArray(s);
-		var bodyTpl = "";
-		var headmodel = "";
-		var tr = "";
-		var text = "";
-		var d = 1;
-		var PTpl;
-		if (s) {
-			for (var i in s) {
-				var number = s[i].CustomerNumber;
-				bodyTpl += '<tr style="height:20px">';
-					if (select == "Arrears") {
-						bodyTpl += '<td style="text-align:center">'+d+'</td>';
-					}
-					
-					for (var n in model) {
-						if (model[n] == "CutCount" || model[n] == "PressCount" || model[n] == "CustomerNumber") {
-							bodyTpl +='<td style="text-align: center"><span id="'+model[n]+'" title="'+s[i].ID+'/'+number+'/'+s[i].YearMonth+'" style="text-decoration:underline;cursor:pointer;'+modelcss[n]+'">'+s[i][model[n]]+'</span></td>';
-						} else  {
-							if (model[n] == "IsRent" || model[n] == "IsControl") {
-								if (s[i][model[n]] == 0) {
-									text = "否";
-								} else if(s[i][model[n]] == 1) {
-									text = "是";
-								} else if(s[i][model[n]] == 2){
-									text = "全部";
-								} else {
-									text = "";
-								}
-							} else {
-								text = s[i][model[n]]
-							}
-							bodyTpl += '<td  style="'+modelcss[n]+'"><div title="'+text+'" style="'+modelcss[n]+'">'+text+'</div></td>';
-						}
-					}
-				d++;
-		        bodyTpl +='</tr>';
-			}
-		}
-		
-
-		if (PageNumber == 1) {
-			PTpl="";
-		} else {
-			if ( Page == 1 ) {
-				PTpl = "<span id='next' style='cursor:pointer'>下一页</span>&nbsp;&nbsp;<span id='end' style='cursor:pointer'>末页</span>";
-			} else if (Page < PageNumber && Page!= 1 ) {
-				PTpl = "<span id='start' style='cursor:pointer'>首页</span>&nbsp;&nbsp;<span id='prev' style='cursor:pointer'>上一页</span>&nbsp;&nbsp;<span id='next' style='cursor:pointer'>下一页</span>&nbsp;&nbsp;<span id='end' style='cursor:pointer'>末页</span>";
-			} else if (Page == PageNumber) {
-				PTpl = "<span id='start' style='cursor:pointer'>首页</span>&nbsp;&nbsp;<span id='prev' style='cursor:pointer'>上一页</span>";
-			} 
-		}
-
-		var headTpl = '<div><div class="line ClientInfo" >'+title+'</div><table id="info" >'+
-		    		'<thead>'+
-			    	'<tr >';
-    	if (select == "Arrears") {
-			headTpl +='<th style="width:60px">序号</th>';
-		}
-
-
-        var txt;
-        for (var i in headarray) {//排序
-            if (headarray[i]== '抄表段编号') {
-                txt ='<div id="segment" style="cursor: pointer">'+headarray[i]+'</div>';
-            } else if(headarray[i] == "用户编号") {
-                txt ='<div id="number" style="cursor: pointer">'+headarray[i]+'</div>';
-            } else{
-                txt = headarray[i];
+//监听store加载
+function comboxLoad(aCombox, bCombox, url)
+{
+    aCombox.store.on('load',function(){
+        bCombox.store.load({
+            url: url,
+            params: {
+                ID: aCombox.store.getAt(0).data.ID
             }
-            headmodel += '<th style="'+modelcss[i]+';text-align:center">'+txt+'</th>';
+        });
+    });
+}
+//监听combox选择事件
+function comSelect(aCombox, bCombox, url)
+{
+    aCombox.on("select",function(combo){
+        bCombox.reset();
+        bCombox.store.load({
+            url: url,
+            params: {
+                ID: combo.value
+            }
+        });
+    })
+}
+comboxLoad(teamCombox, peopleCombox, "/ams/Info/UserList");
+comSelect(teamCombox, peopleCombox, "/ams/Info/SegmentList");
+var infoSearch = new Ext.FormPanel({
+    title: '查询条件',
+    defaults:{
+        border: false
+    },
+    labelAlign: 'right',
+    style: 'padding-top:10px',
+    url:'/ams/CountSearch/charges',
+    layout:'column',
+    items: [{
+        columnWidth:.25,
+        layout: 'form',
+        defaults:{
+            xtype: 'textfield'
+        },
+        items: [
+            teamCombox
+            ,{
+                xtype: 'compositefield',
+                fieldLabel: '收费时间',
+                defaults:{
+                    xtype: 'datefield'
+                },
+                items:[
+                    {
+                        xtype:'datetimefield',
+                        format: 'Y-m-d H:i',
+                        name:'FromData',
+                        value:new Date(new Date()-7*24*60*60*1000),
+                        width: 82
+                    },{
+                        xtype: 'displayfield',
+                        value: '至: '
+                    },{
+                        xtype:'datetimefield',
+                        format: 'Y-m-d H:i',
+                        name:'ToData',
+                        value:new Date().format('Y-m-d H:i:s'),
+                        width: 82
+                    }]
+            }]
+    },{
+        columnWidth:.25,
+        layout: 'form',
+        defaults:{
+            xtype: 'textfield'
+        },
+        items: [
+            peopleCombox
+            ,{
+                xtype: 'compositefield',
+                items:[
+                    {
+                        xtype: 'hidden'
+                        //   style: 'text-align:right;width:40px;',
+                    },{
+                        width:100,
+                        xtype:'button',
+                        text:'查询',
+                        handler:function(){
+                            var data = infoSearch.getForm().getValues();
+                            Ext.apply(listView.store.baseParams, data);
+                            listView.store.load({
+                                params : data,
+                                add: false
+                            });
+                        }
+                    }]
+            }]
+    }]
+});
+var searchPanel = new Ext.TabPanel({
+    labelWidth: 85,
+    activeTab: 0,
+    height:100,
+    plain:true,
+    defaults:{autoScroll: true},
+    items:[
+        infoSearch
+    ]
+});
+
+var store = new Ext.data.JsonStore(
+        {
+            url: '/ams/CountSearch/charges',
+            root: 'data',
+            totalProperty: 'total',
+            baseParams: {
+                start: 0,
+                limit: 5
+            },
+            fields: summaryFields
+        });
+
+var listView = new Ext.grid.EditorGridPanel(
+        {
+            store: store,
+            multiSelect: true,
+            title: '汇总信息',
+            stripeRows: true,
+            autoHeight:true,
+            region: 'center',
+            emptyText: '没有数据',
+            viewConfig: {forceFit:true},
+            reserveScrollOffset: true,
+            columns: [
+                {
+                    id: 'name',
+                    header: '抄表段编号',
+                    align:"center",
+                    sortable: true,
+                    dataIndex: 'Segment'
+                }, {
+                    header: '用户编号',
+                    dataIndex: 'CustomerNumber',
+                    align:"center",
+                    sortable: true,
+                    renderer:function(v){
+                        return "<a href='#'>"+v+"</a>";
+                    }
+                }, {
+                    header: '用户名称',
+                    sortable: true,
+                    align:"center",
+                    width:130,
+                    dataIndex: 'Name'
+                }, {
+                    header: '用电地址',
+                    sortable: true,
+                    align:"center",
+                    width:200,
+                    dataIndex: 'Address'
+                }, {
+                    header: '电费年月',
+                    sortable: true,
+                    align:"center",
+                    dataIndex: 'YearMonth'
+                }, {
+                    header: '电费金额',
+                    sortable: true,
+                    align:"center",
+                    dataIndex: 'Money'
+                }, {
+                    header: '收费时间',
+                    sortable: true,
+                    align:"center",
+                    dataIndex: 'Time'
+                }, {
+                    header: '收费人',
+                    sortable: true,
+                    align:"center",
+                    dataIndex: 'UserName'
+                }, {
+                    header: '交费电话',
+                    sortable: true,
+                    align:"center",
+                    dataIndex: 'LandlordPhone'
+                }, {
+                    header: '租房户信息',
+                    sortable: true,
+                    align:"center",
+                    dataIndex: 'IsRent',
+                    renderer:function(v) {
+                        if (v == 1) {
+                            return '是';
+                        } else {
+                            return '否';
+                        }
+                    }
+                }],
+            bbar: new Ext.PagingToolbar({
+                pageSize: 5,
+                store: store,
+                displayMsg: "显示{0}条到{1}条记录，总共{2}条记录",
+                emptyMsg: "没有数据记录",
+                displayInfo: true,
+                items:[
+                    '-', {
+                        text: 'excel',
+                        iconCls: 'excel',
+                        handler: function(btn, pressed){
+                            alert('excel');
+                        }
+                    }]
+            })
+        });
+
+    listView.on('cellclick', function (grid, rowIndex, columnIndex, e) {
+        var record = grid.getStore().getAt(rowIndex);
+        var columnName = grid.getColumnModel().getDataIndex(columnIndex);
+        if( columnName == 'CustomerNumber'){
+            lookInfo(record.data.CustomerNumber,0)
         }
-		
-		var CurrentNum = s.length; 
+    })
+var listTab = new Ext.TabPanel({
+    labelWidth: 85,
+    activeTab: 0,
+    plain:true,
+    style: 'margin-top:15px',
+    defaults:{autoScroll: true},
+    items:[
+        listView
+    ]
+});
 
-		if (!th){
-			var pageTpl = '<tr >'+
-				    '<td id="PageNum" colspan="11" style="text-align:left">&nbsp;&nbsp;&nbsp;&nbsp;当前第<input name="Num" type="text" value="'+Page+'" style="padding:0px 8px; width:12px" />页，总共'+PageNumber+'页&nbsp;&nbsp;'+PTpl+
-				    '&nbsp;&nbsp;<span>本页'+CurrentNum+'条数据，总共'+total+'条数据</span></td></tr>';
-			 tr = pageTpl+'<tr>'+
-			        '<td colspan="11" style="text-align:left" ><form name="excelform" id="excelform" method="post" target="put_excel" >&nbsp;&nbsp;&nbsp;&nbsp;导出文件：&nbsp;&nbsp;<span  id="excel" style="cursor:pointer"><img  src="/ams/public/images/Excel.png" style="height:25px;width:25px"/></span>&nbsp;&nbsp;</form></td>'+
-			     '</tr>'+
-			     '<td colspan="11" style="text-align:left" >&nbsp;&nbsp;&nbsp;&nbsp;共计：'+total+'条，金额'+Money+'元。</td>'+
-				            '</tr>';
-		}   
-    	
-	    var footTpl = tr + '</tr></thead><tbody></tbody></table></div>';
 
-	    var tpl = headTpl+headmodel+bodyTpl+footTpl;
-
-	    var selected = "#"+select;
-	    $(selected+" div").remove();
-	    $(selected).append(tpl);
-		$(selected+" table tr:even").addClass("InfoTr");
-		$(selected+" table tr:eq(0)").removeClass("InfoTr");
-		$("#tip").css("display","none");
-	}
-	$("#time").val(AgoTime);
-	$("#Totime").val(CurrentTime);
+var allPanel = new Ext.Panel({
+    region: 'center',
+    fileUpload: true,
+    autoScroll: true,
+    bodyStyle: "padding:20px;",
+    items: [
+        searchPanel,
+        listTab
+    ]
+});
+new Ext.Viewport(
+{
+    layout: 'border',
+    items: [
+        allPanel
+    ]
+});
 })
-
-
 </script>
-
-
-<link rel="stylesheet" href="/ams/css/jquery-ui.css">
-<script src="/ams/js/jquery-ui.js"></script>
-<script src="/ams/js/jquery-ui-timepicker-addon.js"></script>
-<link rel="stylesheet" type="text/css" href="/ams/css/jquery-ui-timepicker-addon.css">
-<script src="/ams/js/jquery-ui-date.js"></script>
-<div>
-	<br />
-	<div   class="line ClientInfo" >查询条件</div>
-	<div style="border:1px solid #009966;height:130px;*height:140px">
-		<div style="margin-left:12px;margin-top:15px">
-			<form>
-			<div>
-					<span >管理班组：</span>
-					<span id="team">
-						
-					</span>
-					&nbsp;&nbsp;&nbsp;
-					<span id="name">
-					<span >抄表员：</span>
-						
-					</span>
-				
-			</div>
-			<div style="margin-top:15px;*margin-left:-2px">
-					<span >收费时间：</span>
-					<input  name="FromData" style="width:120px;" type="text" id="time" />
-					&nbsp;&nbsp;<div style="display:inline;margin-left:16px;margin-left:10px\0;*margin-left:7px"></div><span >至</span>&nbsp;&nbsp;
-					<input  name="ToData" style="width:120px;margin-left:-1px;margin-left:5px\0;*margin-left:8px" type="text" id="Totime" />
-			</div>
-			</form>	
-
-			<button  type="button" class="btn btn-success LeftButton" style="background-color:#009966;margin-left:75px;margin-top:-10px">查询</button>
-		</div>
-	</div>
-
-</div>
-<div id="tip" style="color:red;margin-left:12px;display:none;margin-top:4px">
-				当前查询没有数据
-</div>
-<br />
-<div id="Arrears" class="TableCss">
-	<div></div>
-</div>
-<br/><br/><br/><br/>

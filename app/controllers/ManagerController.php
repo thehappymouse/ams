@@ -27,11 +27,14 @@ class ManagerController extends ControllerBase
      */
     public function UserListAction()
     {
-        $users = User::find("1=1 ORDER BY TeamID, Role DESC, ID");
+
+        $start = $this->request->get("start");
+        $limit = $this->request->get("limit");
+        $users = User::find("Name!='admin' ORDER BY TeamID, Role DESC, ID limit $start, $limit");
         $data = array();
         foreach ($users as $u) {
 
-            if('admin' == $u->Name) continue;
+
 
             $row = $u->dump();
             if ($u->Team) {
@@ -44,6 +47,7 @@ class ManagerController extends ControllerBase
             $data[] = $row;
         }
 
+        $this->ajax->total = User::count("Name!='admin'");
         $this->ajax->flushData($data);
     }
 
@@ -53,11 +57,14 @@ class ManagerController extends ControllerBase
      */
     public function GroupListAction()
     {
-        $gs = Team::find();
+        $start = $this->request->get("start");
+        $limit = $this->request->get("limit");
+        $gs = Team::find("1=1 limit $start, $limit");
         $data = array();
         foreach ($gs as $g) {
             $data[] = $g->dump();
         }
+        $this->ajax->total = Team::count();
         $this->ajax->flushData($data);
     }
 
@@ -129,9 +136,8 @@ class ManagerController extends ControllerBase
         if ($r) {
             $this->ajax->flushOk("创建成功");
         } else {
-
             $ms = $u->getMessages();
-            $this->ajax->flushError($ms[0]);
+            $this->ajax->flushError($ms[0]->getMessage());
         }
     }
 
@@ -174,8 +180,8 @@ class ManagerController extends ControllerBase
             $u->Pass = sha1($pass);
         }
 
-        if(($g = $this->request->get("Group")) != null){
-            $u->TeamID = $this->request->get("Group");
+        if(($g = $this->request->get("TeamID")) != null){
+            $u->TeamID = $this->request->get("TeamID");
         }
 
         $this->ajax->logData->Data = $u->Name;

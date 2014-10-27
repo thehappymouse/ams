@@ -1,179 +1,193 @@
-		<style>
-			.fontColor{background:white;color:black;}
-		</style>
+<script>
+Ext.onReady(function(){
+        var infoSearch = new Ext.FormPanel({
+            title: '查询条件',
+            defaults:{
+                border: false
+            },
+            labelAlign: 'right',
+            style: 'margin-top:10px',
+            url:'/ams/Systemlog/list',
+            layout:'column',
+            items: [
+            {
+                columnWidth:.25,
+                layout: 'form',
+                defaults:{
+                    xtype: 'textfield'
+                },
+                items: [
+                    {
+                        xtype: 'compositefield',
+                        fieldLabel: '操作时间',
+                        defaults:{
+                            xtype: 'datefield'
+                        },
+                        items:[
+                            new Ext.form.DateField({
+                                name:'FromData',
+                                width:82,
+                                value:new Date(new Date()-7*24*60*60*1000),
+                                format: 'Y-m-d'
+                            }),{
+                                xtype: 'displayfield',
+                                value: '至: '
+                            },new Ext.form.DateField({
+                                name:'ToData',
+                                width:82,
+                                value:new Date().format('Y-m-d'),
+                                format: 'Y-m-d'
+                            })]
+                    }
+                ]
+            },{
+                columnWidth:.25,
+                layout: 'form',
+                items:[{
+                    width:100,
+                    xtype:'button',
+                    text:'查询',
+                    handler:function(){//ams/Systemlog/list
+                        var data = infoSearch.getForm().getValues();
+                        Ext.apply(listView.store.baseParams, infoSearch.getForm().getValues());
+                        listView.store.load({
+                            params : data,
+                            add: false
+                        });
+                    }
+                }]
+            }]
+        });
 
-		<script type="text/javascript" src="/ams/js/jquery.jqprint-0.3.js" ></script>
+        var searchTab = new Ext.TabPanel({
+            labelWidth: 85,
+            activeTab: 0,
+            height:70,
+            plain:true,
+            defaults:{autoScroll: true},
+            items:[
+                infoSearch
+            ]
+        });
 
-		<script type="text/javascript">
-		$(document).ready(function(){
-			var G = new AjaxFun();
-			var SearchUrl = "/ams/Systemlog/list";
-			var clickpage = new ClickPage(G,ShowTable);//分页
-			//SetTable('', '', headmodel, headarray);
-			
-			
-			$("button:eq(0)").click(function(){
-				data = $("form:eq(0)").serialize();
-				clickpage.Data = data;
-				var SearchData = data+"&Page=1&PageSize="+PageSize;
-				G.GetAjax('get',SearchUrl,SearchData,ShowTable);
-				
-			})
+    var store = new Ext.data.JsonStore(
+            {
+                url: '/ams/Systemlog/list',
+                root: 'data',
+                totalProperty: 'total',
+                baseParams: {
+                    start: 0,
+                    limit: 5
+                },
+                fields: ["ID","UserName","Action","Data","Result","IP","Time"]
+            });
 
-			$("body").keydown(function() {
-					var msg;
-          				if (event.keyCode == "13") {
-          					if ($("[name=Num]").focus()) {
-          						Page = $("[name=Num]").val();
+    var sm = new Ext.grid.CheckboxSelectionModel();
+    var listView = new Ext.grid.EditorGridPanel(
+            {
+                store: store,
+                multiSelect: true,
+                title: '操作日志',
+                stripeRows: true,
+                region: 'center',
+                sm: sm,
+                autoHeight:true,
+                emptyText: '没有数据',
+                viewConfig: {forceFit:true},
+                reserveScrollOffset: true,
+                columns: [
+                    sm,
+                    {
+                        id: 'name',
+                        header: '操作员',
+                        align:"center",
+                        sortable: true,
+                        dataIndex: 'UserName'
+                    }, {
+                        header: '动作',
+                        dataIndex: 'Action',
+                        align:"center",
+                        sortable: true
+                    }, {
+                        header: '明细',
+                        sortable: true,
+                        align:"center",
+                        dataIndex: 'Data',
+                        editor:new Ext.form.TextField({
+                            allowBlank:false
+                        })
+                    }, {
+                        header: '结果',
+                        sortable: true,
+                        align:"center",
+                        dataIndex: 'Result',
+                        editor:new Ext.form.TextField({
+                            allowBlank:false
+                        })
+                    }, {
+                        header: 'IP地址',
+                        sortable: true,
+                        align:"center",
+                        dataIndex: 'IP',
+                        editor:new Ext.form.TextField({
+                            allowBlank:false
+                        })
+                    }, {
+                        header: '操作时间',
+                        sortable: true,
+                        align:"center",
+                        dataIndex: 'Time'
+                    }],
+                bbar: new Ext.PagingToolbar({
+                    pageSize: 5,
+                    store: store,
+                    displayMsg: "显示{0}条到{1}条记录，总共{2}条记录",
+                    emptyMsg: "没有数据记录",
+                    displayInfo: true
+                })
+            });
+    listView.on("render",  function(p,e){
 
-          						if (Page>PageNumber || Page<1) {
-          							msg = "总共只有"+PageNumber+"页。没有第"+Page+"页！";
-									popupDiv('pop-div',msg);
-									Page =1;
-          						}
-								var SearchData = data+"&Page="+Page+"&PageSize="+PageSize;
-								clickpage.Page = Page;
-								G.GetAjax('get',SearchUrl,SearchData,ShowTable);
-          					}
-          					
-          				}
-              	})
-			clickpage.SearchUrl = SearchUrl;
-			Page = clickpage.ReturnPage();
-		 	clickpage.PageClick();
-
-			function ShowTable(value, total)//value, total
-			{
-				Page = clickpage.ReturnPage();
-				var title = '操作日志';
-				var headarray = Array( "操作员", "动作", "明细", "结果", "IP地址", "操作时间");
-				var model = Array(  "UserName", "Action", "Data", "Result", "IP", "Time");
-
-				var modelcss = Array("text-align:center;width:70px;", "text-align:center;width:96px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis", "text-align:left;width:300px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis",  "text-align:center;width:96px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis", "text-align:center;width:143px;", "text-align:center;width:163px;");
-	
-				var number = value[0]['CustomerNumber'];
-				
-				SetArrearsTable(number,value,headarray,title,model,modelcss,total);
-				//SetArrearsTable('', '',value,headarray,title,model,modelcss);
-			}
-			//代表number用户编号，s数据是填充表格的数据，headarray是表头,title是表格上的标题 modelcss是model的css样式
-			function SetArrearsTable(number,s,headarray,title,model,modelcss,total)
-			{
-				PageNumber = Math.ceil(total/PageSize);
-				var bodyTpl = "";
-				var headmodel = "";
-				var money = 0;
-				var PTpl;
-				var text;
-				$("#Arrears div").remove();
-				
-				if (s) {
-					for (var i in s) {
-						var number = parseInt(i)+1;
-						var source = ReplaceArray(s[i]);
-						bodyTpl += '<tr>'+
-							'<td  style="width:60px;height:20px;text-align:center">'+number+'</td>';
-							for (var n in model) {
-								if (model[n] == "CutCount" || model[n] == "PressCount" || model[n] == "CustomerNumber") {
-									bodyTpl +='<td id="'+model[n]+'" title="'+source.ID+'/'+number+'/'+source.YearMonth+'" style="text-decoration:underline;cursor:pointer;'+modelcss[n]+'">'+source[model[n]]+'</td>';
-								} else {
-									if (model[n] == "Data" || model[n] == "Result" || model[n] == "Action") {
-										text = '<div title="'+source[model[n]]+'" style="'+modelcss[n]+'">'+source[model[n]]+'</div>';
-									} else {
-										text = source[model[n]];
-									}
-									bodyTpl += '<td style="'+modelcss[n]+'">'+text+'</td>';
-								}
-								
-							}
-				        bodyTpl +='</tr>';
-				        if (source.IsClean == "未结清") {
-				        	money += parseInt(source.Money);
-				        }
-				        
-					}
-					$("[name=Money]").val(money);
-				}
-				
-
-
-				var headTpl = '<div><div class="line ClientInfo" >'+title+'</div><table id="info" class=" table-bordered" >'+
-				    		'<thead>'+
-					    	'<tr >'+
-					    	'<th >序号</th>';
-
-		    	for (var i in headarray) {
-		    		headmodel +='<th style="'+modelcss[i]+';text-align:center">'+headarray[i]+'</th>';
-		    	}
-				            
-		    	if (PageNumber == 1) {
-					PTpl="";
-				} else {
-					if ( Page == 1 ) {
-
-						PTpl = "<span id='next' style='cursor:pointer'>下一页</span>&nbsp;&nbsp;<span id='end' style='cursor:pointer'>末页</span>";
-					} else if (Page < PageNumber && Page!= 1 ) {
-						PTpl = "<span id='prev' style='cursor:pointer'>上一页</span>&nbsp;&nbsp;<span id='next' style='cursor:pointer'>下一页</span>&nbsp;&nbsp;<span id='end' style='cursor:pointer'>末页</span>";
-					} else if (Page == PageNumber) {
-						PTpl = "<span id='start' style='cursor:pointer'>首页</span>&nbsp;&nbsp;<span id='prev' style='cursor:pointer'>上一页</span>";
-					} 
-				}
-			 	var CurrentNum = s.length; 
-			    var pageTpl = '</tr><tr >'+
-			    ''+
-			    '<td id="PageNum" colspan="8" style="text-align:left">&nbsp;&nbsp;&nbsp;&nbsp;当前第<input name="Num" type="text" value="'+Page+'" style="width:12px;padding:0 8px"  />页，总共'+PageNumber+'页&nbsp;&nbsp;'+PTpl+
-			    '&nbsp;&nbsp;<span >本页'+CurrentNum+'条数据，总共'+total+'条数据</span></td></tr>';
-			    var footTpl = '</tbody></table></div>';
-			    var tpl = headTpl+headmodel+'</thead><tbody>'+bodyTpl+pageTpl+footTpl;
-
-			    
-
-			    $("#Arrears").append(tpl);
-		
-				$("#Arrears table tr:odd").addClass("InfoTr");
-		
-
-			}
-
-	
-		$("[name=FromData]").val(AgoTime);
-		$("[name=ToData]").val(CurrentTime);
-		
-	})
-	</script>
-	
-
-<link rel="stylesheet" href="/ams/css/jquery-ui.css">
-<script src="/ams/js/jquery-ui.js"></script>
-<script src="/ams/js/jquery-ui-timepicker-addon.js"></script>
-<link rel="stylesheet" type="text/css" href="/ams/css/jquery-ui-timepicker-addon.css">
-<script src="/ams/js/jquery-ui-date.js"></script>
+        /* p.canCel.setHandler(function(b, e){
+         if (p.getSelectionModel().getSelections().length == 0) {
+         Ext.Msg.alert('提示','请选择用户！');
+         return;
+         }
+         var SegmentNumber = p.getSelectionModel().getSelections()[0].data.CustomerNumber;
+         freeView.store.load({
+         params : {Number : SegmentNumber },
+         add: false
+         })
+         })*/
+    })
+    var infoPanel = new Ext.TabPanel({
+        labelWidth: 85,
+        activeTab: 0,
+        plain:true,
+        style: 'margin-top:15px',
+        defaults:{autoScroll: true},
+        items:[
+            listView
+        ]
+    });
+        var formpanels = new Ext.Panel({
+            region: 'center',
+            fileUpload: true,
+            autoScroll: true,
+            bodyStyle: "padding:20px;",
+            items: [
+                searchTab,
+                infoPanel
+            ]
+        });
 
 
-		<br />
-		    <div class="line ClientInfo" >查询条件</div>
-			<div style="border:1px solid #009966;height:90px">
-			    <form>
-
-					<div class=" mt_20" style="width:100%;height:20px;margin-top:15px">
-
-				    	<div class=" InputStyle" style="margin-left:10px;float:left;margin-top:3px">操作时间：</div>
-					    <div  style="margin-left:5px;">
-					        <input name="FromData" type="text" id="time" style="width:120px" />&nbsp;&nbsp;至&nbsp;&nbsp;<input name="ToData" type="text" id="Totime" style="width:120px"/>
-					    </div>
-					
-						<button type="button"   class="btn btn-success" style="background-color:#009966;margin-left:90px;margin-top:10px">查询</button>
-						
-					</div>
-				</form>
-			</div>
-		    <br />
-		    <div  id="Arrears" class="TableCss">
-		    	
-		    
-		    	<div>
-		    	
-				</div>
-
-		    </div>
-<br/><br/><br/><br/>
+        new Ext.Viewport(
+        {
+            layout: 'border',
+            items: [
+                formpanels
+            ]
+        });
+})
+</script>

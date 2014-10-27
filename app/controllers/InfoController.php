@@ -19,11 +19,9 @@ class InfoController extends ControllerBase
      */
     public function  TeamListAction()
     {
-
         if ($this->role == ROLE_MATER || $this->role == ROLE_MATER_LEAD) { //抄表员
             $teams = Team::find("ID=" . $this->loginUser["TeamID"]);
         } else {
-
             $type = $this->request->get("Type");
             if (!$type) {
                 $teams = Team::find();
@@ -33,14 +31,12 @@ class InfoController extends ControllerBase
         }
 
         if (($all = $this->request->get("All") == 1) && count($teams) > 1) {
-            $arr["Team"][] = array("ID" => -1, "Name" => "全部");
+            $arr[] = array("ID" => -1, "Name" => "全部");
         }
 
         foreach ($teams as $team) {
-            $arr["Team"][] = $team->dump();
+            $arr[] = $team->dump();
         }
-
-        $this->addUserWithSeg($teams->getFirst()->ID, $arr);
 
         $this->ajax->flushData($arr);
     }
@@ -50,17 +46,10 @@ class InfoController extends ControllerBase
      */
     public function UserListAction()
     {
-        $teamid = $this->request->get("ID");
-        $this->addUserWithSeg($teamid, $arr);
-        $this->ajax->flushData($arr);
-    }
+        $tid = $this->request->get("ID");
 
-    /**
-     * 根据班组ID，添加用户列表，同时添加抄表段
-     */
-    private function  addUserWithSeg($tid, &$arr)
-    {
-        if ($this->role == ROLE_MATER) { //抄表员
+
+        if ($this->role == ROLE_MATER) { //抄表员 只能查看自己
             $users = User::find("ID=" . $this->loginUser["ID"]);
         } else if ($this->role == ROLE_MATER_LEAD) {    //班长, 添加全部字段
             $users = User::find(array("Role = 1 AND TeamID = :TID:", "bind" => array("TID" => $tid)));
@@ -69,27 +58,23 @@ class InfoController extends ControllerBase
         }
 
         if($this->role != ROLE_MATER){
-            $arr["Name"][] = array("ID" => "tid_$tid", "Name" => "全部");
+            $arr[] = array("ID" => "tid_$tid", "Name" => "全部");
         }
 
         foreach ($users as $u) {
-            $arr["Name"][] = $u->dump();
+            $arr[] = $u->dump();
         }
 
-        //第一个用户的操表段
-        if ($arr["Name"][0] != null) {
-            $this->AddSegment($arr["Name"][0]["ID"], $arr);
-        }
+        $this->ajax->flushData($arr);
     }
 
+
     /**
-     * 根据用户Id，装载抄表段
-     * @param $uid
-     * @param $arr
-     * @return mixed
+     * 根据用户ID，得到该用户的抄表段
      */
-    private function AddSegment($uid, &$arr)
+    public function SegmentListAction()
     {
+        $uid = $this->request->get("ID");
 
         if(($tid = User::IsAllUsers($uid))){
 
@@ -99,24 +84,16 @@ class InfoController extends ControllerBase
             $seg = DataUtil::GetSegmentsDataByUid($uid);
         }
 
-        $all = array("ID" => "-1", "Number" => "全部");
-        $arr["Number"][] = $all;
+//        $all = array("ID" => "-1", "Name" => "全部");
+        $all = array("ID" => "全部", "Name" => "全部");
+        $arr[] = $all;
 
         foreach ($seg as $s) {
-            $arr["Number"][] = $s;
+            $a["ID"]  = $s["Number"];
+            $a["Name"] = $s["Number"];
+
+            $arr[] = $a;
         }
-
-        return $arr;
-    }
-
-    /**
-     * 根据用户ID，得到该用户的抄表段
-     */
-    public function SegmentListAction()
-    {
-        $uid = $this->request->get("ID");
-
-        $this->AddSegment($uid, $arr);
 
         $this->ajax->flushData($arr);
     }

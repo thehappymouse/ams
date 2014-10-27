@@ -19,7 +19,7 @@ class CustomerHelper extends HelperBase
         $result = false;
 
         $ids = explode(",", $p->ID);
-        foreach($ids as $id){
+        foreach ($ids as $id) {
             $cut = Cutinfo::findFirst("Arrear = $id");
             if ($cut == null) {
                 continue;
@@ -173,7 +173,6 @@ class CustomerHelper extends HelperBase
     }
 
 
-
     /**
      * 欠费用户信息，多个界面综合使用 客户分类统计中，增加统计数据
      * @param array $params
@@ -182,10 +181,16 @@ class CustomerHelper extends HelperBase
     public static function ArrearsInfo(array $params)
     {
         $p = new RequestParams($params);
-
         $data = array();
         $param = array();
-        $conditions = "1 = 1";
+
+        $count_query = "select count(A.ID) as Count from Arrears as A right join Customer as B on A.CustomerNumber = B.Number where ";
+
+        $query = "select A.ID, A.CustomerName, A.Segment, A.CustomerNumber, B.Address, B.IsCut,
+                        A.YearMonth, A.Money, A.PressCount, B.CutCount, B.Name from Arrears as A
+                    left join Customer as B on A.CustomerNumber = B.Number where ";
+
+        $conditions = "1 = 1 "; 
 
         if ($p->CustomerNumber) {
             $conditions .= " AND CustomerNumber = :Customer:";
@@ -199,23 +204,12 @@ class CustomerHelper extends HelperBase
                         $str = DataUtil::GetSegmentsStrByUid($p->Name);
                     }
 
-                    $conditions .= " AND Segment in ($str)";
+                    $conditions .= " AND A.Segment in ($str)";
                 } else {
-                    $conditions .= " AND Segment = :segment:";
+                    $conditions .= " AND A.Segment = :segment:";
                     $param["segment"] = $p->Number;
                 }
             }
-        }
-
-
-        //只棵催费
-        if ($p->OnlyHasPress) {
-            $conditions .= " AND PressCount > 0";
-        }
-
-        //只查停电
-        if ($p->OnlyAlreadyCut) {
-            $conditions .= " AND IsCut = 1";
         }
 
         //电费年月。其它条件应注意修改关键字
@@ -225,10 +219,18 @@ class CustomerHelper extends HelperBase
             $param["end"] = $p->ToData;
         }
 
+        //是否停电
+        if ($p->PowerCutLogo != null && $p->PowerCutLogo != 2) {
+            $conditions .= " AND B.IsCut = :IsCut:";
+            $param["IsCut"] = $p->PowerCutLogo;
+        }
+
         //是否结清
         if ($p->IsClean != NULL && $p->IsClean != 2) {
-            $conditions .= " AND IsClean = $p->IsClean";
+            $conditions .= " AND A.IsClean = :IsClean:";
+            $param["IsClean"] = $p->IsClean;
         }
+
 
         //欠费金额
         if ($p->ArrearsValue && $p->ArrearsValue > 0) {
@@ -246,7 +248,6 @@ class CustomerHelper extends HelperBase
         if ($p->ReminderFeeValue && (int)$p->ReminderFeeValue > 0) {
             if ($p->ReminderFee == 1) $word = ">=";
             else $word = "<";
-
             $conditions .= " AND PressCount $word :PressCount:";
             $param["PressCount"] = $p->ReminderFeeValue;
         }
@@ -255,70 +256,35 @@ class CustomerHelper extends HelperBase
         if ($p->PowerOutagesValue && (int)$p->PowerOutagesValue > 0) {
             $word = ($p->PowerOutages == 1) ? ">=" : "<";
 
-            $conditions .= " AND CutCount $word :CutCount:";
+            $conditions .= " AND B.CutCount $word :CutCount:";
             $param["CutCount"] = $p->PowerOutagesValue;
         }
 
+        //费控标志
+        if($p->IsControl != null && $p->IsControl != 2){
+            $conditions .= " AND B.IsControl = :IsControl:";
+            $param["IsControl"] = $p->IsControl;
+        }
+
+        //是否租房  2 全部。 1 租。0 非租
+        if($p->IsRent != null && $p->IsRent != 2){
+            $conditions .= " AND B.IsRent = :IsRent:";
+            $param["IsRent"] = $p->IsRent;
+        }
 
         $conditions_mini = $conditions;
+        $conditions .= " limit $p->start, $p->limit";
 
-        //排序
-        if($p->numberSort) {
-            $conditions .= " ORDER BY CustomerNumber " . ($p->numberSort == 1 ? "Desc ": "ASC ");
+        $query .= $conditions;
+        $results = parent::getModelManager()->executeQuery($query, $param);
+
+        foreach ($results as $rs) {
+            $data[] = (array)$rs;
         }
 
-        if($p->segmentSort) {
-            $conditions .= " ORDER BY Segment " . ($p->segmentSort == 1 ? "Desc ": "ASC ");
-        }
+        $results = parent::getModelManager()->executeQuery($count_query . $conditions_mini, $param)->getFirst();
+        $total = $results->Count;
 
-        //分页
-        $total = Arrears::count(array($conditions, "bind" => $param));
-
-
-        $conditions = self::addLimit($conditions, $p->Page, $p->PageSize);
-
-        $arrears = Arrears::find(array($conditions, "bind" => $param));
-
-        foreach ($arrears as $as) {
-            //是否租房  2 全部。 1 租。0 非租
-            if ($p->IsRent && (int)$p->IsRent != 2) {
-                if ($as->Customer->IsRent != $p->IsRent) {
-                    continue;
-                }
-            }
-
-            //是否费控
-            if ($p->IsControl && (int)$p->IsControl != 2) {
-                if ($as->Customer->IsControl != $p->IsControl) {
-                    continue;
-                }
-            }
-
-            if ($p->CutType && $p->CutType != "全部") {
-                if ($as->Cutinfo->CutStyle != $p->CutType) {
-                    continue;
-                }
-            }
-
-            $row = $as->dump();
-            $row["Address"] = $as->Customer->Address;
-            $row["IsCut"] = (int)$as->Customer->IsCut;
-            $row["LandlordPhone"] = $as->Customer->LandlordPhone;
-            $row["RenterPhone"] = $as->Customer->RenterPhone;
-            $row["IsControl"] = $as->Customer->IsControl;
-            $row["AssetNumber"] = $as->Customer->AssetNumber;
-            $row["IsSpecial"] = $as->Customer->IsSpecial;
-            $row["IsRent"] = $as->Customer->IsRent;
-            $row["IsControl"] = $as->Customer->IsControl;
-
-//            计算欠费次数和累计欠费次数
-            //TODO 导出时，将ArrearsCount 增加
-            $row["AllArrearCount"] = $as->Customer->ArrearsCount;
-            //TODO 该字段需要优化
-//            $row["ArrearCount"] = Arrears::count("IsClean!=1 AND CustomerNumber=$as->CustomerNumber");
-
-            $data[] = $row;
-        }
 
         return array($total, $data, $conditions_mini, $param);
     }

@@ -1,213 +1,308 @@
+
+<?php
+$this->pageTitle = "系统设置";
+?>
 <script type="text/javascript">
-$(document).ready(function(){
-	var G = new AjaxFun();
+
+Ext.onReady(function () {
+    var searchPanel= new Ext.TabPanel({
+        labelWidth: 85,
+        activeTab: 0,
+        height:70,
+        plain:true,
+        bodyStyle: 'padding:10px',
+        defaults:{autoScroll: true},
+        items:[{
+            title: '用户查询',
+            xtype: 'panel',
+            items: [{
+                xtype: 'compositefield',
+                width:500,
+                items: [{
+                    xtype: 'displayfield',
+                    style: 'text-align:right;width:85px;',
+                    value: '<a style="color:red;">*</a>用户编号: '
+                },{
+                    xtype: 'textfield',
+                    id:'searchNumber',
+                    width: 220
+                },{
+                    width:100,
+                    xtype:'button',
+                    text:'查询',
+                    handler:function(){
+                        var number = Ext.getCmp('searchNumber').getValue();
+                        infoPanel.getForm().load({
+                            url:'SingleInquiries?Number='+number,
+                            success:function() {
+                                listView.store.load({
+                                    params : {Number : number },
+                                    add: false
+                                })
+                            },
+                            failure:function(action,msg) {
+                                var text = Ext.decode(msg.response.responseText);
+                                if (!text.success) {
+                                    infoPanel.getForm().reset();
+                                    listView.store.removeAll();
+                                    Ext.Msg.alert('提示',text.msg);return;
+                                }
+                            }
+                        })
+                    }
+                }]
+            }]
+        }]
+    });
+
+    var infoPanel = new Ext.FormPanel({
+        labelWidth: 80,
+        title: '用户信息',
+        labelAlign: 'right',
+        defaults:{
+            border: false
+        },
+        style: 'margin-top:10px',
+        layout:'column',
+        items: [{
+            columnWidth:.25,
+            layout: 'form',
+            defaults:{
+                xtype: 'textfield',
+                readOnly:true
+            },
+            items: [{
+                fieldLabel: '管理班组',
+                name: 'Team',
+                anchor:'95%'
+            },{
+                fieldLabel: '用电地址',
+                name: 'Address',
+                anchor:'95%'
+            },new QuietCombox({
+                fieldLabel: '特殊客户',
+                displayField:'Text',
+                valueField:'IsSpecial',
+                hiddenName:'IsSpecial',
+                fields:['Text','IsSpecial'],
+                data   : [['全部', '2'],['是', '1'],['否', '0']],
+                anchor:'95%'
+            }),new QuietCombox({
+                fieldLabel: '是否租房',
+                displayField:'Text',
+                valueField:'IsRent',
+                hiddenName:'IsRent',
+                fields:['Text','IsRent'],
+                data   : [['全部', '2'],['是', '1'],['否', '0']],
+                anchor:'95%'
+            }),{
+                fieldLabel: '累计欠费次数',
+                name: 'ArrearsCount',
+                anchor:'95%'
+            }]
+        },{
+            columnWidth:.25,
+            layout: 'form',
+            defaults:{
+                xtype: 'textfield',
+                readOnly:true
+            },
+            items: [{
+                fieldLabel: '抄表员',
+                name: 'SegUser',
+                anchor:'95%'
+            },new QuietCombox({
+                fieldLabel: '停电标志',
+                displayField:'Text',
+                valueField:'IsCut',
+                hiddenName:'IsCut',
+                fields:['Text','IsCut'],
+                data   : [['全部', '2'],['是', '1'],['否', '0']],
+                anchor:'95%'
+            }),{
+                fieldLabel: '抄表段编号',
+                name: 'Segment',
+                anchor:'95%'
+            },{
+                fieldLabel: '房东电话',
+                name: 'LandlordPhone',
+                anchor:'95%'
+            },{
+                fieldLabel: '备注',
+                name: 'Desc',
+                anchor:'95%'
+            }]
+        },{
+            columnWidth:.25,
+            layout: 'form',
+            defaults:{
+                xtype: 'textfield',
+                readOnly:true
+            },
+            items: [{
+                fieldLabel: '用户编号',
+                name: 'Number',
+                anchor:'95%'
+            },{
+                fieldLabel: '电表资产号',
+                name: 'AssetNumber',
+                anchor:'95%'
+            },{
+                fieldLabel: '停电方式',
+                name: 'CutStyle',
+                anchor:'95%'
+            },{
+                fieldLabel: '房客电话',
+                name: 'RenterPhone',
+                anchor:'95%'
+            }]
+        },{
+            columnWidth:.25,
+            layout: 'form',
+            defaults:{
+                xtype: 'textfield',
+                readOnly:true
+            },
+            items: [{
+                fieldLabel: '用户名称',
+                name: 'Name',
+                anchor:'95%'
+            },new QuietCombox({
+                fieldLabel: '费控标志',
+                displayField:'Text',
+                valueField:'IsControl',
+                hiddenName:'IsControl',
+                fields:['Text','IsControl'],
+                data   : [['全部', '2'],['是', '1'],['否', '0']],
+                anchor:'95%'
+            }),{
+                fieldLabel: '欠费原因',
+                name: 'Cause',
+                anchor:'95%'
+            }]
+        }]
+    });
+
+    var store = new Ext.data.JsonStore(
+            {
+                id: 'tvliststore',
+                url: 'singleInquiriesList',
+                root: 'data',
+                fields: chargesMoneyFields
+            });
+
+    var listView = new Ext.grid.GridPanel(
+            {
+                store: store,
+                multiSelect: true,
+                title: '电费信息',
+                stripeRows: true,
+                region: 'center',
+                autoHeight:true,
+                emptyText: '没有节目',
+                //autoExpandColumn: 'name',
+                reserveScrollOffset: true,
+                viewConfig: {forceFit:true},
+                columns: [
+                    {
+                        header: '电费年月',
+                        sortable: true,
+                        align:"center",
+                        dataIndex: 'YearMonth'
+                    }, {
+                        header: '电费金额',
+                        dataIndex: 'Money',
+                        align:"center",
+                        sortable: true
+                    }, {
+                        header: '结清标志',
+                        sortable: true,
+                        align:"center",
+                        dataIndex: 'IsClean',
+                        renderer:function(v) {
+                            if (v == 1) {
+                                return '已结清';
+                            } else {
+                                return '未结清';
+                            }
+                        }
+                    }, {
+                        header: '停电标志',
+                        sortable: true,
+                        align:"center",
+                        dataIndex: 'IsCut',
+                        renderer:function(v) {
+                            if (v == 1) {
+                                return '已停电';
+                            } else {
+                                return '未停电';
+                            }
+                        }
+                    }, {
+                        header: '催费次数',
+                        sortable: true,
+                        align:"center",
+                        dataIndex: 'PressCount'
+                    },{
+                        header: '停电次数',
+                        sortable: true,
+                        align:"center",
+                        dataIndex: 'CutCount'
+                    },{
+                        header: '收费人',
+                        sortable: true,
+                        align:"center",
+                        dataIndex: 'Charge'
+                    },{
+                        header: '收费日期',
+                        sortable: true,
+                        align:"center",
+                        dataIndex: 'ChargeDate'
+                    }]
+            });
 
 
-	$("button:eq(0)").click(function(){
-		var ID = $("input:eq(0)").val();
+    var infoTab = new Ext.TabPanel({
+        labelWidth: 85,
+        activeTab: 0,
+        height:180,
+        plain:true,
+        style: 'margin-top:15px',
+        defaults:{autoScroll: true},
+        items:[
+            infoPanel
+        ]
+    });
 
-		if (ID == "") {
-			ID = -1;
-		}
-		var data = {Number:ID};
+    var moneyTab = new Ext.TabPanel({
+        labelWidth: 85,
+        activeTab: 0,
+        plain:true,
+        style: 'margin-top:15px',
+        defaults:{autoScroll: true},
+        items:[
+            listView
+        ]
+    });
+    var allPanel = new Ext.Panel({
+        region: 'center',
+        fileUpload: true,
+        autoScroll: true,
+        bodyStyle: "padding:20px;",
+        items: [
+            searchPanel,
+            infoTab,
+            moneyTab
+        ]
+    });
+    new Ext.Viewport(
+            {
+                layout: 'border',
+                items: [
+                    allPanel
+                ]
+            });
 
-		var url = "/ams/Count/SingleInquiries";
-		G.GetAjax('get',url,data,SetTable,true);
-	});
-
-	//添加表格
-	function SetTable(value)
-	{
-
-		if (value == null){
-
-			$("#info div").remove();
-			$("#Arrears div").remove();
-
-			$("form").css("display","none");
-			$("#tip").css("display","block");
-			return ;
-
-		}
-		var Customer =  ReplaceArray(value.Customer);
-		var List =  ReplaceArray(value.List);
-		SetInfoTable(Customer);
-
-		var title = '电费信息';
-		var array = Array("电费年月", "电费金额", "结清标志", "停电标志", "催费次数", "停电次数", "收费人", "收费日期");
-		var model = Array("YearMonth", "Money", "IsClean", "IsCut", "PressCount", "CutCount", "Charge", "ChargeDate");
-		var modelcss = Array("text-align:center", "text-align:center", "text-align:center", "text-align:center",  "text-align:center", "text-align:center", "text-align:center", "text-align:center", "text-align:center");
-		SetArrearsTable( List, array, title, model, modelcss);
-	}
-
-
-	//用户信息表格
-	function SetInfoTable(value)
-	{
-		var IsCutText;
-		var IsRentText;
-		var IsControlText;
-		var IsSpecialText;
-		if (value.IsCut == 2 ){ IsCutText = '全部'} else if( value.IsCut ==1) { IsCutText = '已停电'} else { IsCutText = '未停电'}
-		if (value.IsRent == 2 ){ IsRentText = '全部'} else if( value.IsRent ==1) { IsRentText = '是'} else { IsRentText = '否'}
-		if (value.IsControl == 2 ){ IsControlText = '全部'} else if( value.IsControl ==1) { IsControlText = '是'} else { IsControlText = '否'}
-		if (value.IsSpecial == 2 ){ IsSpecialText = '全部'} else if( value.IsSpecial ==1) { IsSpecialText = '是'} else { IsSpecialText = '否'}
-		var tpl = '<div><div   class="line ClientInfo" >用户详细信息</div><table  >'+
-	        '<tr >'+
-	            '<td  style="width:116px">管理班组：</td>'+
-	            '<td style="text-align:left;width:120px">'+value.Team+'</td>'+
-	            '<td style="width:116px">抄表员：</td>'+
-	            '<td style="text-align:left;width:116px">'+value.SegUser+'</td>'+
-	            '<td style="width:116px">用户编号：</td>'+
-	            '<td style="text-align:left;width:116px">'+value.Number+'</td>'+
-	            '<td style="width:116px">用户名称：</td>'+
-	            '<td style="text-align:left;width:116px"><div title="'+value.Name+'" style="width:110px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">'+value.Name+'</div></td>'+
-	        '</tr>'+
-	        '<tr>'+
-	            '<td >用电地址：</td>'+
-	            '<td colspan="3" style="text-align:left"><div title="'+value.Address+'" style="width:350px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">'+value.Address+'</div></td>'+
-	            '<td >抄表段编号：</td>'+
-	            '<td style="text-align:left">'+value.Segment+'</td>'+
-	            '<td >电表资产号：</td>'+
-	            '<td style="text-align:left">'+value.AssetNumber+'</td>'+
-	        '</tr>'+
-	        '<tr>'+
-	            '<td >特殊客户：</td>'+
-	            '<td class="Warn" style="text-align:left">'+IsSpecialText+'</td>'+
-	            '<td >停电标志：</td>'+
-	            '<td class="Warn" style="text-align:left">'+IsCutText+'</td>'+
-	            '<td  >停电方式：</td>'+
-	            '<td class="Warn" style="text-align:left">'+value.CutStyle+'</td>'+
-	            '<td >费控标志：</td>'+
-	            '<td class="Warn" style="text-align:left">'+IsControlText+'</td>'+
-	        '</tr>'+
-	        '<tr>'+
-	            '<td >租房客户：</td>'+
-	            '<td style="text-align:left">'+IsRentText+'</td>'+
-	            '<td >房东电话：</td>'+
-	            '<td style="text-align:left">'+value.LandlordPhone+'</td>'+
-	            '<td >房客电话：</td>'+
-	            '<td style="text-align:left">'+value.RenterPhone+'</td>'+
-	            '<td >欠费原因：</td>'+
-	            '<td style="text-align:left"><div style="width:100px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">'+value.Cause+'</div></td>'+
-	        '</tr>'+
-	        '<tr>'+
-               '<td >累计欠费次数：</td>'+
-                '<td style="text-align:left">'+value.ArrearsCount+'</td>'+
-	            '<td >备注：</td>'+
-	            '<td style="text-align:left" colspan="5" ><div style="width:500px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">'+value.Desc+'</div></td>'+
-	        '</tr>'+
-	    '</table></div>';
-	    $("#info div").remove();
-	    $("#info").append(tpl);
-	}
-
-
-
-
-	//欠费信息表格
-	//代表number用户编号，s数据是填充表格的数据，headarray是表头,title是表格上的标题
-	function SetArrearsTable( s, headarray, title, model, modelcss)
-	{
-		var s =  ReplaceArray(s);
-		var bodyTpl = "";
-		var headmodel = "";
-		var money = 0;
-		var d = 1;
-		var text;
-		if (s) {
-			for (var i in s) {
-				var number = s[i].CustomerNumber;
-				var source = ReplaceArray(s[i]);
-				bodyTpl += '<tr style="height:20px">'+
-					'<td style="width:50px;text-align:center">'+d+'</td>';
-					for (var n in model) {
-						if (model[n] == "CutCount" || model[n] == "PressCount" || model[n] == "Number") {
-							bodyTpl +='<td style="text-align: center"><span  id="'+model[n]+'" title="'+source.ID+'/'+number+'/'+source.YearMonth+'" style="text-decoration:underline;cursor:pointer;'+modelcss[n]+'">'+source[model[n]]+'</span></td>';
-						} else {
-							if (model[n] == "IsClean") {
-								if (source[model[n]] == 2) {
-									text = text = '<div style="'+modelcss[n]+'" title="预收转逾期">预收转逾期</div>';
-								} else if (source[model[n]] == 1){
-									text = text = '<div style="'+modelcss[n]+'" title="已结清">是</div>';
-								} else {
-									text = text = '<div style="'+modelcss[n]+'" title="未结清">否</div>';
-								}
-							} else if(model[n] == "IsCut"){
-								if (source[model[n]] == 2) {
-									text = text = '<div style="'+modelcss[n]+'" title="全部">全部</div>';
-								} else if (source[model[n]] == 1){
-									text = text = '<div style="'+modelcss[n]+'" title="已停电">已停电</div>';
-								} else {
-									text = '<div style="'+modelcss[n]+'" title="未停电">未停电</div>';
-								}
-							} else {
-								text = '<div style="'+modelcss[n]+'" title="'+source[model[n]]+'">'+source[model[n]]+'</div>';
-							}
-							bodyTpl += '<td  style="'+modelcss[n]+'" >'+text+'</td>';
-						}
-					}
-		        bodyTpl +='</tr>';
-		        money += parseInt(s[i].Money);
-			}
-			d++;
-		}
-
-		var headTpl = '<div><div class="line ClientInfo" >'+title+'</div><table id="info"  >'+
-		    		'<thead>'+
-			    	'<tr >'+
-			    	'<th >序号</th>';
-
-    	for (var t in headarray) {
-    		headmodel +='<th>'+headarray[t]+'</th>';
-    	}
-		d = parseInt(d)-1;
-    	var tr = '<tr>'+
-			        '<td colspan="9" style="text-align:left" >&nbsp;&nbsp;&nbsp;&nbsp;共计：欠费'+d+'笔，'+money+'元。</td>'+
-			     '</tr>';
-	    var footTpl = tr + '</tr></thead><tbody></tbody></table></div>';
-
-	    var tpl = headTpl+headmodel+bodyTpl+footTpl;
-
-	    $("#Arrears div").remove();
-	    $("#Arrears").append(tpl);
-	    $("#tip").css("display","none");
-		$("#Arrears table tr:odd").addClass("InfoTr");
-
-	}
-
-})
+});
 
 </script>
-<br />
-<div class="line ClientInfo" >查询条件</div>
-	<div style="border:1px solid #009966;height:60px;">
-
-		<div class=" mt_20" style="margin-top:15px">
-
-
-			<div class=" InputStyle" style="margin-left:12px;float:left;margin-top:2px;*margin-top:4px">用户编号：</div>
-
-		    <div class=" TreeInput" style="margin-left:5px;float:left;margin-left:-2px">
-
-		      <input type="text" class="input-small" style="width:120px" >
-
-		    </div>
-
-		    <button type="button" class="btn btn-success" style="background-color:#009966;margin-left:20px" >查询</button>
-
-		</div>
-	</div>
-	<div id="tip" style="color:red;margin-left:12px;margin-top:4px;display:none">
-				当前查询没有数据
-	</div>
-	<br />
-	<div  id="info" class="TableCss" >
-		<div></div>
-	</div>
-	<br />
-
-	<div id="Arrears" class="TableCss">
-		<div></div>
-	</div>
-	<br/><br/><br/><br/>

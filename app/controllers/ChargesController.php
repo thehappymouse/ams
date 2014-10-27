@@ -11,6 +11,7 @@ class ChargesController extends ControllerBase
     public function WithDrawnAction()
     {
         $this->view->startdate = Arrears::getStartDate();
+
         //撤销收费界面
     }
 
@@ -87,6 +88,9 @@ class ChargesController extends ControllerBase
 
                 $customer->Team = $customer->getTeamName();
 
+                $customer->IsCut = (int)$customer->IsCut;
+
+
                 if ($customer->IsCut) {
                     $cut = Cutinfo::findFirst(array("CustomerNumber=:num:", "bind" => array("num" => $customer->Number)));
                     $customer->CutStyle = $cut->CutStyle;
@@ -95,7 +99,7 @@ class ChargesController extends ControllerBase
                 }
 
                 $data = $customer->dump();
-                $data["Arrears"] = $arrears;
+//                $data["Arrears"] = $arrears;
 
                 $this->ajax->flushData($data);
             } else {
@@ -106,6 +110,29 @@ class ChargesController extends ControllerBase
         }
     }
 
+    public function ArrearsAction()
+    {
+        $id = $this->request->get("ID");
+        $data = null;
+        $this->view->disable();
+        if ($id) {
+            $customer = Customer::findFirst(array("Number=:id:", "bind" => array("id" => $id)));
+
+            if ($customer) { //查询其欠费信息表
+                $arrears = array();
+                foreach ($customer->Arrears as $ea) {
+                    if ($ea->IsClean == "1") continue;
+                    $arrears[] = $ea->dump();
+                }
+
+                $this->ajax->flushData($arrears);
+            } else {
+                $this->ajax->flushError("此编号不存在");
+            }
+        } else {
+            $this->ajax->flushError("没有输入查询编号");
+        }
+    }
 
     /**
      * 收费动作。
@@ -114,7 +141,6 @@ class ChargesController extends ControllerBase
     public function CreateAction()
     {
         $this->view->disable();
-        $this->ajax->logData->Action = "收费";
         $ll = new LogHelper($this->ajax->logData);
 
         $ids = $this->request->get("ID");
@@ -129,7 +155,6 @@ class ChargesController extends ControllerBase
                 $this->ajax->flushError("没有查找到欠费记录");
             }
         }
-
 
         //IsAgreement
         //TODO 校验金额
@@ -178,7 +203,6 @@ class ChargesController extends ControllerBase
                 var_dump($c->getMessages());
                 $errorCount++;
             }
-            $this->ajax->logData->Data .= "|" . $a->YearMonth . "|￥" . $a->Money;
 
             $a->IsClean = 1;
             $a->Charge = $c->UserName;
@@ -196,7 +220,7 @@ class ChargesController extends ControllerBase
         }
 
         //如果用户没有欠费信息，则将客户IsClean=1
-        if(Arrears::count("CustomerNumber=$customer AND IsClean=0") == 0){
+        if (Arrears::count("CustomerNumber=$customer AND IsClean=0") == 0) {
             $customerModel->IsClean = 1;
         }
 

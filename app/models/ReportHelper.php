@@ -259,10 +259,15 @@ class ReportHelper extends HelperBase
         $team["Money"]["Customer"] = $r->Money;
 
 
-//        欠费
+        //欠费
         return $team;
     }
 
+    /**
+     * 每日工作报表
+     * @param array $params
+     * @return array
+     */
     public static function Work(array $params)
     {
 

@@ -67,11 +67,6 @@ class Arrears extends \Phalcon\Mvc\Model
     public $IsClean;
 
     /**
-     * @var string
-     */
-    public $IsCut;
-
-    /**
      *
      * @var string
      */

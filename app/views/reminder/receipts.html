@@ -1,154 +1,174 @@
-<script type="text/javascript">
-$(document).ready(function(){
-	var G = new AjaxFun();
-	var DrownBox = new DropDownBox()//获取三级下拉框
+<script>
+Ext.onReady(function(){
+    var teamCombox = new SettCombbox({
+        url:'/ams/Info/TeamList?ID=1&Type=1&All=1',
+        fieldLabel: '管理班组',
+        anchor:'95%',
+        id:'searchTeam',
+        hiddenName:'Team',
+        autoLoad:true
+    });
+    var searchPanel= new Ext.TabPanel({
+        labelWidth: 85,
+        activeTab: 0,
+        height:70,
+        plain:true,
+        bodyStyle: 'padding:10px',
+        defaults:{autoScroll: true},
+        items:[{
+            title: '用户查询',
+            xtype: 'panel',
+            items: [{
+                xtype: 'compositefield',
+                width:500,
+                items: [{
+                    xtype: 'displayfield',
+                    style: 'text-align:right;width:85px;',
+                    value: '<a style="color:red;">*</a>管理班组: '
+                },teamCombox,{
+                    width:100,
+                    xtype:'button',
+                    text:'查询',
+                    handler:function(){
+                        var number = Ext.getCmp('searchTeam').getValue();
+                        listView.store.removeAll();
+                        listView.store.load({
+                            params : {Team : number },
+                            callback:function(ecords, options, success){
+                                if (!success) {
+                                    Ext.Msg.alert('提示','此班组下没有数据');
+                                }
+                            },
+                            add: false
+                        })
+                    }
+                }]
+            }]
+        }]
+    });
 
-	var excel = new ExportExcel();
-	excel.url = "/ams/export/advance";
-	excel.exportTo();
+    var store = new Ext.data.JsonStore(
+            {
+                url: 'Advance',
+                root: 'data',
+                totalProperty: 'total',
+                baseParams: {
+                    start: 0,
+                    limit: 5
+                },
+                fields: reminderFields
+            });
 
-	DrownBox.select = {"Team":"#team"};
-	var Getdata = {ID:"1"};
-	var url = "/ams/Info/TeamList?Type=1";
-	G.GetAjax('get',url,Getdata,DrownBox.SetAllSelect,true);
+    // var singlem = new Ext.grid.CheckboxSelectionModel({singleSelect : true});
+    var listView = new Ext.grid.EditorGridPanel(
+            {
+                store: store,
+                multiSelect: true,
+                title: '预收明细',
+                stripeRows: true,
+                region: 'center',
+                autoHeight:true,
+                emptyText: '没有数据',
+                viewConfig: {forceFit:true},
+                reserveScrollOffset: true,
+                columns: [ {
+                        header: '用户编号',
+                        dataIndex: 'CustomerNumber',
+                        align:"center",
+                        sortable: true,
+                        editor:new Ext.form.TextField({
+                            allowBlank:false
+                        })
+                    }, {
+                        header: '用户名称',
+                        sortable: true,
+                        align:"center",
+                        dataIndex: 'CustomerName'
+                    }, {
+                        header: '用电地址',
+                        sortable: true,
+                        align:"center",
+                        dataIndex: 'Address'
+                    }, {
+                        header: '电费年月',
+                        sortable: true,
+                        align:"center",
+                        dataIndex: 'YearMonth'
+                    }, {
+                        header: '电费金额',
+                        sortable: true,
+                        align:"center",
+                        dataIndex: 'Money'
+                    }, {
+                        header: '抄表员',
+                        sortable: true,
+                        align:"center",
+                        dataIndex: 'SegUser'
+                    }],
+                bbar: new Ext.PagingToolbar({
+                    pageSize: 5,
+                    store: store,
+                    displayMsg: "显示{0}条到{1}条记录，总共{2}条记录",
+                    emptyMsg: "没有数据记录",
+                    displayInfo: true,
+                    items:[
+                        '-', {
+                            text: 'excel',
+                            iconCls: 'excel',
+                            handler: function(btn, pressed){
+                               /* Ext.Ajax.request({
+                                    url:'/ams/export/reminder'
+                                })*/
+                            }
+                        }]
+                })
+            });
+    listView.on("render",  function(p,e){
 
+        /* p.canCel.setHandler(function(b, e){
+         if (p.getSelectionModel().getSelections().length == 0) {
+         Ext.Msg.alert('提示','请选择用户！');
+         return;
+         }
+         var SegmentNumber = p.getSelectionModel().getSelections()[0].data.CustomerNumber;
+         freeView.store.load({
+         params : {Number : SegmentNumber },
+         add: false
+         })
+         win.show();
+         })*/
+    })
 
-	$("button:eq(0)").click(function(){
-		data = $("form").serialize();
-		var url = "/ams/reminder/Advance";
-		excel.Todata = data;
-		G.GetAjax('post',url,data,ShowTable,true);
-	})
-
-	function ShowTable(value)
-	{	
-
-		if (value == null){
-			$("#info div").remove();
-			$("#Arrears div").remove();
-			$("#Entry").css("display","none");
-			 $("#tip").css("display","block");
-			//SetInfoTable();
-			//SetArrearsTable('','',array,title,model,modelcss);
-
-			return ; 
-
-		}
-
-		var title = '预收明细';
-		var headarray = Array("序号", "用户编号", "用户名称", "用电地址", "电费年月", "电费金额", "抄表员");
-		var model = Array("ID", "CustomerNumber", "CustomerName", "Address", "YearMonth", "Money", "SegUser");
-		var modelcss = Array("text-align:center;width:50px", "text-align:center;width:80px", "text-align:center;width:80px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis",  "text-align:left;width:420px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis", "text-align:center;width:80px", "text-align:center;width:80px", "text-align:center;width:70px");
-		//var number = value.Number;
-		SetArrearsTable(value,headarray,title,model,modelcss);
-		//SetArrearsTable("","",headarray,title,model);
-	}
-	
-
-
-	
-	//代表number用户编号，s数据是填充表格的数据，headarray是表头,title是表格上的标题
-	function SetArrearsTable(s,headarray,title,model,modelcss)
-	{
-		var bodyTpl = "";
-		var headmodel = "";
-		var money = 0;
-		var d = 1;
-		if (s) {
-			for (var i in s) {
-				var source = ReplaceArray(s[i]);
-				var number = s[i].CustomerNumber;
-				bodyTpl += '<tr >';
-					for (var n in model) {
-						if (model[n] == "CutCount" || model[n] == "PressCount" || model[n] == "CustomerNumber") {
-							bodyTpl +='<td style="text-align: center"><span id="'+model[n]+'" title="'+source.ID+'/'+number+'/'+s[i].YearMonth+'" style="text-decoration:underline;cursor:pointer;'+modelcss[n]+'">'+s[i][model[n]]+'</span></td>';
-						} else if(model[n] == "ID") {
-								bodyTpl += '<td style="'+modelcss[n]+'">'+d+'</td>';
-						} else {
-							bodyTpl += '<td  style="'+modelcss[n]+'"><div title="'+s[i][model[n]]+'" style="'+modelcss[n]+'">'+s[i][model[n]]+'</div></td>';
-						}
-						
-					}
-		        bodyTpl +='</tr>';
-		        
-		        	money += parseInt(s[i].Money);
-		    
-		        d++;
-		        
-			}
-			//$("[name=Money]").val(money);
-		}
-		
-
-
-		var headTpl = '<div><div class="line ClientInfo" >'+title+'</div><table id="info"  class="table-bordered">'+
-		    		'<thead>'+
-			    	'<tr style="font-size:15px">';
-
-    	for (var i in headarray) {
-    		headmodel +='<th style="'+modelcss[i]+';text-align:center">'+headarray[i]+'</th>';
-    	}
-		            
-
-	    var footTpl = '<tr>'+
-				        '<td colspan="8" style="text-align:left;"><form name="excelform" id="excelform" method="post" target="put_excel" >&nbsp;&nbsp;&nbsp;&nbsp;导出文件：&nbsp;&nbsp;<span  id="excel" style="cursor:pointer"><img  src="/ams/public/images/Excel.png" style="height:25px;width:25px"/></span></form></td>'+
-				            '</tr></tr>'+
-				            '<tr>'+
-				        '<td colspan="8" style="text-align:left" >&nbsp;&nbsp;&nbsp;&nbsp;共计：预收转逾期电费'+(parseInt(d)-1)+'笔，'+money+'元。</td>'+
-				            '</tr>'+
-				            '</thead><tbody></tbody></table></div>';
-
-	    var tpl = headTpl+headmodel+bodyTpl+footTpl;
-
-	    $("#Arrears div").remove();
-
-	    $("#Arrears").append(tpl);
-	     $("#tip").css("display","none");
-		$("#Arrears table tr:odd").addClass("InfoTr");
-		$("#Entry").css("display","block");
-
-	}
+    var infoPanel = new Ext.TabPanel({
+        labelWidth: 85,
+        activeTab: 0,
+        plain:true,
+        style: 'margin-top:15px',
+        defaults:{autoScroll: true},
+        items:[
+            listView
+        ]
+    });
 
 
+    var formpanels = new Ext.Panel({
+        region: 'center',
+        fileUpload: true,
+        autoScroll: true,
+        bodyStyle: "padding:20px;",
+        items: [
+            searchPanel,
+            infoPanel
+        ]
+    });
+
+
+    new Ext.Viewport(
+            {
+                layout: 'border',
+                items: [
+                    formpanels
+                ]
+            });
 })
 </script>
-		    <br />
-		    <div class="line ClientInfo" >用户信息</div>
-		    <div style="border:1px solid #009966;height:60px;">
-
-			    <div class=" mt_20" style="margin-top:15px">
-			    	<form>
-
-			    	<div class=" InputStyle group"  style="margin-left:12px;float:left">管理班组：</div>
-				    <div id="team" class=" TreeInput" style="float:left;width:130px">
-				        
-				    </div>
-			
-					<button type="button"  class="btn btn-success" style="background-color:#009966">查询</button>
-					</form>
-				</div>
-			</div>
-			<div id="tip" style="color:red;margin-left:12px;display:none;margin-top:4px">
-				当前查询没有数据
-			</div>
-		   <br />
-		    <div id="Arrears" class="TableCss">
-		    	<div></div>
-		    </div>
-		   <br/><br/><br/><br/>
-			<style>
-				#team{
-					margin-left:5px;
-					
- 					margin-top:0px;
- 					margin-top:2px\0;/*IE8、9、10支持*/
- 					* margin-top:-2px;/*IE7仅支持*/
- 				}
-
- 				.group{
- 					margin-top:0px;
- 					margin-top:2px\0;/*IE8、9、10支持*/
- 					* margin-top:4px;/*IE7仅支持*/
- 				}
- 				
-			</style>

@@ -138,7 +138,7 @@ class ExportController extends ControllerBase
 
         $filename = "催费情况报表.xls";
         $objWriter->save($filename);
-        $this->ajax->flushOk("/ams/public/" . $filename);
+        $this->ajax->flushOk("/ams/public/xls/" . $filename);
 
         //输出文档到页面
 //        $fileName = iconv("UTF-8", "gb2312", "催费情况报表");
@@ -242,7 +242,7 @@ class ExportController extends ControllerBase
 
         $filename = "每日工作报表.xls";
         $objWriter->save($filename);
-        $this->ajax->flushOk("/ams/public/" . $filename);
+        $this->ajax->flushOk("/ams/public/xls/" . $filename);
 
 
 //        $fileName = iconv("UTF-8", "gb2312", "每日工作报表");
@@ -278,7 +278,7 @@ class ExportController extends ControllerBase
         try {
             $filename = ExcelImportUtils::arrayToExcel("预收转逾期", $head, $data, $floor, true);
 
-            $this->ajax->flushOk("/ams/public/" . $filename);
+            $this->ajax->flushOk("/ams/public/xls/" . $filename);
         } catch (Exception $e) {
             $this->ajax->flushError($e->getMessage());
         }
@@ -409,7 +409,7 @@ class ExportController extends ControllerBase
 
         $filename = "电费回收报表.xls";
         $objWriter->save($filename);
-        $this->ajax->flushOk("/ams/public/" . $filename);
+        $this->ajax->flushOk("/ams/public/xls/" . $filename);
 
 
         // 输出文档到页面
@@ -448,7 +448,7 @@ class ExportController extends ControllerBase
 
         try {
             $filename = ExcelImportUtils::arrayToExcel("对账查询", $head, $data, true);
-            $this->ajax->flushOk("/ams/public/" . $filename);
+            $this->ajax->flushOk("/ams/public/xls/" . $filename);
         } catch (Exception $e) {
             $this->ajax->flushError($e->getMessage());
         }
@@ -481,7 +481,7 @@ class ExportController extends ControllerBase
         try {
             $filename = ExcelImportUtils::arrayToExcel("财务对账查询", $head, $data, $floor, true);
 
-            $this->ajax->flushOk("/ams/public/" . $filename);
+            $this->ajax->flushOk("/ams/public/xls/" . $filename);
         } catch (Exception $e) {
             $this->ajax->flushError($e->getMessage());
         }
@@ -514,7 +514,7 @@ class ExportController extends ControllerBase
         try {
             $filename = ExcelImportUtils::arrayToExcel("催费明细查询", $head, $data, $floor, true);
 
-            $this->ajax->flushOk("/ams/public/" . $filename);
+            $this->ajax->flushOk("/ams/public/xls/" . $filename);
         } catch (Exception $e) {
             $this->ajax->flushError($e->getMessage());
         }
@@ -545,7 +545,7 @@ class ExportController extends ControllerBase
         }
         try {
             $filename = ExcelImportUtils::arrayToExcel("复电统计", $head, $data, $floor, true);
-            $this->ajax->flushOk("/ams/public/" . $filename);
+            $this->ajax->flushOk("/ams/public/xls/" . $filename);
 
         } catch (Exception $e) {
             $this->ajax->flushError($e->getMessage());
@@ -576,8 +576,7 @@ class ExportController extends ControllerBase
 
         try {
             $filename = ExcelImportUtils::arrayToExcel("停电统计", $head, $data, $floor, true);
-
-            $this->ajax->flushOk("/ams/public/" . $filename);
+            $this->ajax->flushOk("/ams/public/xls/" . $filename);
         } catch (Exception $e) {
             $this->ajax->flushError($e->getMessage());
         }
@@ -610,7 +609,7 @@ class ExportController extends ControllerBase
         try {
             $filename = ExcelImportUtils::arrayToExcel("电费回收明细", $head, $data, $floor, true);
 
-            $this->ajax->flushOk("/ams/public/" . $filename);
+            $this->ajax->flushOk("/ams/public/xls/" . $filename);
         } catch (Exception $e) {
             $this->ajax->flushError($e->getMessage());
         }
@@ -644,7 +643,7 @@ class ExportController extends ControllerBase
         }
 
         $filename = ExcelImportUtils::arrayToExcel("客户分类统计", $headArr, $data, null, true);
-        $this->ajax->flushOk("/ams/public/" . $filename);
+        $this->ajax->flushOk("/ams/public/xls/" . $filename);
     }
 
     /**
@@ -656,7 +655,7 @@ class ExportController extends ControllerBase
 
         $headArr = $this->headArrear;
 
-        $params["PageSize"] = 100000; //不再需要分页
+        $params["limit"] = 100000; //不再需要分页
 
         list($total, $data, $countinfo) = CustomerHelper::Customers($params);
 //        list($total, $data) = CustomerHelper::ArrearsInfo($params);
@@ -670,6 +669,6 @@ class ExportController extends ControllerBase
         $floor = sprintf($floor, count($data), $countinfo["allCustomer"], $countinfo["cutCount"], $countinfo["specialCount"]);
 
         $filename = ExcelImportUtils::arrayToExcel("客户分类统计", $headArr, $data, $floor, true);
-        $this->ajax->flushOk("/ams/public/" . $filename);
+        $this->ajax->flushOk("/ams/public/xls/" . $filename);
     }
 } 

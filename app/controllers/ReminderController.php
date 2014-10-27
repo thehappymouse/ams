@@ -42,18 +42,19 @@ class ReminderController extends ControllerBase
         $this->view->disable();
         $params = $this->request->get();
 
+        $countinfo  = array();
+
         list($total, $data, $conditions, $param) = CustomerHelper::ArrearsInfo($params);
-        $builder = $this->modelsManager->createBuilder();
-        $result = $builder->columns(array("Count(*) as Count, SUM(Money) as Money "))
-            ->from("Arrears")
-            ->andWhere($conditions)
-            ->andWhere("IsClean=0")
-            ->getQuery()->execute($param)->getFirst();
-
-        $count = $result->Count;
-        $money = $result->Money;
-
-        $countinfo = array("arrearsCount" => $count, "arrearsMoney" => $money);
+//        $builder = $this->modelsManager->createBuilder();
+//        $result = $builder->columns(array("Count(*) as Count, SUM(Money) as Money "))
+//            ->from("Arrears")
+//            ->andWhere($conditions)
+//            ->andWhere("IsClean=0")
+//            ->getQuery()->execute($param)->getFirst();
+//
+//        $count = $result->Count;
+//        $money = $result->Money;
+//        $countinfo = array("arrearsCount" => $count, "arrearsMoney" => $money);
 
         $this->ajax->countInfo = $countinfo;
         $this->ajax->total = $total;

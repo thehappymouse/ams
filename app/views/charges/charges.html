@@ -1,243 +1,392 @@
-			<script type="text/javascript">
 
-			$(document).ready(function(){
-                var clickBox = new countMoney();//checkbox全点击对象
-                clickBox.allClick();
-                clickBox.singleClick();
-			    var G = new AjaxFun();//获取ajax方法
-				var infourl = "/ams/Charges/Customer";
+<?php
+$this->pageTitle = "系统设置";
+?>
+<script type="text/javascript">
 
-				//查询编号的提交
-				$("button:eq(0)").click(function(){
-					var val = $("input:eq(0)").val();
-					var data = {ID:val};
-					G.GetAjax('get',infourl,data,SetTable,"true");
-				})
-				
-				//收费金额的提交
-				$("button:eq(1)").click(function(){
-					var number = $("td:eq(3)")[0].innerText;
-					var url = "/ams/Charges/Create";
-                    var ID = checkbox();
-                    if (ID == 0) {
-                        $("button:eq(1)").attr("disabled","true");
+Ext.onReady(function () {
+    var searchPanel= new Ext.TabPanel({
+        labelWidth: 85,
+        activeTab: 0,
+        height:68,
+        plain:true,
+        defaults:{autoScroll: true},
+        items:[{
+            title: '用户查询',
+            xtype: 'panel',
+            style:'margin-top:10px;margin-bottom:8px;',
+            items: [{
+                xtype: 'compositefield',
+                width:500,
+                items: [{
+                    xtype: 'displayfield',
+                    style: 'text-align:right;width:85px;',
+                    value: '<a style="color:red;">*</a>用户编号: '
+                },{
+                    xtype: 'textfield',
+                    id:'searchNumber',
+                    width: 220
+                },{
+                    width:100,
+                    xtype:'button',
+                    text:'查询',
+                    handler:function(){
+                        var number = Ext.getCmp('searchNumber').getValue();
+                        if (number == "") {
+                            Ext.Msg.alert('提示',"编号不能为空");
+                            return;
+                        }
+                        infoPanel.getForm().load({
+                            url:'/ams/Charges/Customer?ID='+number,
+                            success:function(c,action) {
+                                var text = Ext.decode(action.response.responseText);
+                                Ext.getCmp('LandlordPhone').setValue(text.data.LandlordPhone);
+                                Ext.getCmp('RenterPhone').setValue(text.data.RenterPhone);
+                                listView.store.removeAll();
+                                listView.store.load({
+                                    params : {ID : number },
+                                    scope: store,
+                                    add: false
+                                })
+                            },
+                            failure:function(action,msg) {
+                                    infoPanel.getForm().reset();
+                                    listView.store.removeAll();
+                                    Ext.Msg.alert('提示',"没有此编号数据");return;
+                            }
+                        })
                     }
-					var value = $("form").serialize()+'&Number='+number+'&ID='+ID;
-					var val = {ID:number};
-					G.GetAjax('post',url,value,null,false);
-					G.GetAjax('get',infourl,val,SetTable);
+                }]
+            }]
+        }]
+    });
 
-					$("form")[0].reset();
-					//G.GetAjax('post',url,value);
-				})
+    var infoPanel = new Ext.FormPanel({
+        labelWidth: 75,
+        title: '用户信息',
+        labelAlign: 'right',
+        defaults:{
+            border: false
+        },
+        style: 'margin-top:10px;margin-bottom:8px;',
+        autoHeight:true,
+        layout:'column',
+        items: [{
+            columnWidth:.25,
+            layout: 'form',
+            defaults:{
+                xtype: 'textfield',
+                readOnly:true
+            },
+            items: [{
+                fieldLabel: '用户名称',
+                name: 'Name',
+                anchor:'95%'
+            },{
+                fieldLabel: '抄表段编号',
+                name: 'Segment',
+                id:'SegmentId',
+                anchor:'95%'
+            },new QuietCombox({
+                fieldLabel: '停电标志',
+                displayField:'Text',
+                valueField:'IsCut',
+                hiddenName:'IsCut',
+                fields:['Text','IsCut'],
+                data   : [['全部', '2'],['是', '1'],['否', '0']],
+                anchor:'95%'
+            })]
+        },{
+            columnWidth:.25,
+            layout: 'form',
+            defaults:{
+                xtype: 'textfield',
+                readOnly:true
+            },
+            items: [{
+                fieldLabel: '用户编号',
+                name: 'Number',
+                id:'NumberID',
+                anchor:'95%'
+            },{
+                fieldLabel: '房东电话',
+                name: 'LandlordPhone',
+                anchor:'95%'
+            },new QuietCombox({
+                fieldLabel: '租房户',
+                displayField:'Text',
+                valueField:'IsRent',
+                hiddenName:'IsRent',
+                fields:['Text','IsRent'],
+                data   : [['全部', '2'],['是', '1'],['否', '0']],
+                anchor:'95%'
+            })]
+        },{
+            columnWidth:.25,
+            layout: 'form',
+            defaults:{
+                xtype: 'textfield',
+                readOnly:true
+            },
+            items: [{
+                fieldLabel: '抄表员',
+                name: 'SegUser',
+                anchor:'95%'
+            },{
+                fieldLabel: '用电地址',
+                name: 'Address',
+                anchor:'95%'
+            }]
+        },{
+            columnWidth:.25,
+            layout: 'form',
+            defaults:{
+                xtype: 'textfield',
+                readOnly:true
+            },
+            items: [{
+                fieldLabel: '管理班组',
+                name: 'Team',
+                anchor:'95%'
+            },{
+                fieldLabel: '停电方式',
+                name: 'CutStyle',
+                anchor:'95%'
+            }]
+        }]
+    });
 
-				//添加表格0268476438
-				function SetTable(value) 
-				{
-					var title = '用户欠费信息';
-					var array = Array("电费年月","欠费金额","结清标志","催费次数","停电次数");
-					var model = Array("YearMonth","Money","IsClean","PressCount","CutCount");
-					var modelcss = Array("text-align:center", "text-align:center", "text-align:center", "text-align:center",  "text-align:center");
+    var store = new Ext.data.JsonStore(
+        {
+            id: 'tvliststore',
+            url: '/ams/Charges/Arrears',
+            root: 'data',
+            fields: chargesMoneyFields
+        });
 
-					if (value == null){
-						$("#info div").remove();
-						$("#Arrears div").remove();
-						$("form").css("display","none");
-						$("#tip").css("display","block");
-						return;
-					}
+    var sm = new Ext.grid.CheckboxSelectionModel();
+    var listView = new Ext.grid.GridPanel(
+        {
+            store: store,
+            multiSelect: true,
+            title: '电费欠费情况',
+            stripeRows: true,
+            region: 'center',
+            sm: sm,
+            autoHeight:true,
+            emptyText: '没有节目',
+            reserveScrollOffset: true,
+            viewConfig: {forceFit:true},
+            columns: [
+                sm,
+                {
+                    id: 'name',
+                    header: '应收年月',
+                    sortable: true,
+                    align:"center",
+                    dataIndex: 'YearMonth'
+                }, {
+                    header: '欠费金额',
+                    dataIndex: 'Money',
+                    align:"center",
+                    sortable: true
+                }, {
+                    header: '停电次数',
+                    sortable: true,
+                    align:"center",
+                    dataIndex: 'CutCount'
+                }, {
+                    header: '结清标志',
+                    sortable: true,
+                    align:"center",
+                    dataIndex: 'IsClean',
+                    renderer:function(v) {
+                        if (v == 1) {
+                            return '已结清';
+                        } else {
+                            return '未结清';
+                        }
+                    }
+                }, {
+                    header: '催费次数',
+                    sortable: true,
+                    align:"center",
+                    dataIndex: 'CutCount'
+                }]
+        });
+    listView.on("render",  function(p,e){
+        p.store.on('load',function(){
+            listView.getSelectionModel().selectAll();
+            var money = 0;
+            var ids = [];
+            Ext.each(listView.store.data.items, function (item) {
 
-					var v =  ReplaceArray(value);
-					var number = v.Number;
-					SetInfoTable(v);
-                    if (value['Arrears'] == "") {
-                        $("#Arrears div").remove();
-                        $("form").css("display","none");
+                money += parseInt(item.data.Money);
+                ids.push(item.data.ID);
+            });
+            var idString = ids.join(",");
+            Ext.getCmp('MoneyTotalo').setValue(money);
+            Ext.getCmp('moneyID').setValue(idString);
+        });
+        p.getSelectionModel().on("selectionchange", function(sm){
+            var money = 0;
+            var ids = [];
+            Ext.each(this.getSelections(),function(item){
+                money += parseInt(item.data.Money);
+                ids.push(item.data.ID);
+            })
+            var idString = ids.join(",");
+            Ext.getCmp('MoneyTotalo').setValue(money);
+            Ext.getCmp('moneyID').setValue(idString);
+        });
+    })
+
+
+    var submitForm = new Ext.FormPanel({
+        labelWidth: 85,
+        defaults:{
+            border: false
+        },
+        url:'/ams/Charges/Create',
+        title: '收费',
+        style: 'margin-top:10px;margin-left:20px',
+        labelAlign: 'right',
+        layout: 'column',
+        items: [{
+            columnWidth:.2,
+            layout: 'form',
+            items: [{
+                fieldLabel: '<a style="color:red;">*</a>收费金额',
+                xtype: 'textfield',
+                id:'MoneyTotalo',
+                readOnly:true,
+                name:'Money',
+                width: 151
+            },{
+                fieldLabel:'房东电话',
+                xtype: 'textfield',
+                name:'LandlordPhone',
+                id:'LandlordPhone',
+                width: 151
+            },new QuietCombox({
+                fieldLabel: '签订费控协议',
+                displayField:'Text',
+                hiddenName:'IsControl',
+                valueField:'IsControl',
+                fields:['Text','IsControl'],
+                data   : [['是', '1'],['否', '0']],
+                width: 151
+            }),{
+                style:'margin-left:90px',
+                width:100,
+                xtype:'button',
+                text:'收费',
+                handler:function(){
+                    var number = Ext.getCmp('NumberID').getValue();
+                    if (listView.getSelectionModel().getSelections().length == 0) {
+                        Ext.Msg.alert('提示','请选择收费条目!');
                         return;
                     }
-					SetArrearsTable(number,v['Arrears'],array,title,model,modelcss);
-					$("form").css("display","block");
-				}
+                    submitForm.getForm().submit({
+                        params : {Number : number },
+                        success:function(form,action){
+                            infoPanel.getForm().load({
+                                url:'/ams/Charges/Customer?ID='+number
+                            })
+                            listView.store.removeAll();
+                            listView.store.reload();
+                            listView.store.load({
+                                params : {ID : number },
+                                scope: store,
+                                add: false
+                            })
+                        },
+                        failure:function(form,action){
+                            var text = Ext.decode(action.response.responseText);
+                            Ext.Msg.alert('提示',text.msg);return;
+                        }
+                    });
+                }
+            }]
+        },{
+            columnWidth:.2,
+            layout: 'form',
+            items: [
+            new QuietCombox({
+                fieldLabel: '是否租房',
+                displayField:'Text',
+                valueField:'IsRent',
+                hiddenName:'IsRent',
+                fields:['Text','IsRent'],
+                data   : [['是', '1'],['否', '0']],
+                width: 151
+            }),{
+                fieldLabel:'房客电话',
+                xtype: 'textfield',
+                name:'RenterPhone',
+                id:'RenterPhone',
+                width: 151
+            },{
+                xtype: 'hidden',
+                id:'moneyID',
+                name: 'ID'
+            }]
+        }]
+    })
 
+    var infoTab = new Ext.TabPanel({
+        labelWidth: 85,
+        activeTab: 0,
+        //height:150,
+        plain:true,
+        style: 'margin-top:15px',
+        defaults:{autoScroll: true},
+        items:[
+            infoPanel
+        ]
+    });
 
-				//用户信息表格
-				function SetInfoTable(v)
-				{
+    var moneyTab = new Ext.TabPanel({
+        labelWidth: 85,
+        activeTab: 0,
+        plain:true,
+        style: 'margin-top:15px',
+        defaults:{autoScroll: true},
+        items:[
+            listView
+        ]
+    });
+    var submmitTab = new Ext.TabPanel({
+        labelWidth: 85,
+        activeTab: 0,
+        height:145,
+        plain:true,
+        style: 'margin-top:15px',
+        defaults:{autoScroll: true},
+        items:[
+            submitForm
+        ]
+    });
+    var allPanel = new Ext.Panel({
+        region: 'center',
+        fileUpload: true,
+        autoScroll: true,
+        bodyStyle: "padding:15px;",
+        items: [
+            searchPanel,
+            infoTab,
+            moneyTab,
+            submmitTab
+        ]
+    });
+    new Ext.Viewport(
+        {
+            layout: 'border',
+            items: [
+                allPanel
+            ]
+    });
 
-					var IsCutText;
-					var IsRentText;
+});
 
-					if (v.IsCut == 2 ){ IsCutText = '全部'} else if( v.IsCut ==1) { IsCutText = '已停电'} else { IsCutText = '未停电'}
-					if (v.IsRent == 2 ){ IsRentText = '全部'} else if( v.IsRent ==1) { IsRentText = '是'} else { IsRentText = '否'}
-					var tpl = '<div><div   class="line ClientInfo" >用户基本信息</div><table  >'+
-				        '<tr >'+
-				            '<td  style="width:155px" >用户名称：</td>'+
-				            '<td style="text-align:left;width:155px"><div title="'+v.Name+'" style="width:150px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">'+v.Name+'</div></td>'+
-				            '<td style="width:155px">用户编号：</td>'+
-				            '<td style="text-align:left;width:155px"">'+v.Number+'</td>'+
-				            '<td style="width:155px">管理班组：</td>'+
-				            '<td style="text-align:left;width:155px">'+v.Team+'</td>'+
-				        '</tr>'+
-				        '<tr>'+
-				            '<td class="RightHabitat">用电地址：</td>'+
-				            '<td colspan="3" style="text-align:left"><div title="'+v.Address+'" style="width:467px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">'+v.Address+'</div></td>'+
-                            '<td class="RightHabitat">抄表段编号：</td>'+
-                            '<td style="text-align:left">'+v.Segment+'</td>'+
-				        '</tr>'+
-				        '<tr>'+
-                            '<td class="RightHabitat">抄表员：</td>'+
-                            '<td style="text-align:left">'+v.SegUser+'</td>'+
-				            '<td class="RightHabitat">停电标志：</td>'+
-				            '<td class="Warn" style="text-align:left">'+ IsCutText+'</td>'+
-				            '<td class="RightHabitat">停电方式：</td>'+
-				            '<td class="Warn" style="text-align:left">'+v.CutStyle+'</td>'+
-				        '</tr>'+
-				        '<tr>'+
-				            '<td class="RightHabitat">租房户：</td>'+
-				            '<td style="text-align:left">'+IsRentText+'</td>'+
-				            '<td class="RightHabitat">房东电话：</td>'+
-				            '<td style="text-align:left">'+v.LandlordPhone+'</td>'+
-				            '<td class="RightHabitat"></td>'+
-				            '<td></td>'+
-				        '</tr>'+
-				    '</table></div>';
-
-				    $("#info div").remove();
-				    $("#info").append(tpl);
-				}
-
-				//欠费信息表格
-				//代表number用户编号，s数据是填充表格的数据，headarray是表头,title是表格上的标题
-				function SetArrearsTable(number,s,headarray,title,model)
-				{	
-					var s =  ReplaceArray(s);
-					var bodyTpl = "";
-					var headmodel = "";
-					var money = 0;
-					var text;
-					if (s) {//0268001535
-						for (var i in s) {
-							bodyTpl += '<tr style="height:22px">'+
-								'<td style="width:30px;text-align:center"><input name="select"  value="'+s[i].ID+'"  type="checkbox" style="vertical-align:text-bottom;"    />';
-								for (var n in model) {
-									if (model[n] == "CutCount" || model[n] == "PressCount" || model[n] == "CustomerNumber") {
-										bodyTpl +='<td id="'+model[n]+'" title="'+s[i].ID+'/'+number+'/'+s[i].YearMonth+'" style="text-decoration:underline;cursor:pointer;text-align:center">'+s[i][model[n]]+'</td>';
-									} else{
-										if (model[n] == "IsClean") {
-											if (s[i][model[n]] == 2) {
-												text = '<div  title="预收转逾期">预收转逾期</div>';
-											} else if (s[i][model[n]] == 1){
-												 text = '<div  title="已结清">是</div>';
-											} else {
-												 text = '<div  title="未结清">否</div>';
-											}
-										} else {
-											text = s[i][model[n]];
-										}
-										bodyTpl += '<td style="text-align:center">'+text+'</td>';
-									}
-								}
-					        bodyTpl +='</tr>';
-					        if (s[i].IsClean == 0) {
-					        	money += parseInt(s[i].Money);
-                                allMoney[s[i].ID] = s[i].Money;
-					        }
-						}
-						$("input[name=Money]").val(money);
-					}
-
-					var headTpl = '<div><div class="line ClientInfo" >'+title+'</div><table id="info"  >'+
-					    		'<thead>'+
-						    	'<tr >'+
-						    	'<th   ><input name="allcheck" type="checkbox"/></th>';
-			    	for (var i in headarray) {
-			    		headmodel +='<th>'+headarray[i]+'</th>';
-			    	}
-				    var footTpl = '</tr></tbody></table></div>';
-				    var tpl = headTpl+headmodel+'</thead><tbody>'+bodyTpl+footTpl;
-
-				    $("#Arrears div").remove();
-				    $("#Arrears").append(tpl);
-					$("#Arrears table tr:odd").addClass("InfoTr");
-					$("#tip").css("display","none");
-                    var ID =  checkbox();
-                    $("[name=ID]").val(ID);
-				}
-			})
-
-			</script>
-			<br/>
-			<div >
-				<div class="line ClientInfo" >查询条件</div>
-				<div style="border:1px solid #009966;height:60px;">
-					<div style="margin-top:15px">
-				    	<div class=" InputStyle" style="margin-left:12px;float:left;margin-top:2px;*margin-top:3px">用户编号：</div>
-					    <div class=" TreeInput" style="margin-left:3px;float:left;">
-					      <input type="text" class="input-small" style="width:120px;">
-					    </div>
-					    <button type="button" class="btn btn-success" style="background-color:#009966;margin-left:20px" >查询</button>
-					</div>
-				</div>
-		    </div>
-		    <div id="tip" style="color:red;margin-left:12px;display:none;margin-top:4px">
-				当前查询没有数据
-			</div>
-			<br />
-		    <div  id="info" class="TableCss" >
-		    	<div></div>
-		    </div>
-		    <br />
-		    <div id="Arrears" class="TableCss">
-		    	<div>
-		    	</div>
-		    </div>
-
-
-		    <br />
-		    <form style="display:none">
-		    	<div   class="line ClientInfo" >收费信息录入</div>
-				<div style="border:1px solid #009966;height:125px">
-				    <div class=" mt_20" style="width:100%;height:40px;margin-top:15px">
-				    	<div class=" InputStyle" style="margin-left:10px;float:left;*margin-top:5px">收款金额：</div>
-					    <div class=" TreeInput" style="margin-left:5px;float:left">
-					      <input name="Money" type="text" class="input-small"  style="width:50px">
-					    </div>
-				    </div>
-				 	<div >
-				    	<div class=" InputStyle" style="margin-left:10px;float:left;*margin-top:5px">是否租房：</div>
-					    <div class=" TreeInput" style="margin-left:5px;float:left;width:60px;*margin-left:10px">
-					       <select name="IsRent" style="width:50px">
-									<option value="0" >否</option>
-									<option value="1">是</option>
-								</select>
-					    </div>
-					    <div style="float:left;width:220px;height:100px">
-						    <div class=" InputStyle" style="margin-left:10px;float:left;*margin-top:5px">房东电话：</div>
-						    <div class=" TreeInput" style="margin-left:5px;float:left">
-						      <input name="LandlordPhone" type="text" class="input-small" style="width:115px" />
-						    </div>
-						    <div style="margin-left:10px">
-							    <div class=" InputStyle" style="float:left;margin-top:5px;*margin-top:8px">房客电话：</div>
-								<div  class=" TreeInput" style="float:left;margin-left:5px;margin-top:5px;*margin-left:0px;">
-							      <input name="RenterPhone" type="text" class="input-small" style="width:115px" />
-							    </div>
-							</div>
-
-					    </div>
-			
-
-					    <div class=" InputStyle" style="margin-left:15px;float:left;width:100px;*margin-top:5px">签订费控协议：</div>
-					    <div class=" TreeInput" style="margin-left:5px;float:left">
-					       <select name="IsControl" style="width:50px">
-									<option value="0">否</option>
-									<option value="1">是</option>
-							</select>
-				    	</div>
-                        <input name="ID" type="hidden" />
-						<button type="button"  disabled class="btn btn-success" style="*margin-top:2px;background-color:#009966" >收费</button>
-					</div>
-			</div>
-			</form>	
-						<br /><br /><br /><br />
-
-    	
+</script>

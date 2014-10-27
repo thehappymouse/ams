@@ -8,7 +8,7 @@ class Customer extends \Phalcon\Mvc\Model
      * @var integer
      */
     public $ID;
-     
+
     /**
      *
      * @var string
@@ -20,55 +20,67 @@ class Customer extends \Phalcon\Mvc\Model
      * @var string
      */
     public $CreateTime;
-     
+
     /**
      *
      * @var string
      */
     public $Number;
-     
+
     /**
      *
      * @var string
      */
     public $Address;
-     
+
     /**
      *
-     * @var float
+     * @var double
      */
     public $Balance;
-     
+
+    /**
+     *
+     * @var double
+     */
+    public $ArrearsMoney;
+
     /**
      *
      * @var string
      */
     public $IsRent;
-     
+
     /**
      *
      * @var string
      */
     public $LandlordPhone;
-     
+
     /**
      *
      * @var string
      */
     public $RenterPhone;
-     
+
     /**
      *
      * @var string
      */
     public $Cause;
-     
+
+    /**
+     *
+     * @var string
+     */
+    public $IsSpecial;
+
     /**
      *
      * @var string
      */
     public $IsCut;
-     
+
     /**
      *
      * @var string
@@ -80,7 +92,13 @@ class Customer extends \Phalcon\Mvc\Model
      * @var string
      */
     public $IsClean;
-     
+
+    /**
+     *
+     * @var string
+     */
+    public $Segment;
+
     /**
      *
      * @var integer
@@ -88,35 +106,29 @@ class Customer extends \Phalcon\Mvc\Model
     public $SegmentID;
 
     /**
-     * @var string
-     */
-    public $Segment;
-
-    /**
+     *
      * @var string
      */
     public $SegUser;
 
     /**
+     *
      * @var string
      */
     public $IsControl;
 
     /**
+     *
      * @var string
      */
     public $Desc;
 
     /**
-     * @var string
-     */
-    public $IsSpecial;
-
-    /**
+     *
      * @var string
      */
     public $AssetNumber;
-     
+
     /**
      * Initialize method for model.
      */
@@ -136,15 +148,20 @@ class Customer extends \Phalcon\Mvc\Model
     }
 
     /**
+     * 管理班组
      * @var string
      */
     public $Team;
-
     /**
-     * 总停决次数
      * @var int
      */
-    public $ArrearsCount;
+    public $CutCount;
+
+    /**
+     *
+     * @var integer
+     */
+    public $PressCount;
 
     public function getTeamName()
     {
@@ -159,16 +176,6 @@ class Customer extends \Phalcon\Mvc\Model
     }
 
     /**
-     * 根据编号查找客户
-     * @param $number
-     * @return Customer
-     */
-    public static  function findByNumber($number)
-    {
-        return self::findFirst(array("Number=:num:", "bind" => array("num" => $number)));
-    }
-
-    /**
      * Independent Column Mapping.
      */
     public function columnMap()
@@ -176,25 +183,29 @@ class Customer extends \Phalcon\Mvc\Model
         return array(
             'ID' => 'ID', 
             'Name' => 'Name', 
-            'CreateTime' => 'CreateTime',
+            'CreateTime' => 'CreateTime', 
             'Number' => 'Number', 
             'Address' => 'Address', 
             'Balance' => 'Balance', 
+            'ArrearsMoney' => 'ArrearsMoney', 
             'IsRent' => 'IsRent', 
             'LandlordPhone' => 'LandlordPhone', 
             'RenterPhone' => 'RenterPhone', 
             'Cause' => 'Cause', 
+            'IsSpecial' => 'IsSpecial', 
             'IsCut' => 'IsCut', 
             'CanCut' => 'CanCut', 
-            'IsClean' => 'IsClean',
-            'SegmentID' => 'SegmentID',
-            'Segment' => 'Segment',
-            'IsControl' => 'IsControl',
-            'SegUser' => 'SegUser',
-            'IsSpecial' => 'IsSpecial',
-            'AssetNumber' => 'AssetNumber',
-            'Desc' => 'Desc',
-            'ArrearsCount' => 'ArrearsCount',
+            'IsClean' => 'IsClean', 
+            'Segment' => 'Segment', 
+            'SegmentID' => 'SegmentID', 
+            'SegUser' => 'SegUser', 
+            'IsControl' => 'IsControl', 
+            'Desc' => 'Desc', 
+            'AssetNumber' => 'AssetNumber', 
+            'ArrearsCount' => 'ArrearsCount', 
+            'CutCount' => 'CutCount', 
+            'PressCount' => 'PressCount'
         );
     }
+
 }

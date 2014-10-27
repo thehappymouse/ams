@@ -18,7 +18,18 @@ class CountsearchController extends ControllerBase
     {
         list($data, $total) = CountHelper::AccountCheck($this->request->get());
 
-        $this->ajax->flushData(array("charges" => $data, "Total" => $total));
+        $this->ajax->flushData($data);
+    }
+
+    /**
+     * 对账查询
+     * 参数： Team, Name
+     */
+    public function ReconciliationInquiryListAction()
+    {
+        list($data, $total) = CountHelper::AccountCheck($this->request->get());
+
+        $this->ajax->flushData($total);
     }
 
     /**
@@ -37,8 +48,8 @@ class CountsearchController extends ControllerBase
     public function ChargesAction()
     {
         list($totaldata, $data) = CountHelper::Charges($this->request->get());
-
-        $this->ajax->flushData(array("Data" => $data, "TotalData" => $totaldata));
+        $this->ajax->TotalData = $totaldata;
+        $this->ajax->flushData($data);//array("Data" => $data, "TotalData" => $totaldata));
     }
 
     /**
@@ -47,8 +58,9 @@ class CountsearchController extends ControllerBase
     public function pressAction()
     {
         list($totalData, $data) = CountHelper::DetailsFee($this->request->get());
+        $this->ajax->TotalData = $totalData;
 
-        $this->ajax->flushData(array("Data" => $data, "TotalData" => $totalData));
+        $this->ajax->flushData($data);
     }
 
     /**
@@ -58,11 +70,13 @@ class CountsearchController extends ControllerBase
     {
         list($data, $d2, $total) = CountHelper::Cut($this->request->get());
 
-        if($data == null && $d2 == null){
+        if ($data == null && $d2 == null) {
             $this->ajax->flushData($data);
         }
 
-        $this->ajax->flushData(array("data" => $data, "data2" => $d2, "TotalData" => $total));
+        $this->ajax->data2 = $d2;
+        $this->ajax->TotalData = $total;
+        $this->ajax->flushData($data);
     }
 
     /**
@@ -71,11 +85,14 @@ class CountsearchController extends ControllerBase
     public function ResetAction()
     {
         list($data, $d2, $total) = CountHelper::Reset($this->request->get());
-        if($data == null && $d2 == null){
+        if ($data == null && $d2 == null) {
             $this->ajax->flushData($data);
         }
 
-        $this->ajax->flushData(array("data" => $data, "data2" => $d2, "TotalData" => $total));
+        $this->ajax->data2 = $d2;
+        $this->ajax->TotalData = $total;
+        $this->ajax->flushData($data);
+
     }
 
     /**

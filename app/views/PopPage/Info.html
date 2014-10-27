@@ -188,7 +188,7 @@
 				    				<?php echo $s->YearMonth; 	?>
 				    			</td>
 				    			<td >
-				    				<?php echo $s->Money;  	$sum += $s->Money ?>
+				    				<?php echo $s->Money;  if (!$s->IsClean){	$sum += $s->Money;} ?>
 				    			</td>
 				    			<td >
 				    				<?php   $a = $s->IsClean; if( $a == 1) { echo "已结清";} elseif ($a == 0) { echo "未结清"; } else {echo "预收转逾期";} ?>

@@ -60,8 +60,8 @@ class Elements extends Phalcon\Mvc\User\Component
     public function getPermissionsMenu()
     {
         $auth = $this->session->get('auth');
+//        $auth["Role"] = 7;;
         if ($auth) {
-
             $moels = $this->getMenuByRole($auth["Role"]);
 
             $headerMenu = $moels;
@@ -72,13 +72,67 @@ class Elements extends Phalcon\Mvc\User\Component
         return $headerMenu;
     }
 
+    public function getSubMenu()
+    {
+        $auth = $this->session->get('auth');
+        $controllerName = strtolower($this->view->getControllerName());
+        $actionName = $this->view->getActionName();
+
+        $li_base = "<LI><A class='' id=mainMenu_item_1_1%s title=管理 onclick=javascript:mainMenu.setTab(%s) href='javascript:void(0)' target=_self>%s</A></LI>";
+        $moels = $this->getPermissionsMenu();
+        $index = 1;
+        foreach ($moels as $m) {
+            if (count($m["model"]) == 0) continue;
+            $display = ($index == 1) ? "block" : "none";
+            echo '<UL id="mainMenu_menu_' . $index . '" style="display:' . $display . '">';
+
+            $second = $m["model"];
+            $j = 1;
+            foreach ($second as $se) {
+                $action = '/ams/' . $se["Url"];
+                echo '    <LI><A id="mainMenu_item_' . $index . '_'. $j++ .'" target=PageFrame href="' . $action . '" title="收费">' . $se["Name"] . '</A></LI>';
+            }
+            echo '</UL>';
+
+            $index++;
+        }
+
+    }
+
+    public function getMenu()
+    {
+        $auth = $this->session->get('auth');
+        $controllerName = strtolower($this->view->getControllerName());
+        $actionName = $this->view->getActionName();
+
+        $class = "";
+        $li_base = '<LI id=mainMenu_tab_%s><A class="%s"  title=%s  href="javascript:void(0)" >%s</A></LI>';
+        $moels = $this->getPermissionsMenu();
+        $index = 1;
+        foreach ($moels as $m) {
+
+            if (count($m["model"]) == 0) continue;
+
+            if ($index == 1) {
+                $class = "active";
+            } else {
+                $class = "";
+            }
+
+            echo sprintf($li_base, $index, $class, $m["Name"], $m["Name"]);
+
+            $index++;
+        }
+
+
+    }
 
     /**
      * Builds header menu with left and right items
      *
      * @return string
      */
-    public function getMenu()
+    public function getMenu2()
     {
         $auth = $this->session->get('auth');
         $controllerName = strtolower($this->view->getControllerName());

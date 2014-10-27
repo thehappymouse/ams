@@ -80,6 +80,19 @@ class SiteController extends ControllerBase
 
     public function index2Action()
     {
+        $this->view->setTemplateAfter("empty");
+        $rid = $this->loginUser["Role"];
+        $role = ARole::findFirst($rid);
+        $page = $role->IndexPage;
+        $page = $page ? $page : "/site/index2";
+
+        $page = substr($page, 1);
+        $this->redirect($page);
+
+        if (in_array($this->loginUser["Role"], array("1"))) {
+            $this->redirect("site/index");
+
+        }
 
     }
 }

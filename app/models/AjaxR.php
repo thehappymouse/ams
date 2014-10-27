@@ -57,7 +57,7 @@ class AjaxR
     public function flushLog($log)
     {
         if ($log->Action != "" && $log->Data != "") {
-            $log->save();
+            $r = $log->save();
         }
     }
 

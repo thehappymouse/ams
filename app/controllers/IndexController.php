@@ -4,13 +4,14 @@ class IndexController extends ControllerBase
 {
     public function indexAction()
     {
-        $rid = $this->loginUser["Role"];
-        $role  = ARole::findFirst($rid);
-        $page = $role->IndexPage;
-        $page = $page ? $page : "/site/index2";
-
-        $page = substr($page, 1);
-        $this->redirect($page);
+//        $this->view->setTemplateAfter("empty");
+//        $rid = $this->loginUser["Role"];
+//        $role  = ARole::findFirst($rid);
+//        $page = $role->IndexPage;
+//        $page = $page ? $page : "/site/index2";
+//
+//        $page = substr($page, 1);
+//        $this->redirect($page);
 //
 //        if (in_array($this->loginUser["Role"], array("1"))) {
 //            $this->redirect("site/index");
@@ -18,6 +19,11 @@ class IndexController extends ControllerBase
 //        } else {
 //            $this->redirect("site/index2");
 //        }
+    }
+
+    public function infobarAction()
+    {
+        //$this->view->setTemplateAfter("empty");
     }
 
     public function logoutAction()
@@ -51,6 +57,7 @@ class IndexController extends ControllerBase
 
     public function loginCheckAction()
     {
+
         $this->ajax->logData->Action = "登录";
 
         $name = $this->request->get("UserName");
@@ -63,6 +70,7 @@ class IndexController extends ControllerBase
 
         if ($r) {
             $this->ajax->logData->Result = "登录成功";
+            $this->ajax->logData->Data = $name;
             $this->_registerSession($r);
             $this->ajax->flushData("index/index");
 
