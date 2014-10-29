@@ -8,9 +8,9 @@ Ext.onReady(function () {
     var searchPanel= new Ext.TabPanel({
         labelWidth: 85,
         activeTab: 0,
-        height:70,
+        height:68,
         plain:true,
-        bodyStyle: 'padding:10px',
+        bodyStyle: 'padding:8px',
         defaults:{autoScroll: true},
         items:[{
             title: '用户查询',
@@ -32,11 +32,21 @@ Ext.onReady(function () {
                     text:'查询',
                     handler:function(){
                         var number = Ext.getCmp('searchNumber').getValue();
+                        if (number == "") {
+                            Ext.MessageBox.alert("提示","没有数据！");
+                            return;
+                        }
                         infoPanel.getForm().load({
                             url:'SingleInquiries?Number='+number,
                             success:function() {
                                 listView.store.load({
                                     params : {Number : number },
+                                    callback:function(v){
+                                        if (v.length == 0) {
+                                            listView.store.removeAll();
+                                            Ext.MessageBox.alert("提示","没有数据！");
+                                        }
+                                    },
                                     add: false
                                 })
                             },

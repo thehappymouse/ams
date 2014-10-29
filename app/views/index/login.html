@@ -53,32 +53,57 @@
       }
     })
 </script>
+<link href="/ams/public/css/ext-all.css" rel="stylesheet" type="text/css"/>
 <style>
      #content {
-        position:absolute;
-        top:50%;
-        height:240px;
-        margin-top:-120px; /* negative half of the height */
+         position:absolute;
+        top:65%;
+         left:40%;
+
+         /*  margin-left:-120px; negative half of the height */
     }
+
+ body{
+     background-size:cover;
+    background: url(/ams/public/images/login/login.png) no-repeat 50% 50%;
+}
+
+ div#div1{
+     position:fixed;
+     top:0;
+     left:0;
+     bottom:0;
+     right:0;
+     z-index:-1;
+ }
+ div#div1 > img {
+     height:100%;
+     width:100%;
+ }
 </style>
-<div  id="content"    name="login" style="width:470px;height:110px;border:1px solid #009966;padding-top:20px;padding-left:50px">
+<body >
+<!--<div id="div1"><img src="/ams/public/images/login/login.png" /></div>-->
+<div  id="content"    name="login" >
     <form >
   <div>
-    <label  for="UserName">登录名：</label>
-    <div >
-      <input name="UserName" style="width:180px" type="text" id="UserName" placeholder="用户名">
-    </div>
+    <label  for="UserName" style="color:white">登录名：</label>
+
+      <input name="UserName" style="width:150px" type="text" id="UserName" placeholder="用户名">
+
   </div>
   <div >
-    <label for="inputPassword">密&nbsp;&nbsp;码：</label>
-    <div >
-      <input name="Password" style="width:168px;height:15px" type="password" id="inputPassword" placeholder="密码">
-    </div>
+    <label for="inputPassword" style="color:white">密&nbsp;&nbsp;&nbsp;&nbsp;码：</label>
+
+      <input name="Password" style="width:150px" type="password" id="inputPassword" placeholder="密码">
+
   </div>
   <div >
-    <div >
-      <button type="button" class="btn">登录</button>
+    <div style="margin-left:28%;margin-top:5px">
+        <table id="ext-comp-1115" cellspacing="0" class="btn x-btn x-btn-noicon" style="width: 50px; left: 0px; top: 0px;"><tbody class="x-btn-small x-btn-icon-small-left"><tr><td class="x-btn-tl"><i>&nbsp;</i></td><td class="x-btn-tc"></td><td class="x-btn-tr"><i>&nbsp;</i></td></tr><tr><td class="x-btn-ml"><i>&nbsp;</i></td><td class="x-btn-mc"><em class="" unselectable="on"><button type="button" id="ext-gen136" class=" x-btn-text">登录</button></em></td><td class="x-btn-mr"><i>&nbsp;</i></td></tr><tr><td class="x-btn-bl"><i>&nbsp;</i></td><td class="x-btn-bc"></td><td class="x-btn-br"><i>&nbsp;</i></td></tr></tbody></table>
+
+
     </div>
   </div>
 </form>
 </div>
+</body>

@@ -84,68 +84,80 @@ Ext.onReady(function(){
         ]
     });
 
-    var products = ['ProductX', 'ProductY'],
-    fields = [],
-    columns = [],
-    data = [],
-    continentGroupRow = [
-        {header: 'Asia', colspan: 4, align: 'center'},
-        {header: 'Europe', colspan: 6, align: 'center'}
-    ],
-    cityGroupRow = [
-                  {header: 'Beijing', colspan: 2, align: 'center'},
-                  {header: 'Tokyo', colspan: 2, align: 'center'},
-                  {header: 'Berlin', colspan: 2, align: 'center'},
-                  {header: 'London', colspan: 2, align: 'center'},
-                  {header: 'Paris', colspan: 2, align: 'center'}
-    ];
+    var PersonRecord = Ext.data.Record.create([
+        {name: 'YearMonth', type: 'string'},
+        {name: 'Action', type: 'string'},
+        {name: 'Name', type: 'string'},
+        {name: 'Value'}
+    ]);
 
-    var group = new Ext.ux.grid.ColumnHeaderGroup({
-        rows: [continentGroupRow, cityGroupRow]
-    });
-    var store = new Ext.data.ArrayStore({
-                fields: [{type: 'int', name: 'BeijingProductX'},
-                    {type: 'int', name: 'BeijingProductY'},
-                    {type: 'int', name: 'TokyoProductX'},
-                    {type: 'int', name: 'TokyoProductY'},
-                    {type: 'int', name: 'BerlinProductX'},
-                    {type: 'int', name: 'BerlinProductY'},
-                    {type: 'int', name: 'LondonProductX'},
-                    {type: 'int', name: 'LondonProductY'},
-                    {type: 'int', name: 'ParisProductX'},
-                    {type: 'int', name: 'ParisProductY'}
-                ],
-                data: data
-            });
-    var columns= [
-        {dataIndex: 'BeijingProductX', header: 'ProductX'},
-        {dataIndex: 'BeijingProductY', header: 'ProductY'},
-        {dataIndex: 'TokyoProductX', header: 'ProductX'},
-        {dataIndex: 'TokyoProductY', header: 'ProductY'},
-        {dataIndex: 'BerlinProductX', header: 'ProductX'},
-        {dataIndex: 'BerlinProductY', header: 'ProductY'},
-        {dataIndex: 'LondonProductX', header: 'ProductX'},
-        {dataIndex: 'LondonProductY', header: 'ProductY'},
-        {dataIndex: 'ParisProductX', header: 'ProductX'},
-        {dataIndex: 'ParisProductY', header: 'ProductY'}
-    ];
-    var grid = new Ext.grid.GridPanel({
-        viewConfig: {forceFit:true},
-        title: 'Sales By Location',
-        store:store,
-        columns: columns,
-        plugins: group
+    var myStore = new Ext.data.Store({
+        url: '/ams/a.json',
+        autoLoad: true,
+        reader: new Ext.data.JsonReader({
+            root: 'rows',
+            idProperty: 'id'
+        }, PersonRecord)
     });
 
-    var infoTab = new Ext.TabPanel({
-        labelWidth: 85,
+    var averagePanel = new Ext.grid.PivotGrid({
+        store     : myStore,
+        aggregator: 'sum',
+        width     : 600,
+        height:200,
+        title     : '综合排名',
+        measure   : 'Value',
+        leftAxis: [{
+            dataIndex: 'YearMonth'
+        }],
+        topAxis: [{
+            dataIndex: 'Name'
+        },{
+            dataIndex: 'Action'
+        }]
+    });
+
+    averagePanel.getStore().on('load',function(v){
+        var arr = [];
+        Ext.each(v.data.items, function(item){
+            arr.push(item.data.YearMonth);
+        })
+
+        if (arr.length == 0) {
+            return;
+        }
+        var tempArray = arr.slice(0);
+        for (var i = 0; i< tempArray.length; i++) {
+            for (var j = i + 1; j< tempArray.length; ) {
+                if (tempArray[i] == tempArray[j]) {
+                    tempArray.splice(j,1);
+                } else {
+                    j++;
+                }
+            }
+        }
+        var n = tempArray.length;
+        var Tabheight = 70+(21*n);
+        var panelheight = 43+(21*n);
+        if (panelheight > 400) {
+            panelheight = 400;
+            Tabheight = 400;
+        }
+        averageTab.setHeight(Tabheight);
+        averagePanel.setHeight(panelheight);
+    })
+
+
+
+    var averageTab = new Ext.TabPanel({
+        //labelWidth: 85,
         activeTab: 0,
-        height:70,
+        //autoHeight:true,
         plain:true,
         style: 'margin-top:15px',
-        defaults:{autoScroll: true},
+        //defaults:{autoScroll: true},
         items:[
-            grid
+            averagePanel
         ]
     });
     var allPanel = new Ext.Panel({
@@ -155,7 +167,7 @@ Ext.onReady(function(){
         bodyStyle: "padding:20px;",
         items: [
             searchPanel,
-            infoTab
+            averageTab
         ]
     });
     new Ext.Viewport(

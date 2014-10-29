@@ -1,5 +1,9 @@
 <script>
 Ext.onReady(function(){
+    var msgTip = new Ext.LoadMask(Ext.getBody(),{
+        msg:'Excel正在生成中',
+        removeMask : true
+    });
     var teamCombox = new SettCombbox({
         url:'/ams/Info/TeamList?ID=1&Type=2&All=0',
         fieldLabel: '营业班组',
@@ -26,7 +30,7 @@ Ext.onReady(function(){
             items: [
                 teamCombox]
         },{
-            columnWidth:.25,
+            columnWidth:.35,
             layout: 'form',
             defaults:{
                 xtype: 'textfield'
@@ -42,9 +46,8 @@ Ext.onReady(function(){
                         {
                             xtype:'datetimefield',
                             value:new Date(new Date()-7*24*60*60*1000),
-                            format: 'Y-m-d H:i',
                             name:'FromData',
-                            width: 82
+                            width: 140
                         },{
                             xtype: 'displayfield',
                             value: '至: '
@@ -53,7 +56,7 @@ Ext.onReady(function(){
                             format: 'Y-m-d H:i',
                             name:'ToData',
                             value:new Date().format('Y-m-d H:i:s'),
-                            width: 82
+                            width: 140
                         }]
                 }
             ]
@@ -68,6 +71,12 @@ Ext.onReady(function(){
                     var data = infoSearch.getForm().getValues();
                     listView.store.load({
                         params : data,
+                        callback:function(v){
+                            if (v.length == 0) {
+                                listView.store.removeAll();
+                                Ext.MessageBox.alert("提示","没有数据！");
+                            }
+                        },
                         add: false
                     });
                 }
@@ -132,9 +141,28 @@ Ext.onReady(function(){
         bbar: [{
          text: 'excel',
          ref:'../canCel',
-         iconCls: 'excel'
-         }]
-    });
+         iconCls: 'excel',
+        handler: function(btn, pressed){
+            if (listView.getStore().data.length == 0) {
+                Ext.MessageBox.alert('提示','请先查询数据');
+                return;
+            }
+            msgTip.show();
+            infoSearch.getForm().submit({
+                url:'/ams/export/reconciliation',
+                success:function(v,action){
+                    var re = Ext.decode(action.response.responseText);
+                    msgTip.hide();
+                    Ext.MessageBox.alert('提示',"<a target='_blank' href='"+re.msg+"'>下载</a>");
+                },
+                failure:function(v,action) {
+                    msgTip.hide();
+                    Ext.MessageBox.alert('提示','创建失败');
+                }
+            })
+        }
+     }]
+});
 
     var infoPanel = new Ext.TabPanel({
         labelWidth: 85,

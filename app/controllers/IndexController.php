@@ -4,6 +4,7 @@ class IndexController extends ControllerBase
 {
     public function indexAction()
     {
+        $this->view->name = $this->loginUser["Name"];
 //        $this->view->setTemplateAfter("empty");
 //        $rid = $this->loginUser["Role"];
 //        $role  = ARole::findFirst($rid);
@@ -61,6 +62,9 @@ class IndexController extends ControllerBase
         $name = $this->request->get("UserName");
         $pass = $this->request->get("Password");
 
+        if (!Dog::check()) {
+//            $this->ajax->flushError("授权文件错误");
+        }
 
 
         $r = User::findFirst(array("Name=:name: AND Pass=:pass:",

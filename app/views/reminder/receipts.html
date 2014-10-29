@@ -1,7 +1,12 @@
 <script>
 Ext.onReady(function(){
+    _pageSize = 50;
+    var msgTip = new Ext.LoadMask(Ext.getBody(),{
+        msg:'Excel正在生成中',
+        removeMask : true
+    });
     var teamCombox = new SettCombbox({
-        url:'/ams/Info/TeamList?ID=1&Type=1&All=1',
+        url:'/ams/Info/TeamList?ID=1&Type=1&All=0',
         fieldLabel: '管理班组',
         anchor:'95%',
         id:'searchTeam',
@@ -54,7 +59,7 @@ Ext.onReady(function(){
                 totalProperty: 'total',
                 baseParams: {
                     start: 0,
-                    limit: 5
+                    limit: _pageSize
                 },
                 fields: reminderFields
             });
@@ -90,10 +95,10 @@ Ext.onReady(function(){
                         align:"center",
                         dataIndex: 'Address'
                     }, {
-                        header: '电费年月',
+                        header: '预收金额',
                         sortable: true,
                         align:"center",
-                        dataIndex: 'YearMonth'
+                        dataIndex: 'Balance'
                     }, {
                         header: '电费金额',
                         sortable: true,
@@ -106,7 +111,7 @@ Ext.onReady(function(){
                         dataIndex: 'SegUser'
                     }],
                 bbar: new Ext.PagingToolbar({
-                    pageSize: 5,
+                    pageSize: _pageSize,
                     store: store,
                     displayMsg: "显示{0}条到{1}条记录，总共{2}条记录",
                     emptyMsg: "没有数据记录",
@@ -116,9 +121,25 @@ Ext.onReady(function(){
                             text: 'excel',
                             iconCls: 'excel',
                             handler: function(btn, pressed){
-                               /* Ext.Ajax.request({
-                                    url:'/ams/export/reminder'
-                                })*/
+                                if (listView.getStore().data.length == 0) {
+                                    Ext.MessageBox.alert('提示','请先查询数据');
+                                    return;
+                                }
+                                var number = Ext.getCmp('searchTeam').getValue();
+                                 msgTip.show();
+                                Ext.Ajax.request({
+                                    params:{Team:number},
+                                    url:'/ams/export/advance',
+                                    success:function(v){
+                                        var re = Ext.decode(v.responseText);
+                                        msgTip.hide();
+                                        Ext.MessageBox.alert('提示',"<a target='_blank' href='"+re.msg+"'>下载</a>");
+                                    },
+                                    failure:function(v,action) {
+                                        msgTip.hide();
+                                        Ext.MessageBox.alert('提示','创建失败');
+                                    }
+                                })
                             }
                         }]
                 })

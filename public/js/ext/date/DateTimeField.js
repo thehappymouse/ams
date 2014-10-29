@@ -379,3 +379,8 @@ Ext.ux.form.DateTimeField = Ext.extend(Ext.form.DateField, {
     }
 });
 Ext.reg('datetimefield', Ext.ux.form.DateTimeField);
+if(Ext.ux.form.DateTimeField) {
+    Ext.apply(Ext.DatePicker.prototype, {
+        todayText         : "确定"
+    })
+}

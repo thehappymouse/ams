@@ -262,7 +262,7 @@ class ExportController extends ControllerBase
             "CustomerNumber" => "用户编号",
             "CustomerName" => "用户名称",
             "Address" => "用电地址",
-            "YearMonth" => "电费年月",
+            "Balance" => "预收金额",
             "Money" => "电费金额");
 
         $floor = "  共计：预收转逾期电费%s笔，%s元。";
@@ -278,7 +278,7 @@ class ExportController extends ControllerBase
         try {
             $filename = ExcelImportUtils::arrayToExcel("预收转逾期", $head, $data, $floor, true);
 
-            $this->ajax->flushOk("/ams/public/xls/" . $filename);
+            $this->ajax->flushOk("/ams/public/" . $filename);
         } catch (Exception $e) {
             $this->ajax->flushError($e->getMessage());
         }
@@ -426,7 +426,9 @@ class ExportController extends ControllerBase
      */
     public function AccountCheckAction()
     {
+
         list($data, $total) = CountHelper::AccountCheck($this->request->get());
+
 
         $head = array("Time" => "收费时间",
             "CustomerNumber" => "用户编号",
@@ -434,7 +436,7 @@ class ExportController extends ControllerBase
             "YearMonth" => "电费年月",
             "Money" => "电费金额",
             "UserName" => "收费员",
-            "LandlordPhone" => "交费电话",
+            "LandlordPhone" => "交费登记电话",
             "IsRent" => "登记租房户信息",
             "IsControl" => "签订费控");
 
@@ -444,10 +446,10 @@ class ExportController extends ControllerBase
 
             $data[$key] = $d;
         }
-
         try {
-            $filename = ExcelImportUtils::arrayToExcel("对账查询", $head, $data, true);
-            $this->ajax->flushOk("/ams/public/xls/" . $filename);
+
+            $filename = ExcelImportUtils::arrayToExcel("对账查询", $head, $data, null, true);
+            $this->ajax->flushOk("/ams/public/" . $filename);
         } catch (Exception $e) {
             $this->ajax->flushError($e->getMessage());
         }
@@ -480,7 +482,7 @@ class ExportController extends ControllerBase
         try {
             $filename = ExcelImportUtils::arrayToExcel("财务对账查询", $head, $data, $floor, true);
 
-            $this->ajax->flushOk("/ams/public/xls/" . $filename);
+            $this->ajax->flushOk("/ams/public/" . $filename);
         } catch (Exception $e) {
             $this->ajax->flushError($e->getMessage());
         }
@@ -492,7 +494,8 @@ class ExportController extends ControllerBase
     public function countPressAction()
     {
         $param = $this->request->get();
-        $param["PageSize"] = 10000;
+        $param["start"] = 0;
+        $param["limit"] = 10000;
 
         list($totalData, $data) = CountHelper::DetailsFee($param);
         foreach ($data as $key => $d) {
@@ -513,7 +516,7 @@ class ExportController extends ControllerBase
         try {
             $filename = ExcelImportUtils::arrayToExcel("催费明细查询", $head, $data, $floor, true);
 
-            $this->ajax->flushOk("/ams/public/xls/" . $filename);
+            $this->ajax->flushOk("/ams/public/" . $filename);
         } catch (Exception $e) {
             $this->ajax->flushError($e->getMessage());
         }
@@ -526,8 +529,8 @@ class ExportController extends ControllerBase
     {
 
         $param = $this->request->get();
-        $param["PageSize"] = 10000;
-        $param["Page"] = 1;
+        $param["limit"] = 10000;
+        $param["start"] = 0;
         list($data, $d2) = CountHelper::Reset($param);
 
         $head = array_merge($this->headCount, array(
@@ -544,7 +547,7 @@ class ExportController extends ControllerBase
         }
         try {
             $filename = ExcelImportUtils::arrayToExcel("复电统计", $head, $data, $floor, true);
-            $this->ajax->flushOk("/ams/public/xls/" . $filename);
+            $this->ajax->flushOk("/ams/public/" . $filename);
 
         } catch (Exception $e) {
             $this->ajax->flushError($e->getMessage());
@@ -557,8 +560,8 @@ class ExportController extends ControllerBase
     public function CountCutAction()
     {
         $param = $this->request->get();
-        $param["PageSize"] = 10000;
-        $param["Page"] = 1;
+        $param["limit"] = 10000;
+        $param["start"] = 0;
 
         list($data, $d2) = CountHelper::Cut($param);
         $f = "%s年停电:%s笔，%s元。";
@@ -575,7 +578,7 @@ class ExportController extends ControllerBase
 
         try {
             $filename = ExcelImportUtils::arrayToExcel("停电统计", $head, $data, $floor, true);
-            $this->ajax->flushOk("/ams/public/xls/" . $filename);
+            $this->ajax->flushOk("/ams/public/" . $filename);
         } catch (Exception $e) {
             $this->ajax->flushError($e->getMessage());
         }
@@ -587,7 +590,8 @@ class ExportController extends ControllerBase
     public function CountChargesAction()
     {
         $param = $this->request->get();
-        $param["PageSize"] = 10000;
+        $param["start"] = 0;
+        $param["limit"] = 10000;
         list($total, $data) = CountHelper::Charges($param);
 
         $head = array_merge($this->headCount, array(
@@ -608,7 +612,7 @@ class ExportController extends ControllerBase
         try {
             $filename = ExcelImportUtils::arrayToExcel("电费回收明细", $head, $data, $floor, true);
 
-            $this->ajax->flushOk("/ams/public/xls/" . $filename);
+            $this->ajax->flushOk("/ams/public/" . $filename);
         } catch (Exception $e) {
             $this->ajax->flushError($e->getMessage());
         }

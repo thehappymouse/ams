@@ -1,5 +1,6 @@
 <script>
 Ext.onReady(function(){
+    _pageSize = 50;
     /*三个动态框*/
     var teamCombox = new SettCombbox({
         url:'/ams/Info/TeamList?ID=1&Type=1&All=1',
@@ -152,7 +153,7 @@ Ext.onReady(function(){
                             method:'GET',
                             params: {
                                 start: 0,
-                                limit: 5
+                                limit: _pageSize
                             },
                             success:function(action,msg){
                                 var text = Ext.decode(msg.response.responseText);
@@ -194,7 +195,7 @@ Ext.onReady(function(){
                 totalProperty: 'total',
                 baseParams: {
                     start: 0,
-                    limit: 5
+                    limit: _pageSize
                 },
                 fields: reminderFields
             });
@@ -287,7 +288,7 @@ Ext.onReady(function(){
                         }
                     }],
                 bbar: new Ext.PagingToolbar({
-                    pageSize: 5,
+                    pageSize: _pageSize,
                     store: store,
                     displayMsg: "显示{0}条到{1}条记录，总共{2}条记录",
                     emptyMsg: "没有数据记录",

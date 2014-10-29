@@ -218,10 +218,10 @@ class  JpgController extends ControllerBase
 
         if ($seg) {
 
-            $r = $this->getBuilder("Arrears", $seg)->columns("COUNT(*) as Count")->andWhere("IsCut =1")->getQuery()->execute()->getFirst();
+            $r = $this->getBuilder("Cutinfo", $seg)->columns("COUNT(*) as Count")->andWhere("ResetTime is null")->getQuery()->execute()->getFirst();
             $data[0] = $r->Count;
 
-            $r = $this->getBuilder("Arrears", $seg)->columns("COUNT(*) as Count")->andWhere("PressCount >= 2 and IsCut != 1")->getQuery()->execute()->getFirst();
+            $r = $this->getBuilder("Customer", $seg)->columns("COUNT(*) as Count")->andWhere("PressCount >= 2 and IsCut != 1")->getQuery()->execute()->getFirst();
             $data[1] = $r->Count;
 
             $r = $this->getBuilder("Cutinfo", $seg)->columns("COUNT(*) as Count")->andWhere("ResetTime is not null")->getQuery()->execute()->getFirst();
@@ -232,7 +232,7 @@ class  JpgController extends ControllerBase
 
 //        $data = array(40, 21, 17, 14, 23);
         $dataLegend = $this->Iconv($dataLegend, true);
-        // Create the Pie Graph. 
+        // Create the Pie Graph.
         $graph = new PieGraph(350, 350);
 
         $theme_class = "DefaultTheme";
@@ -244,7 +244,7 @@ class  JpgController extends ControllerBase
         $graph->title->Set($title);
         $graph->title->SetFont(FF_SIMSUN, FS_BOLD, 11);
         $graph->SetBox(true);
-        //$graph->legend->Pos(0.05,0.5,"left","center");   
+        //$graph->legend->Pos(0.05,0.5,"left","center");
         // Create
         // $data = $this->Iconv($data,true);
         $p1 = new PiePlot($data);

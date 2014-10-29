@@ -1,6 +1,7 @@
 <script>
 var startdate = <?php echo $startdate; ?>;
 Ext.onReady(function(){
+    _pageSize = 50;
     /*三个动态框*/
     var teamCombox = new SettCombbox({
         url:'/ams/Info/TeamList?ID=1&Type=1&All=1',
@@ -246,12 +247,12 @@ Ext.onReady(function(){
                             method:'GET',
                             params: {
                                 start: 0,
-                                limit: 5
+                                limit: _pageSize
                             },
                             success:function(action,msg){
                                 var text = Ext.decode(msg.response.responseText);
                                 if (text.success) {
-                                    listView.store.removeAll();console.log(1);
+                                    listView.store.removeAll();
                                     listView.store.loadData(text);
                                     Ext.apply(listView.store.baseParams, infoSearch.getForm().getValues());
                                     return;
@@ -297,7 +298,7 @@ Ext.onReady(function(){
             totalProperty: 'total',
             baseParams: {
                 start: 0,
-                limit: 5
+                limit: _pageSize
             },
             fields: ArrarsinfoFields
         });
@@ -332,9 +333,12 @@ Ext.onReady(function(){
                         dataIndex: 'CustomerNumber',
                         align:"center",
                         sortable: true,
-                        editor:new Ext.form.TextField({
+                        /*editor:new Ext.form.TextField({
                             allowBlank:false
-                        })
+                        })*/
+                        renderer:function(v){
+                            return "<a href='#'>"+v+"</a>";
+                        }
                     }, {
                         header: '用户名称',
                         sortable: true,
@@ -384,12 +388,18 @@ Ext.onReady(function(){
                         header: '催费次数',
                         sortable: true,
                         align:"center",
-                        dataIndex: 'PressCount'
+                        dataIndex: 'PressCount',
+                        renderer:function(v){
+                            return "<a href='#'>"+v+"</a>";
+                        }
                     }, {
                         header: '停电次数',
                         sortable: true,
                         align:"center",
-                        dataIndex: 'CutCount'
+                        dataIndex: 'CutCount',
+                        renderer:function(v){
+                            return "<a href='#'>"+v+"</a>";
+                        }
                     }],
                 getSelectedIds: function () {
                     var ids = [];
@@ -400,13 +410,24 @@ Ext.onReady(function(){
                     return ids.join(",");
                 },
                 bbar: new Ext.PagingToolbar({
-                    pageSize: 5,
+                    pageSize: _pageSize,
                     store: store,
                     displayMsg: "显示{0}条到{1}条记录，总共{2}条记录",
                     emptyMsg: "没有数据记录",
                     displayInfo: true
                 })
             });
+    listView.on('cellclick', function (grid, rowIndex, columnIndex, e) {
+        var record = grid.getStore().getAt(rowIndex);
+        var columnName = grid.getColumnModel().getDataIndex(columnIndex);
+        if (columnName == 'PressCount'){
+            lookInfo(record.data.CustomerNumber,1)
+        } else if(columnName == 'CutCount') {
+            lookInfo(record.data.CustomerNumber,2)
+        } else if( columnName == 'CustomerNumber'){
+            lookInfo(record.data.CustomerNumber,0)
+        }
+    })
     listView.on("render",  function(p,e){
 
         p.canCel.setHandler(function(b, e){

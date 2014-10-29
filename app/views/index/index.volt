@@ -79,7 +79,9 @@
                 <TABLE class="buttonInfo" id="buttonInfo" cellSpacing="0" cellPadding="0"
                        border="0">
                     <TBODY>
-                    <TR>
+                    <TR><TD style="cursor:pointer;"><A title=消息 style="FONT-SIZE:14px;WIDTH: 100%; HEIGHT: 100%">
+                                <?php echo $name; ?>&nbsp;&nbsp;</A>
+                        </TD>
                         <TD width="160">
                             <DIV class="time" id="serverDateField"
                                  style="PADDING-RIGHT: 10px"></DIV>
@@ -105,23 +107,24 @@
     var curDate = new Date();
     var serverTime = 1409644390152;
     var interval = serverTime - curDate.getTime();
-
+    Date.prototype.Format = function (fmt) { //author: meizz
+        var o = {
+            "M+": this.getMonth() + 1, //月份
+            "d+": this.getDate(), //日
+            "h+": this.getHours(), //小时
+            "m+": this.getMinutes(), //分
+            "s+": this.getSeconds(), //秒
+            "q+": Math.floor((this.getMonth() + 3) / 3), //季度
+            "S": this.getMilliseconds() //毫秒
+        };
+        if (/(y+)/.test(fmt)) fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
+        for (var k in o)
+        if (new RegExp("(" + k + ")").test(fmt)) fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+        return fmt;
+    }
     function setServerTime(getid) {
-        localDate = new Date();
-        serverDate = new Date(localDate.getTime() + interval);
-        myweekday = serverDate.getDay();
-        mymonth = parseInt(serverDate.getMonth() + 1) < 10 ? "0" + (serverDate.getMonth() + 1) : serverDate.getMonth() + 1;
-        myday = serverDate.getDate();
-        myday = parseInt(myday) < 10 ? "0" + myday : myday;
-        myyear = serverDate.getFullYear();
-        myHours = serverDate.getHours();
-        myHours = parseInt(myHours) < 10 ? "0" + myHours : myHours;
-        myMinutes = serverDate.getMinutes();
-        myMinutes = parseInt(myMinutes) < 10 ? "0" + myMinutes : myMinutes;
-        mySeconds = parseInt(serverDate.getSeconds()) < 10 ? "0" + serverDate.getSeconds() : serverDate.getSeconds();
-        year = (myyear > 200) ? myyear : 1900 + myyear;
-        document.getElementById(getid).innerText = year + "-" + mymonth + "-" + myday + " " + myHours + ":" + myMinutes + ":" + mySeconds;
-        setTimeout("setServerTime('" + getid + "')", 1000);
+        document.getElementById(getid).innerText =  new Date().Format("yyyy-MM-dd hh:mm:ss");
+                setTimeout("setServerTime('" + getid + "')", 1000);
     }
     setServerTime("serverDateField");
 </script>

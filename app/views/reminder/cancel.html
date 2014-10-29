@@ -1,6 +1,7 @@
 <script>
 var startdate = <?php echo $startdate; ?>;
 Ext.onReady(function(){
+    _pageSize = 50;
     /*三个动态框*/
     var teamCombox = new SettCombbox({
         url:'/ams/Info/TeamList?ID=1&Type=1',
@@ -256,7 +257,7 @@ Ext.onReady(function(){
                             method:'GET',
                             params: {
                                 start: 0,
-                                limit: 5
+                                limit: _pageSize
                             },
                             success:function(action,msg){
                                 var text = Ext.decode(msg.response.responseText);
@@ -298,7 +299,7 @@ Ext.onReady(function(){
                 totalProperty: 'total',
                 baseParams: {
                     start: 0,
-                    limit: 5
+                    limit: _pageSize
                 },
                 fields: ArrarsinfoFields
             });
@@ -396,7 +397,7 @@ Ext.onReady(function(){
                         }
                     }],
                 bbar: new Ext.PagingToolbar({
-                    pageSize: 5,
+                    pageSize: _pageSize,
                     store: store,
                     displayMsg: "显示{0}条到{1}条记录，总共{2}条记录",
                     emptyMsg: "没有数据记录",
@@ -492,11 +493,18 @@ Ext.onReady(function(){
                     dataIndex: 'Photo',
                     renderer:function(v){
                         if (v != "") {
-                            return "<a href='"+v+"'>查看</a>";
+                            return "<a href='#'>查看</a>";
                         }
                     }
                 }]
         });
+    freeView.on('cellclick', function (grid, rowIndex, columnIndex, e) {
+        var record = grid.getStore().getAt(rowIndex);
+        var columnName = grid.getColumnModel().getDataIndex(columnIndex);
+        if (columnName == 'Photo'){
+            lookImg(record.data.Photo,1);
+        }
+    })
     freeView.on("render",  function(p,e){
 
         p.cancel.setHandler(function(b, e){
@@ -531,6 +539,7 @@ Ext.onReady(function(){
         width:500,
         height:300,
         closeAction:'hide',
+        title:'撤销收费',
         plain: true,
         items:[freeView],
         buttons: [{

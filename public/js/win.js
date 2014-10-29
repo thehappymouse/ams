@@ -132,155 +132,165 @@ arrarsPanel = new Ext.FormPanel({
         border: false
     },
     style: 'margin-top:10px',
-    layout:'column',
+    layout:'form',
     items: [{
-        columnWidth:.25,
-        layout: 'form',
-        defaults:{
-            xtype: 'textfield'
-        },
-        items: [{
-            fieldLabel: '管理班组',
-            name: 'Team',
-            disabled:true,
-            anchor:'95%'
-        },{
-            fieldLabel: '用电地址',
-            name: 'Address',
-            anchor:'95%'
-        },new QuietCombox({
-            fieldLabel: '特殊客户',
-            displayField:'Text',
-            valueField:'IsSpecial',
-            hiddenName:'IsSpecial',
-            fields:['Text','IsSpecial'],
-            data   : [['是', '1'],['否', '0']],
-            anchor:'95%'
-        }),new QuietCombox({
-            fieldLabel: '是否租房',
-            displayField:'Text',
-            valueField:'IsRent',
-            hiddenName:'IsRent',
-            fields:['Text','IsRent'],
-            data   : [['是', '1'],['否', '0']],
-            anchor:'95%'
-        }),{
-            fieldLabel: '累计欠费次数',
-            name: 'ArrearsCount',
-            disabled:true,
-            anchor:'95%'
-        }]
+        layout:'column',
+        items:[
+            {
+                columnWidth:.25,
+                layout: 'form',
+                defaults:{
+                    xtype: 'textfield'
+                },
+                items: [{
+                    fieldLabel: '管理班组',
+                    name: 'Team',
+                    disabled:true,
+                    anchor:'95%'
+                },{
+                    fieldLabel: '用电地址',
+                    name: 'Address',
+                    anchor:'95%'
+                },new QuietCombox({
+                    fieldLabel: '特殊客户',
+                    displayField:'Text',
+                    valueField:'IsSpecial',
+                    hiddenName:'IsSpecial',
+                    fields:['Text','IsSpecial'],
+                    data   : [['是', '1'],['否', '0']],
+                    anchor:'95%'
+                }),new QuietCombox({
+                    fieldLabel: '是否租房',
+                    displayField:'Text',
+                    valueField:'IsRent',
+                    hiddenName:'IsRent',
+                    fields:['Text','IsRent'],
+                    data   : [['是', '1'],['否', '0']],
+                    anchor:'95%'
+                })]
+            },{
+                columnWidth:.25,
+                layout: 'form',
+                defaults:{
+                    xtype: 'textfield'
+                },
+                items: [{
+                    fieldLabel: '抄表员',
+                    name: 'SegUser',
+                    disabled:true,
+                    anchor:'95%'
+                },new QuietCombox({
+                    fieldLabel: '停电标志',
+                    displayField:'Text',
+                    valueField:'IsCut',
+                    hiddenName:'IsCut',
+                    fields:['Text','IsCut'],
+                    data   : [['是', '1'],['否', '0']],
+                    anchor:'95%'
+                }),{
+                    fieldLabel: '抄表段编号',
+                    name: 'Segment',
+                    disabled:true,
+                    anchor:'95%'
+                },{
+                    fieldLabel: '房东电话',
+                    name: 'LandlordPhone',
+                    id:'LandlordPhone',
+                    anchor:'95%'
+                }]
+            },{
+                columnWidth:.25,
+                layout: 'form',
+                defaults:{
+                    xtype: 'textfield'
+                },
+                items: [{
+                    xtype:'hidden',
+                    name:'ID'
+                },{
+                    fieldLabel: '用户编号',
+                    name: 'Number',
+                    readOnly:true,
+                    anchor:'95%'
+                },{
+                    fieldLabel: '电表资产号',
+                    name: 'AssetNumber',
+                    anchor:'95%'
+                },{
+                    fieldLabel: '停电方式',
+                    name: 'CutStyle',
+                    disabled:true,
+                    anchor:'95%'
+                },{
+                    fieldLabel: '房客电话',
+                    name: 'RenterPhone',
+                    id:'RenterPhone',
+                    anchor:'95%'
+                }]
+            },{
+                columnWidth:.25,
+                layout: 'form',
+                defaults:{
+                    xtype: 'textfield'
+                },
+                items: [{
+                    fieldLabel: '用户名称',
+                    name: 'Name',
+                    anchor:'95%'
+                },
+                    new QuietCombox({
+                        fieldLabel: '签订费控协议',
+                        displayField:'Text',
+                        hiddenName:'IsControl',
+                        valueField:'IsControl',
+                        fields:['Text','IsControl'],
+                        data   : [['是', '1'],['否', '0']],
+                        anchor:'95%'
+                    }),{
+                        fieldLabel: '累计欠费次数',
+                        name: 'ArrearsCount',
+                        disabled:true,
+                        anchor:'95%'
+                    },{
+                        fieldLabel: '欠费原因',
+                        name: 'Cause',
+                        anchor:'95%'
+                    }]
+            }
+        ]
     },{
-        columnWidth:.25,
-        layout: 'form',
-        defaults:{
-            xtype: 'textfield'
-        },
-        items: [{
-            fieldLabel: '抄表员',
-            name: 'SegUser',
-            disabled:true,
-            anchor:'95%'
-        },new QuietCombox({
-            fieldLabel: '停电标志',
-            displayField:'Text',
-            valueField:'IsCut',
-            hiddenName:'IsCut',
-            fields:['Text','IsCut'],
-            data   : [['是', '1'],['否', '0']],
-            anchor:'95%'
-        }),{
-            fieldLabel: '抄表段编号',
-            name: 'Segment',
-            disabled:true,
-            anchor:'95%'
-        },{
-            fieldLabel: '房东电话',
-            name: 'LandlordPhone',
-            anchor:'95%'
-        },{
+        xtype: 'compositefield',
+        items:[{
             fieldLabel: '备注',
             name: 'Desc',
-            anchor:'95%'
-        }]
-    },{
-        columnWidth:.25,
-        layout: 'form',
-        defaults:{
-            xtype: 'textfield'
-        },
-        items: [{
-            xtype:'hidden',
-            name:'ID'
+            xtype:'textfield',
+            width:380
         },{
-            fieldLabel: '用户编号',
-            name: 'Number',
-            disabled:true,
-            anchor:'95%'
-        },{
-            fieldLabel: '电表资产号',
-            name: 'AssetNumber',
-            anchor:'95%'
-        },{
-            fieldLabel: '停电方式',
-            name: 'CutStyle',
-            disabled:true,
-            anchor:'95%'
-        },{
-            fieldLabel: '房客电话',
-            name: 'RenterPhone',
-            anchor:'95%'
-        },{
-            xtype: 'compositefield',
-            items:[{xtype:'hidden'},{
-                width:90,
-                xtype:'button',
-                text:'修改',
-                handler:function(){
-                    arrarsPanel.getForm().submit({
-                        method:'post',
-                        params:arrarsPanel.getForm().getValues(),
-                        success:function(v,action){
+            width:90,
+            xtype:'button',
+            text:'修改',
+            handler:function(){
+                arrarsPanel.getForm().submit({
+                    method:'post',
+                    params:arrarsPanel.getForm().getValues(),
+                    success:function(v,action){
+                        var text = Ext.decode(action.response.responseText);
+                        Ext.MessageBox.alert('提示',text.msg);
+                    },
+                    failure:function(v,action){
+                        try{
                             var text = Ext.decode(action.response.responseText);
                             Ext.MessageBox.alert('提示',text.msg);
-                        },
-                        failure:function(v,action){
-                            try{
-                                var text = Ext.decode(action.response.responseText);
-                                Ext.MessageBox.alert('提示',text.msg);
-                            }catch(err){
-                                Ext.MessageBox.alert('提示','服务器异常');
-                            }
+                        }catch(err){
+                            Ext.MessageBox.alert('提示','服务器异常');
                         }
-                    })
-                }
-            }]
+                    }
+                })
+            }
         }]
-    },{
-        columnWidth:.25,
-        layout: 'form',
-        defaults:{
-            xtype: 'textfield'
-        },
-        items: [{
-            fieldLabel: '用户名称',
-            name: 'Name',
-            anchor:'95%'
-        },
-            new QuietCombox({
-                fieldLabel: '签订费控协议',
-                displayField:'Text',
-                hiddenName:'IsControl',
-                valueField:'IsControl',
-                fields:['Text','IsControl'],
-                data   : [['是', '1'],['否', '0']],
-                anchor:'95%'
-            }),{
-                fieldLabel: '欠费原因',
-                name: 'Cause',
-                anchor:'95%'
-            }]
-    }]
+    }
+
+    ]
 });
 
  cuifeiView = new Ext.grid.GridPanel( {
@@ -326,10 +336,53 @@ arrarsPanel = new Ext.FormPanel({
             align:"center",
             dataIndex: 'Photo',
             renderer:function(v){
-                return "<a href='"+v+"'>查看</a>";
+                if (v != "") {
+                    return "<a href='#' >查看</a>";
+                }
+
             }
         }]
 });
+cuifeiView.on('cellclick', function (grid, rowIndex, columnIndex, e) {
+    var record = grid.getStore().getAt(rowIndex);
+    var columnName = grid.getColumnModel().getDataIndex(columnIndex);
+    if (columnName == 'Photo'){
+        lookImg(record.data.Photo,1);
+    }
+})
+lookImg = function(v)
+{
+    var tpl = "<img src='/ams"+v+"' />";
+    var imgPanel = new Ext.Panel({
+        region: 'center',
+        autoScroll: true,
+        bodyStyle: "padding:10px;",
+        items: [
+            {
+                html:tpl
+            }
+        ]
+    })
+
+    var imgWin = new Ext.Window({
+        layout:'fit',
+        height:400,
+        width:400,
+        title:'催费照片',
+        autoScroll:true,
+        closeAction:'hide',
+        plain: true,
+        items:[imgPanel],
+        buttons: [{
+            text: '关闭',
+            handler: function(){
+                imgWin.hide();
+            }
+        }]
+    });
+    imgWin.show();
+}
+
 tingdianView = new Ext.grid.GridPanel( {
     store: new Ext.data.JsonStore({
         url: '/ams/PopPage/PowerCut',
@@ -432,15 +485,14 @@ submit1Form = new Ext.FormPanel({
     style: 'margin-top:6px;margin-left:20px',
     labelAlign: 'right',
     layout: 'form',
+    fileUpload: true,
     items: [{
         xtype:'textfield',
         allowBlank:false,
         fieldLabel:'通知单催费',
         inputType:'file',
         name:'fileName',
-        allowBlank:false,
         vtype: 'FileInspection'
-
     },{
         xtype:'hidden',
         id:'submit1ID',
@@ -494,15 +546,38 @@ submit2Form = new Ext.FormPanel({
     style: 'margin-top:6px;margin-left:20px',
     labelAlign: 'right',
     layout: 'form',
-    items: [ new QuietCombox({
-        fieldLabel: '催费电话',
-        displayField:'Text',
-        valueField:'PhoneType',
-        hiddenName:'PhoneType',
-        fields:['Text','PhoneType'],
-        data   : [['房东', '1'],['房客', '0']],
-        anchor:'65%'
-    }),{
+    items: [{
+        xtype:'compositefield',
+        anchor:'95%',
+        items:[
+            new QuietCombox({
+            fieldLabel: '催费电话',
+            displayField:'Text',
+            valueField:'PhoneType',
+            hiddenName:'PhoneType',
+            id:'PhoneType',
+            fields:['Text','PhoneType'],
+            data   : [['房东电话', '房东电话'],['房客电话', '房客电话']],
+            width: 150,
+            listeners:{
+                'select':function(){
+                        var type = Ext.getCmp('PhoneType').getValue();
+                        var phone = "";
+                        if (type == "房东电话") {
+                            phone = Ext.getCmp('LandlordPhone').getValue();
+                        } else {
+                            phone = Ext.getCmp('RenterPhone').getValue();
+                        }
+                        Ext.getCmp('Phone').setValue(phone);
+                }
+            }
+        }),{
+                xtype:'textfield',
+                id:'Phone',
+                name:'Phone',
+                width: 100
+        }]
+    },{
         fieldLabel: '催费时间',
         xtype:'datetimefield',
         format: 'Y-m-d H:i:s',
@@ -544,6 +619,18 @@ submit2Form = new Ext.FormPanel({
             }
         }]
     }]
+})
+
+freeView.getSelectionModel().on("selectionchange", function(sm){
+    var type = Ext.getCmp('PhoneType').getValue();
+
+    var phone = "";
+    if (type == "房东电话") {
+        phone = Ext.getCmp('LandlordPhone').getValue();
+    } else {
+        phone = Ext.getCmp('RenterPhone').getValue();
+    }
+    Ext.getCmp('Phone').setValue(phone);
 })
 
  submitTabPanel = new Ext.TabPanel({

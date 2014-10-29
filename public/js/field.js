@@ -63,6 +63,7 @@ var arrarsFreeFields = [
 var reminderFields = [
     'ID',
     'Segment',
+    'SegUser','Balance',
     'CustomerNumber',
     'CustomerName',
     'Address',
@@ -116,6 +117,7 @@ var  summaryFields = [
 var  countFields = [
     'ID',
     'Segment',
+    'CutUserName',
     'CustomerNumber',
     'Name',
     'Address',
@@ -136,6 +138,7 @@ var    customerFelds = [
     'Segment',
     'CustomerNumber',
     'CustomerName',
+    'ArrearsCount',
     'Address',
     'LandlordPhone',
     'YearMonth',

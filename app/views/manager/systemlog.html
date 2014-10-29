@@ -11,7 +11,7 @@ Ext.onReady(function(){
             layout:'column',
             items: [
             {
-                columnWidth:.25,
+                columnWidth:.3,
                 layout: 'form',
                 defaults:{
                     xtype: 'textfield'
@@ -26,7 +26,7 @@ Ext.onReady(function(){
                         items:[
                             new Ext.form.DateField({
                                 name:'FromData',
-                                width:82,
+                                width:100,
                                 value:new Date(new Date()-7*24*60*60*1000),
                                 format: 'Y-m-d'
                             }),{
@@ -34,7 +34,7 @@ Ext.onReady(function(){
                                 value: '至: '
                             },new Ext.form.DateField({
                                 name:'ToData',
-                                width:82,
+                                width:100,
                                 value:new Date().format('Y-m-d'),
                                 format: 'Y-m-d'
                             })]

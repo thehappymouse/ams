@@ -2,7 +2,7 @@
 var startdate = <?php echo $startdate; ?>;
 
 Ext.onReady(function(){
-
+    _pageSize = 50;
     var msgTip = new Ext.LoadMask(Ext.getBody(),{
         msg:'Excel正在生成中',
         removeMask : true
@@ -255,7 +255,7 @@ Ext.onReady(function(){
                             method:'GET',
                             params: {
                                 start: 0,
-                                limit: 5
+                                limit: _pageSize
                             },
                             success:function(action,msg){
                                 var text = Ext.decode(msg.response.responseText);
@@ -345,10 +345,10 @@ Ext.onReady(function(){
                         dataIndex: 'Address'
                     },
 //                    {
-//                        header: '欠费笔数',
+//                        header: '电费年月',
 //                        sortable: true,
 //                        align:"center",
-//                        dataIndex: 'ArrearsCount'
+//                        dataIndex: 'YearMonth'
 //                    },
                     {
                         header: '电费金额',
@@ -404,7 +404,7 @@ Ext.onReady(function(){
                         }
                     }*/],
                 bbar: new Ext.PagingToolbar({
-                    pageSize: 5,
+                    pageSize: _pageSize,
                     store: store,
                     displayMsg: "显示{0}条到{1}条记录，总共{2}条记录",
                     emptyMsg: "没有数据记录",
@@ -414,6 +414,10 @@ Ext.onReady(function(){
                             text: 'excel',
                             iconCls: 'excel',
                             handler: function(btn, pressed){
+                                if (listView.getStore().data.length == 0) {
+                                    Ext.MessageBox.alert('提示','请先查询数据');
+                                    return;
+                                }
                                 msgTip.show();
                                 infoSearch.getForm().submit({
                                     url:'/ams/export/reminder',

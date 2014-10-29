@@ -1,5 +1,6 @@
 <script>
 Ext.onReady(function(){
+    _pageSize = 50;
 /*二个动态框*/
 var teamCombox = new SettCombbox({
     url:'/ams/Info/TeamList&ID=1&Type=1',
@@ -55,7 +56,7 @@ var infoSearch = new Ext.FormPanel({
     url:'/ams/Charges/SearchFee',
     layout:'column',
     items: [{
-        columnWidth:.25,
+        columnWidth:.35,
         layout: 'form',
         defaults:{
             xtype: 'textfield'
@@ -74,7 +75,7 @@ var infoSearch = new Ext.FormPanel({
                         format: 'Y-m-d H:i',
                         name:'FromData',
                         value:new Date(new Date()-7*24*60*60*1000),
-                        width: 82
+                        width: 140
                     },{
                         xtype: 'displayfield',
                         value: '至: '
@@ -83,7 +84,7 @@ var infoSearch = new Ext.FormPanel({
                         format: 'Y-m-d H:i',
                         value:new Date().format('Y-m-d H:i:s'),
                         name:'ToData',
-                        width: 82
+                        width: 140
                     }]
             }]
     },{
@@ -105,8 +106,15 @@ var infoSearch = new Ext.FormPanel({
                         text:'查询',
                         handler:function(){
                             var data = infoSearch.getForm().getValues();
+                            Ext.apply(listView.store.baseParams, data);
                             listView.store.load({
                                 params : data,
+                                callback:function(v){
+                                    if (v.length == 0) {
+                                        listView.store.removeAll();
+                                        Ext.MessageBox.alert("提示","没有数据！");
+                                    }
+                                },
                                 add: false
                             });
                         }
@@ -129,9 +137,18 @@ var store = new Ext.data.JsonStore(
         {
             url: '/ams/countsearch/press',
             root: 'data',
+            totalProperty: 'total',
+            baseParams: {
+                start: 0,
+                limit: _pageSize
+            },
             fields: countFields
         });
 
+    var msgTip = new Ext.LoadMask(Ext.getBody(),{
+        msg:'Excel正在生成中',
+        removeMask : true
+    });
 var listView = new Ext.grid.EditorGridPanel(
         {
             store: store,
@@ -204,7 +221,7 @@ var listView = new Ext.grid.EditorGridPanel(
                     }
                 }],
             bbar: new Ext.PagingToolbar({
-                pageSize: 5,
+                pageSize: _pageSize,
                 store: store,
                 displayMsg: "显示{0}条到{1}条记录，总共{2}条记录",
                 emptyMsg: "没有数据记录",
@@ -214,7 +231,23 @@ var listView = new Ext.grid.EditorGridPanel(
                         text: 'excel',
                         iconCls: 'excel',
                         handler: function(btn, pressed){
-                            alert('excel');
+                            if (listView.getStore().data.length == 0) {
+                                Ext.MessageBox.alert('提示','请先查询数据');
+                                return;
+                            }
+                            msgTip.show();
+                            infoSearch.getForm().submit({
+                                url:'/ams/export/countpress',
+                                success:function(v,action){
+                                    var re = Ext.decode(action.response.responseText);
+                                    msgTip.hide();
+                                    Ext.MessageBox.alert('提示',"<a target='_blank' href='"+re.msg+"'>下载</a>");
+                                },
+                                failure:function(v,action) {
+                                    msgTip.hide();
+                                    Ext.MessageBox.alert('提示','创建失败');
+                                }
+                            })
                         }
                     }]
             })
