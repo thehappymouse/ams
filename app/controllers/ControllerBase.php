@@ -9,6 +9,7 @@ define("ROLE_TOLL_LEAD", 4); //收费员班长
 define("ROLE_FINANCE", 5); //财务，对账
 define("ROLE_MANAGER", 6); //领导
 define("ROLE_ADMIN", 7); //admin
+
 class ControllerBase extends Controller
 {
     /**

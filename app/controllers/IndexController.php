@@ -57,11 +57,11 @@ class IndexController extends ControllerBase
 
     public function loginCheckAction()
     {
-
         $this->ajax->logData->Action = "登录";
-
         $name = $this->request->get("UserName");
         $pass = $this->request->get("Password");
+
+
 
         $r = User::findFirst(array("Name=:name: AND Pass=:pass:",
             "bind" => array("name" => $name, "pass" => sha1($pass))));

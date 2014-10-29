@@ -196,7 +196,8 @@ class ReminderController extends ControllerBase
 
         $pressStyle = "";
         $pressPhoto = "";
-        $pressPhone = "";
+        $pressPhone = $this->request->get("Phone");
+
 
         if($this->request->get("reminderStyle") == 1){
             if(!$this->request->hasFiles()){
@@ -210,9 +211,14 @@ class ReminderController extends ControllerBase
             $files = $this->request->getUploadedFiles("Photo");
             $file = $files[0];
 
-            $dir = str_replace("/app/controllers", "/public/images/", __DIR__);
+            $dir = str_replace("/app/controllers", "/public/upload/", __DIR__);
             $root = "/opt/lampp/htdocs/ams";
-            $savefile = $dir . $file->getName();
+            $dir =  $dir . date("Ym") . "/";
+            if(!is_dir($dir)){
+                mkdir($dir);
+            }
+
+            $savefile = $dir . $this->loginUser["ID"] . "_" . time() . ".jpg"; // $file->getName();
 
             if (move_uploaded_file($file->getTempName(), $savefile)) {
                 $pressPhoto = str_replace($root, "", $savefile);
@@ -244,6 +250,7 @@ class ReminderController extends ControllerBase
             $press->Money = $ar->Money;
             $press->PressStyle = $pressStyle;
             $press->Phone = $pressPhone;
+            $press->PhoneType = $this->request->get("PhoneType");
             $press->Photo = $pressPhoto;
             $r = $press->save();
 

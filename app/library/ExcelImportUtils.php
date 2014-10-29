@@ -33,7 +33,6 @@ class ExcelImportUtils
             $arr["SegUser"] = $row["L"];
             $arr["Phone"] = "";
 
-
             self::saveCustomer($arr);
             self::saveSegment($arr);
             self::advancefee($arr);
@@ -48,18 +47,17 @@ class ExcelImportUtils
     public static function advancefee($data)
     {
         $arrears = Arrears::findByNumber($data["Number"]);
-        $total = 0.0;
-        foreach ($arrears as $a) {
-            $total += (float)$a->Money;
-        }
+        $customer = Customer::findByNumber($data["Number"]);
 
-        if ($total < $data["Balance"]) {
+        if ($customer->Money < $data["Balance"]) {
             foreach ($arrears as $a) {
-                $a->IsClean = 2;
-                $a->save();
+                if ($a->IsClean == 0) {
+                    $a->IsClean = 2;
+                    $a->save();
+                }
             }
         }
-        $customer = Customer::findByNumber($data["Number"]);
+
         $customer->IsClean = 2;
         $customer->save();
     }
@@ -114,8 +112,8 @@ class ExcelImportUtils
 
         $r = $c->save();
 
-        if(!$r) {
-            $msg  = $c->getMessages();
+        if (!$r) {
+            $msg = $c->getMessages();
             var_dump($msg[0]->getMessage());
         }
 
@@ -192,6 +190,7 @@ class ExcelImportUtils
         if (empty($data) || !is_array($data)) {
             die("没有数据，无法导出");
         }
+        $fileName = "xls/" . $fileName;
 
         $date = date("Y_m_d", time());
         $fileName .= "_{$date}.xls";
@@ -242,11 +241,10 @@ class ExcelImportUtils
 
         $objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel2007');
         //脚本方式运行，保存在当前目录
-        if($writefile){
+        if ($writefile) {
             $objWriter->save($fileName);
             return $fileName;
-        }
-        else {
+        } else {
             // 输出文档到页面
             header('Content-Type: application/vnd.ms-excel');
             header('Content-Disposition: attachment;filename="' . $fileName . '"');

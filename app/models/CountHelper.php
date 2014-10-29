@@ -41,7 +41,7 @@ class CountHelper extends HelperBase
 
         $param = array("start" => $p->FromData, "end" => $p->ToData);
 
-        $query .= self::addLimit($condition_Sort, $p->Page, $p->PageSize);
+        $query .= self::addLimit($condition_Sort, $p->start, $p->limit);
         $results = parent::getModelManager()->executeQuery($query, $param);
 
         foreach ($results as $rs) {
@@ -129,11 +129,14 @@ class CountHelper extends HelperBase
             $d2[$year]["Money"] = (float)$d2[$year]["Money"] + $rs->Money;
         }
 
+
+        $page =  ($p->start / $p->limit) + 1;
+
         $paginator = new Phalcon\Paginator\Adapter\NativeArray(
             array(
                 "data" => $data,
-                "limit" => $p->PageSize,
-                "page" => $p->Page
+                "limit" => $p->limit,
+                "page" => $page
             )
         );
         $page = $paginator->getPaginate();
@@ -188,11 +191,13 @@ class CountHelper extends HelperBase
             $d2[$year]["Money"] = (float)$d2[$year]["Money"] + $rs->Money;
         }
 
+        $page =  ($p->start / $p->limit) + 1;
+
         $paginator = new Phalcon\Paginator\Adapter\NativeArray(
             array(
                 "data" => $data,
-                "limit" => $p->PageSize,
-                "page" => $p->Page
+                "limit" => $p->limit,
+                "page" => $page
             )
         );
 
@@ -236,7 +241,7 @@ class CountHelper extends HelperBase
             $query .= " ORDER BY a.Segment " . ($p->segmentSort == 1 ? "Desc ": "ASC ");
         }
 
-        $query = parent::addLimit($query, $p->Page, $p->PageSize);
+        $query = parent::addLimit($query, $p->start, $p->limit);
 
         $results = parent::getModelManager()->executeQuery($query, array("start" => $start, "end" => $end));
 

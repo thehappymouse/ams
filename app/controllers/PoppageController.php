@@ -89,11 +89,14 @@ class  PopPageController extends ControllerBase
     public function userInfoAction()
     {
         $number = $this->request->get("Number");
+        $customer = Customer::findByNumber($number);
 
         $Arrears = Arrears::find("IsClean = 0 AND CustomerNumber=$number");
         $data = array();
         foreach($Arrears as $c){
-            $data[] = $c->dump();
+            $d = $c->dump();
+            $d["IsCut"] = $customer->IsCut;
+            $data[] = $d;
         }
         $this->ajax->flushData($data);
     }

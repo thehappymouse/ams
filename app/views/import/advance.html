@@ -25,6 +25,12 @@
                         inputType:'file',
                         name:'fileName'
                     },{
+                        xtype:'textfield',
+                        allowBlank:false,
+                        fieldLabel:'预存电费数据文件模板上传',
+                        inputType:'file',
+                        name:'advanceTpl'
+                    },{
                         xtype: 'compositefield',
                         items:[{
                             xtype:'displayfield',
@@ -52,7 +58,7 @@
 
         var searchTab = new Ext.TabPanel({
             activeTab: 0,
-            height:115,
+            height:145,
             plain:true,
             defaults:{autoScroll: true},
             items:[

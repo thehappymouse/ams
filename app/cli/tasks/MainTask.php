@@ -83,7 +83,7 @@ class MainTask extends \Phalcon\CLI\Task
     public function advanceAction()
     {
         try {
-            ExcelImportUtils::importAdvance("/opt/lampp/htdocs/ams/app/library/1.xls");
+            ExcelImportUtils::importAdvance("/opt/lampp/htdocs/ams/app/cli/1.xls");
         } catch (PHPExcel_Reader_Exception $e) {
             echo $e->getMessage();
         }

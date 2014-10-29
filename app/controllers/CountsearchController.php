@@ -48,7 +48,8 @@ class CountsearchController extends ControllerBase
     public function ChargesAction()
     {
         list($totaldata, $data) = CountHelper::Charges($this->request->get());
-        $this->ajax->TotalData = $totaldata;
+
+        $this->ajax->total = $totaldata["Count"];
         $this->ajax->flushData($data);//array("Data" => $data, "TotalData" => $totaldata));
     }
 
@@ -58,7 +59,8 @@ class CountsearchController extends ControllerBase
     public function pressAction()
     {
         list($totalData, $data) = CountHelper::DetailsFee($this->request->get());
-        $this->ajax->TotalData = $totalData;
+
+        $this->ajax->total = $totalData["Count"];
 
         $this->ajax->flushData($data);
     }
@@ -75,7 +77,7 @@ class CountsearchController extends ControllerBase
         }
 
         $this->ajax->data2 = $d2;
-        $this->ajax->TotalData = $total;
+        $this->ajax->total = $total["Count"];
         $this->ajax->flushData($data);
     }
 
@@ -90,7 +92,7 @@ class CountsearchController extends ControllerBase
         }
 
         $this->ajax->data2 = $d2;
-        $this->ajax->TotalData = $total;
+        $this->ajax->total = $total["Count"];
         $this->ajax->flushData($data);
 
     }

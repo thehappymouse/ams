@@ -21,7 +21,7 @@ class ExportController extends ControllerBase
         "CustomerNumber" => "用户编号",
         "CustomerName" => "用户名称",
         "Address" => "用电地址",
-        "YearMonth" => "电费年月",
+//        "YearMonth" => "电费年月",
         "Money" => "电费金额",
         "IsClean" => "结清标志",
         "IsCut" => "停电标志",
@@ -424,8 +424,7 @@ class ExportController extends ControllerBase
     /**
      * 对账查询
      */
-    public
-    function AccountCheckAction()
+    public function AccountCheckAction()
     {
         list($data, $total) = CountHelper::AccountCheck($this->request->get());
 
@@ -652,13 +651,13 @@ class ExportController extends ControllerBase
     public function reminderAction()
     {
         $params = $this->request->get();
-
         $headArr = $this->headArrear;
 
+        $params["start"]  = 0;
         $params["limit"] = 100000; //不再需要分页
 
         list($total, $data, $countinfo) = CustomerHelper::Customers($params);
-//        list($total, $data) = CustomerHelper::ArrearsInfo($params);
+
         foreach ($data as $key => $d) {
             $d["IsClean"] = $d["IsClean"] ? "是" : "否";
             $d["IsCut"] = $d["IsCut"] ? "是" : "否";
@@ -669,6 +668,6 @@ class ExportController extends ControllerBase
         $floor = sprintf($floor, count($data), $countinfo["allCustomer"], $countinfo["cutCount"], $countinfo["specialCount"]);
 
         $filename = ExcelImportUtils::arrayToExcel("客户分类统计", $headArr, $data, $floor, true);
-        $this->ajax->flushOk("/ams/public/xls/" . $filename);
+        $this->ajax->flushOk("/ams/public/" . $filename);
     }
 } 

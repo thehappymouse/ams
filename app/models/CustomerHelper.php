@@ -80,14 +80,14 @@ class CustomerHelper extends HelperBase
 
             $cut->ResetTime = $p->ResetTime;
             $cut->ResetStyle = $p->ResetType;
-            $cut->ResetPhone = $p->ResetPhone;
+            $cut->ResetPhone = $p->Phone;
 
             $cut->ResetUser = $p->User;
             if ($cut->save()) {
 //                $arrear = Arrears::findFirst($id);
 //                $arrear->IsCut = 0;
 //                $arrear->save();
-                
+
                 $customer = Customer::findByNumber($id);
                 $customer->IsCut = 0;
                 $customer->save();
@@ -170,15 +170,13 @@ class CustomerHelper extends HelperBase
 
         $data = array();
         if (count($seg) > 0) {
-            $builder = parent::getBuilder("Arrears", $seg);
+            $builder = parent::getBuilder("Customer", $seg);
             $builder->andWhere("IsClean=2");
             $rs = $builder->getQuery()->execute();
             foreach ($rs as $r) {
-                $customer = Customer::findByNumber($r->CustomerNumber);
                 $row = $r->dump();
-                $row["Address"] = $customer->Address;
-                $row["SegUser"] = $customer->SegUser;
-
+                $row["CustomerName"] = $row["Name"];
+                $row["CustomerNumber"] = $row["Number"];
                 $data[] = $row;
             }
         }
@@ -191,32 +189,16 @@ class CustomerHelper extends HelperBase
      */
     public static function Customers(array $params)
     {
+        $countinfo = array("allCustomer" => 0, "cutCount" => 0, "specialCount" => 0);
+
         list($total, $data, $conditions, $param) = self::ArrearsInfo($params);
+        foreach($data as $c){
 
-        $builder = parent::getModelManager()->createBuilder();
-        $result = $builder->columns(array("COUNT( DISTINCT CustomerNumber) as Count"))
-            ->from("Arrears")
-            ->andWhere($conditions)
-            ->getQuery()->execute($param)->getFirst();exit;
-        $allCustomer = $result->Count;
-        $cutCount = $result->CutCount;
+            if($c["IsClean"] != 1) $countinfo["allCustomer"]++;
+            if($c["IsSpecial"]) $countinfo["specialCount"]++;
+            if($c["IsCut"]) $countinfo["cutCount"]++;
+        }
 
-
-        $sql = "SELECT  * from User WHERE Role = " . ROLE_MATER . " AND TeamID in (SELECT ID FROM Team WHERE Type = 1)";
-        $u = new User();
-        $users = new Phalcon\Mvc\Model\Resultset\Simple(null, $u, $u->getReadConnection()->query($sql));
-
-        $conditions = str_replace("AND (YearMonth BETWEEN :start: AND :end:)", "", $conditions);
-        $builder = parent::getModelManager()->createBuilder();
-        $result = $builder->columns("SUM(IsSpecial) as Count")
-            ->from("Customer")
-            ->andWhere("IsClean!=1")
-            ->andWhere($conditions)
-            ->getQuery()->execute($param)->getFirst();
-
-        $specialCount = (int)$result->Count; //这个需要特殊处理
-
-        $countinfo = array("allCustomer" => $allCustomer, "cutCount" => $cutCount, "specialCount" => $specialCount);
 
         return array($total, $data, $countinfo);
     }
@@ -256,7 +238,7 @@ class CustomerHelper extends HelperBase
 
             //电费年月查询
             if ($p->FromData && $p->ToData) {
-                $conditions .= " AND  (FirstDate >= :start: AND LastDate <= :end:)";
+                $conditions .= " AND  (FirstDate <= :end: AND LastDate >= :start:)";
                 $param["start"] = $p->FromData;
                 $param["end"] = $p->ToData;
             }
@@ -321,7 +303,6 @@ class CustomerHelper extends HelperBase
                 $param["IsRent"] = $p->IsRent;
             }
         }
-
 
         $conditions_mini = $conditions;
         $conditions .= " limit $p->start, $p->limit";

@@ -1,0 +1,230 @@
+<script>
+   Ext.onReady(function(){
+       Ext.chart.Chart.CHART_URL='/ams/public/js/charts.swf';
+       var store = new Ext.data.JsonStore({
+           fields: ['season', 'total'],
+           data: [{
+               season: '0次',
+               total: 150
+           },{
+               season: '1次',
+               total: 245
+           },{
+               season: '2次',
+               total: 117
+           },{
+               season: '3次以上',
+               total: 184
+           }]
+       });
+
+       var tingStore = new Ext.data.JsonStore({
+           fields: ['season', 'total'],
+           data: [{
+               season: '已停电',
+               total: 150
+           },{
+               season: '可停电',
+               total: 245
+           },{
+               season: '已复电',
+               total: 117
+           },{
+               season: '无',
+               total: 184
+           }]
+       });
+
+       onePanel = new Ext.Panel({
+           title: '欠费催费次数客户统计',
+           region:'north',
+           flex: 1,
+           items: {
+               store: store,
+               xtype: 'piechart',
+               dataField: 'total',
+               categoryField: 'season',
+               extraStyle:
+               {
+                   legend:
+                   {
+                       display: 'bottom',
+                       padding: 5,
+                       font:
+                       {
+                           family: 'Tahoma',
+                           size: 13
+                       }
+                   }
+               }
+           }
+       });
+       twoPanel = new Ext.Panel({
+           region:'center',
+           flex: 1,
+           title: '停电统计',
+           items: {
+               store: tingStore,
+               xtype: 'piechart',
+               dataField: 'total',
+               categoryField: 'season',
+               extraStyle:
+               {
+                   legend:
+                   {
+                       display: 'bottom',
+                       padding: 5,
+                       font:
+                       {
+                           family: 'Tahoma',
+                           size: 13
+                       }
+                   }
+               }
+           }
+       });
+
+       var tstore = new Ext.data.JsonStore(
+       {
+           fields:['name', 'visits', 'views'],
+           data: [
+               {name:'Jul 07', visits: 245000, views: 3000000},
+               {name:'Aug 07', visits: 240000, views: 3500000},
+               {name:'Sep 07', visits: 355000, views: 4000000},
+               {name:'Oct 07', visits: 375000, views: 4200000},
+               {name:'Nov 07', visits: 490000, views: 4500000},
+               {name:'Dec 07', visits: 495000, views: 5800000},
+               {name:'Jan 08', visits: 520000, views: 6000000},
+               {name:'Feb 08', visits: 620000, views: 7500000}
+           ]
+       });
+
+       var topPanel = new Ext.Panel(
+       {
+           title: 'top frame',
+           region: 'north',
+           minHeight: 300,
+           flex: 1,
+           items: {
+               xtype: 'linechart',
+               store: tstore,
+               xField: 'name',
+               yField: 'visits'
+           }
+       });
+       var bottomPanel = new Ext.Panel(
+       {
+           title: 'bottom frame',
+           region: 'center',
+           minHeight: 300,
+           flex: 1,
+           items: {
+               xtype: 'linechart',
+               store: tstore,
+               xField: 'name',
+               yField: 'visits'
+           }
+       });
+       var centerPanel = new Ext.Panel(
+       {
+           region: 'center',
+           layout: {
+               type  : 'vbox',
+               align : 'stretch',
+               pack  : 'start'
+           },
+           items:[
+               topPanel, bottomPanel
+           ]
+       });
+       var eastPanel = new Ext.Panel(
+       {
+           region: 'east',
+           width: 350,
+           layout: {
+               type  : 'vbox',
+               align : 'stretch',
+               pack  : 'start'
+           },
+           items:[
+               onePanel, twoPanel
+           ]
+       });
+
+       var arrarsPanel = new Ext.grid.PropertyGrid({
+           width: 300,
+           autoHeight: true,
+           title:'欠费情况',
+           region: "north",
+           propertyNames: {
+               tested: 'QA',
+               borderWidth: 'Border Width'
+           },
+           sortPropertyColumn:false,
+
+           source: {
+               '欠费户数': '1',
+               '欠费笔数': '1',
+               '欠费金额': '1',
+               '电费回收率': '1',
+               '户数回收率': '1',
+               '个人排名': '1'
+           },
+           viewConfig : {
+               forceFit: true,
+               scrollOffset: 2 // the grid will never have scrollbars
+           }
+       });
+
+   var    jiaoPanel = new Ext.grid.PropertyGrid({
+               width: 300,
+               autoHeight: true,
+                title:'昨日缴费情况',
+                region: "center",
+               propertyNames: {
+                  '中文':'score'
+               },
+                sortPropertyColumn:false,
+               source: {
+                   '交费户数': '1',
+                   '交费金额': '1'
+               },
+               viewConfig : {
+                   forceFit: true,
+                   scrollOffset: 1// the grid will never have scrollbars
+               }
+           });
+
+       var weastPanel = new Ext.Panel(
+       {
+           region: 'weastPanel',
+           region: "west",
+           width: 250,
+           layout: {
+               type  : 'vbox',
+               align : 'stretch',
+               pack  : 'start'
+           },
+           items:[
+               arrarsPanel,
+               jiaoPanel
+           ]
+       });
+
+       new Ext.Viewport(
+       {
+           title: "Viewport",
+           layout: "border",
+           defaults:
+           {
+               bodyStyle: "background-color: #FFFFFF;",
+               frame: true
+           },
+           items: [
+               eastPanel,
+               centerPanel,
+               weastPanel
+           ]
+       });
+    })
+</script>
