@@ -21,7 +21,8 @@ class  ReportsearchController extends ControllerBase
     public function ElectricityAction()
     {
         //TODO 用户排名没有计算
-        list($years, $result) = ReportHelper::Electricity($this->request->get());
+        list($years, $result, $total) = ReportNewHelper::Electricity($this->request->get());
+        echo json_encode(array("total" => $total, "rows" => $result, "h_rows" => $years));exit;
         $this->ajax->flushData(array("years" => $years, "result" => $result));
     }
 
@@ -80,9 +81,11 @@ class  ReportsearchController extends ControllerBase
      */
     public function PressAction()
     {
-        list($years, $teams, $users) = ReportHelper::Press($this->request->get());
+        list($years, $teams, $users) = ReportNewHelper::Press($this->request->get());
 
-        $this->ajax->flushData(array("years" => $years, "result" => $teams, "userdata" => $users));
+        echo json_encode(array("total" => 6, "rows" => $users, "h_rows" => $teams));exit;
+
+//        $this->ajax->flushData(array("years" => $years, "result" => $teams, "userdata" => $users));
     }
 
 

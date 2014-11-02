@@ -86,21 +86,61 @@ Ext.onReady(function(){
      autoLoad: true,
      root:"data"
      });*/
-    var tstore = new Ext.data.JsonStore(
-        {
-            fields:['name', 'value', 'views'],
-            data: {{sig}}
 
-        });
+
+    var setForm = new Ext.FormPanel({
+        labelWidth: 75,
+        frame:true,
+        labelAlign: 'right',
+        style: 'padding-top:10px',
+        //url:'/ams/Charges/SearchFee',
+        defaultType: 'textfield',
+        items: [{
+                fieldLabel: '指标',
+                name: 'Index',
+                allowBlank:false
+        }]
+    });
+
+    var setWin =new Ext.Window({
+            layout:'fit',
+            width:300,
+            height:120,
+            closeAction:'hide',
+            plain: true,
+            title: '指标设置',
+            items:[setForm],
+            buttons: [{
+                text: '确定'
+            },{
+                text: '关闭',
+                handler: function(){
+                    //setForm.getForm().reset();
+                    setWin.hide();
+                }
+            }]
+        })
+
+     var tstore = new Ext.data.JsonStore(
+     {
+         fields:['name', 'value', 'views'],
+         data: {{sig}}
+
+     });
 
     var topPanel = new Ext.Panel({
         iconCls:'chart',
-        title: 'ExtJS.com Visits and Pageviews, 2007/2008 (Full styling)',
+        title: '个人排名',
         frame:true,
         width:500,
-        height:300,
+        height:170,
         layout:'fit',
-
+        tbar:[{
+            text: '指标设置',
+            handler: function(){
+                setWin.show();
+            }
+        }],
         items: {
             xtype: 'columnchart',
             store: tstore,
@@ -112,9 +152,9 @@ Ext.onReady(function(){
             }),
             tipRenderer : function(chart, record, index, series){
                 if(series.yField == 'value'){
-                    return Ext.util.Format.number(record.data.value, '0,0') + ' value in ' + record.data.name;
+                    return  "综合指标为" +Ext.util.Format.number(record.data.value, '0,0');
                 }else{
-                    return Ext.util.Format.number(record.data.views, '0,0') + ' page views in ' + record.data.name;
+                    return  "应完成的指标为" +Ext.util.Format.number(record.data.views, '0,0');
                 }
             },
             chartStyle: {
@@ -166,27 +206,15 @@ Ext.onReady(function(){
                 }
             },{
                 type:'line',
-                displayName: 'visits',
-                yField: 'visits',
+                displayName: 'views',
+                yField: 'views',
                 style: {
                     color: 0x15428B
                 }
             }]
         }
     });
-    var stopPanel = new Ext.Panel(
-        {
-            title: '个人排名',
-            region: 'north',
-            minHeight: 300,
-            flex: 1,
-            items: {
-                xtype: 'linechart',
-                store: tstore,
-                xField: 'name',
-                yField: 'value'
-            }
-        });
+
 
 var s2 = new Ext.data.JsonStore(
     {
@@ -199,7 +227,7 @@ var s2 = new Ext.data.JsonStore(
         {
             title: '欠费月份户数及金额的分布',
             region: 'center',
-            minHeight: 300,
+            height: 150,
             flex: 1,
             items: {
                 xtype: 'linechart',
@@ -211,6 +239,7 @@ var s2 = new Ext.data.JsonStore(
     var centerPanel = new Ext.Panel(
         {
             region: 'center',
+            autoScroll:true,
             layout: {
                 type  : 'vbox',
                 align : 'stretch',
@@ -243,8 +272,6 @@ var s2 = new Ext.data.JsonStore(
             tested: 'QA',
             borderWidth: 'Border Width'
         },
-        sortPropertyColumn:false,
-
         source: {
             '欠费户数': '{{arrear["CustomerCount"]}}',
             '欠费笔数': '{{arrear["ArrearCount"]}}',
@@ -258,7 +285,10 @@ var s2 = new Ext.data.JsonStore(
             scrollOffset: 2 // the grid will never have scrollbars
         }
     });
-
+    arrarsPanel.on("beforeedit",function(e){
+        e.cancel=true;
+        return false;
+    });
     var    jiaoPanel = new Ext.grid.PropertyGrid({
         width: 300,
         autoHeight: true,
@@ -277,7 +307,10 @@ var s2 = new Ext.data.JsonStore(
             scrollOffset: 1// the grid will never have scrollbars
         }
     });
-
+    jiaoPanel.on("beforeedit",function(e){
+            e.cancel=true;
+            return false;
+    });
     var weastPanel = new Ext.Panel(
         {
             region: 'weastPanel',
@@ -298,6 +331,7 @@ var s2 = new Ext.data.JsonStore(
         {
             title: "Viewport",
             layout: "border",
+            //height:"100%",
             defaults:
             {
                 bodyStyle: "background-color: #FFFFFF;",

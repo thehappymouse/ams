@@ -315,7 +315,19 @@ Ext.onReady(function(){
                 sm: sm,
                 autoHeight:true,
                 emptyText: '没有数据',
-                viewConfig: {forceFit:true},
+                viewConfig: {
+                    forceFit:true,
+                    getRowClass : function(record,rowIndex,rowParams,store){
+                        var color = "";
+                        if (record.data.IsSpecial == 1) {
+                            color = "x-grid-record-blue";
+                        }
+                        if (record.data.IsCut == 1) {
+                            color = "x-grid-record-red";
+                        }
+                        return color;
+                    }
+                },
                 reserveScrollOffset: true,
                 tbar: [{
                     text: '撤销催费',
@@ -364,7 +376,7 @@ Ext.onReady(function(){
                             if (v == 1) {
                                 return "已结清";
                             } else {
-                                return "未结清";
+                                return "<a style='color:#804000'>未结清</a>";
                             }
                         }
                     }, {
@@ -374,7 +386,7 @@ Ext.onReady(function(){
                         dataIndex: 'IsCut',
                         renderer:function(v) {
                             if (v == 1) {
-                                return "已停电";
+                                return "<a style='color:blue'>已停电</a>";
                             } else {
                                 return "未停电";
                             }

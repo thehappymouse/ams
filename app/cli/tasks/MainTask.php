@@ -93,7 +93,7 @@ class MainTask extends \Phalcon\CLI\Task
     public function arrearsAction()
     {
         try {
-            ExcelImportUtils::importArrears("/opt/lampp/htdocs/ams/app/cli/23.xls");
+            ExcelImportUtils::importArrears("/opt/lampp/htdocs/ams/app/cli/2.xls");
         } catch (PHPExcel_Reader_Exception $e) {
             echo $e->getMessage();
         } catch (PDOException $pe) {

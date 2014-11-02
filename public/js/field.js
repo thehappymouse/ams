@@ -6,7 +6,7 @@ var ArrarsinfoFields = [
     'CustomerName',
     'Address',
     'YearMonth',
-    'Money',
+    'Money', 'IsSpecial',
     'IsClean', 'IsCut',
     'PressCount', 'CutCount'
 ];/**
@@ -20,9 +20,9 @@ var chargesMoneyFields = [
     'Money',
     'IsClean',
     'PressCount',
-    'CutCount',
+    'CutCount', 'IsSpecial',
     'CustomerNumber',
-    'Time',
+    'Time', 'IsCut',
     'CustomerName',
     'UserName',
     'LandlordPhone',
@@ -62,7 +62,7 @@ var arrarsFreeFields = [
 /**   催费明细*/
 var reminderFields = [
     'ID',
-    'Segment',
+    'Segment','IsSpecial',
     'SegUser','Balance',
     'CustomerNumber',
     'CustomerName',

@@ -47,6 +47,7 @@ class HelperBase
 //
 //        $page = $page ? $page : 1;
 //        $start = ($page - 1) * $size;
+        if($limit == null) $limit = 30;
 
         $condition .= " LIMIT $start, $limit";
 

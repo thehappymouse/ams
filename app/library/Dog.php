@@ -1,7 +1,9 @@
 <?php
 
-define("CMD", "./kkk ");
-
+define("CMD", "/root/test/kkk ");
+//狗不存在
+//进程挂掉
+//是否过期
 class Dog
 {
     public static function run($cmd, &$val = 0)
@@ -9,6 +11,7 @@ class Dog
         ob_start();
         $ret = system($cmd, $val);
         ob_end_clean();
+
         return $ret;
     }
 

@@ -92,8 +92,7 @@ class CustomerHelper extends HelperBase
                 $customer->IsCut = 0;
                 $customer->save();
                 $result = true;
-            }
-            else{
+            } else {
                 var_dump($cut->getMessages());
             }
         }
@@ -192,11 +191,11 @@ class CustomerHelper extends HelperBase
         $countinfo = array("allCustomer" => 0, "cutCount" => 0, "specialCount" => 0);
 
         list($total, $data, $conditions, $param) = self::ArrearsInfo($params);
-        foreach($data as $c){
+        foreach ($data as $c) {
 
-            if($c["IsClean"] != 1) $countinfo["allCustomer"]++;
-            if($c["IsSpecial"]) $countinfo["specialCount"]++;
-            if($c["IsCut"]) $countinfo["cutCount"]++;
+            if ($c["IsClean"] != 1) $countinfo["allCustomer"]++;
+            if ($c["IsSpecial"]) $countinfo["specialCount"]++;
+            if ($c["IsCut"]) $countinfo["cutCount"]++;
         }
 
 
@@ -221,19 +220,13 @@ class CustomerHelper extends HelperBase
             $conditions .= " AND Number = :Customer:";
             $param["Customer"] = $p->CustomerNumber;
         } else {
-            if ($p->Number) {
-                if ($p->Number == "全部") { //选择了所有抄表段
-                    if (($tid = User::IsAllUsers($p->Name))) { //选择了所有抄表员，则取其组下的抄表段
-                        $str = DataUtil::GetSegmentsStrByTid($p->Team);
-                    } else {
-                        $str = DataUtil::GetSegmentsStrByUid($p->Name);
-                    }
-
-                    $conditions .= " AND Segment in ($str)";
-                } else {
-                    $conditions .= " AND Segment = :segment:";
-                    $param["segment"] = $p->Number;
-                }
+            //抄表员和抄表段
+            if ($p->Number == "全部") { //选择了所有抄表段
+                $str = DataUtil::getSegName($p->Name);
+                $conditions .= " AND SegUser in ($str)";
+            } else {
+                $conditions .= " AND Segment = :segment:";
+                $param["segment"] = $p->Number;
             }
 
             //电费年月查询
@@ -281,6 +274,14 @@ class CustomerHelper extends HelperBase
                 else $word = "<";
                 $conditions .= " AND PressCount $word :PressCount:";
                 $param["PressCount"] = $p->ReminderFeeValue;
+            }
+
+            //催费次数
+            if ($p->ArrearsItemsValue && (int)$p->ArrearsItemsValue > 0) {
+                if ($p->ArrearsItems == 1) $word = ">=";
+                else $word = "<";
+                $conditions .= " AND ArrearsCount $word :ArrearsCount:";
+                $param["ArrearsCount"] = $p->ArrearsItemsValue;
             }
 
             //停电次数

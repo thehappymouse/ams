@@ -1,6 +1,5 @@
 <script>
 var startdate = <?php echo $startdate; ?>;
-
 Ext.onReady(function(){
     _pageSize = 50;
     var msgTip = new Ext.LoadMask(Ext.getBody(),{
@@ -314,7 +313,19 @@ Ext.onReady(function(){
                 //sm: singlem,
                 autoHeight:true,
                 emptyText: '没有数据',
-                viewConfig: {forceFit:true},
+                viewConfig: {
+                    forceFit:true,
+                    getRowClass : function(record,rowIndex,rowParams,store){
+                        var color = "";
+                        if (record.data.IsSpecial == 1) {
+                            color = "x-grid-record-blue";
+                        }
+                        if (record.data.IsCut == 1) {
+                            color = "x-grid-record-red";
+                        }
+                        return color;
+                    }
+                },
                 reserveScrollOffset: true,
                 columns: [
                    // singlem,
@@ -364,7 +375,7 @@ Ext.onReady(function(){
                             if (v == 1) {
                                 return "已结清";
                             } else {
-                                return "未结清";
+                                return "<a style='color:#804000'>未结清</a>";
                             }
                         }
                     }, {
@@ -374,7 +385,7 @@ Ext.onReady(function(){
                         dataIndex: 'IsCut',
                         renderer:function(v) {
                             if (v == 1) {
-                                return "已停电";
+                                return "<a style='color:blue'>已停电</a>";
                             } else {
                                 return "未停电";
                             }
@@ -432,6 +443,9 @@ Ext.onReady(function(){
                                     }
                                 })
                         }
+                    },{
+                        id: 'htmlID',
+                        html: ""
                     }]
                 })
             });
@@ -446,6 +460,19 @@ listView.on('cellclick', function (grid, rowIndex, columnIndex, e) {
         } else if( columnName == 'CustomerNumber'){
             lookInfo(record.data.CustomerNumber,0)
         }
+    })
+    listView.getStore().on("load",function(p){
+        var money = 0;
+        var tpl = "";
+        var total = p.totalLength;
+        if (total != 0) {
+            Ext.each(p.data.items,function(item){
+                money += parseInt(item.data.Money);
+            })
+            tpl = '&nbsp;&nbsp;总共'+total+'位用户欠费，共计'+money+'元';
+        }
+        Ext.getCmp('htmlID').update(tpl);
+
     })
         listView.on("render",  function(p,e){
 
@@ -498,3 +525,4 @@ listView.on('cellclick', function (grid, rowIndex, columnIndex, e) {
             });
 })
 </script>
+

@@ -1,0 +1,59 @@
+{
+    "rows": [{
+        "id": 1,
+        "year": "2014",
+        "head": "电话催费",
+        "value": 17,
+        "action": "笔数",
+        "group": "低压一班"
+    },{
+        "id": 2,
+        "year": "2014",
+        "head": "通知单催费",
+        "value": 17,
+        "action": "笔数",
+        "group": "低压一班"
+    },{
+            "id": 3,
+            "year": "2014",
+            "head": "通知单催费",
+            "value": 22,
+            "action": "金额",
+            "group": "低压一班"
+        },{
+        "id": 4,
+        "year": "2014",
+        "head": "电话催费",
+        "value": 22,
+        "action": "金额",
+        "group": "低压一班"
+    },{
+        "id": 5,
+        "year": "2015",
+        "head": "电话催费",
+        "value": 17,
+        "action": "笔数",
+        "group": "低压一班"
+    },{
+        "id": 6,
+        "year": "2015",
+        "head": "通知单催费",
+        "value": 17,
+        "action": "笔数",
+        "group": "低压一班"
+    },{
+        "id": 7,
+        "year": "2015",
+        "head": "通知单催费",
+        "value": 22,
+        "action": "金额",
+        "group": "低压一班"
+    },{
+        "id": 8,
+        "year": "2015",
+        "head": "电话催费",
+        "value": 22,
+        "action": "金额",
+        "group": "低压一班"
+    }]
+}

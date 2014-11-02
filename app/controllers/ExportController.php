@@ -407,18 +407,9 @@ class ExportController extends ControllerBase
         $objPHPExcel->setActiveSheetIndex(0);
         $objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel2007');
 
-        $filename = "电费回收报表.xls";
+        $filename = "xls/电费回收报表.xls";
         $objWriter->save($filename);
-        $this->ajax->flushOk("/ams/public/xls/" . $filename);
-
-
-        // 输出文档到页面
-//        header('Content-Type: application/vnd.ms-excel');
-//        header('Content-Disposition: attachment;filename="' . $fileName . '"');
-//        header('Cache-Control: max-age=0');
-//        $objWriter->save("php://output");
-
-
+        $this->ajax->flushOk("/ams/public/" . $filename);
     }
 
     /**

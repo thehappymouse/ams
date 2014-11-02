@@ -1,83 +1,90 @@
 <script>
-    Ext.onReady(function(){
+    Ext.onReady(function () {
 
         var infoSearch = new Ext.FormPanel({
-            title: '每月欠费数据导入',
-            defaults:{
-                border: false,
-                allowBlank: false,
-                msgTarget: 'side'
-            },
+            title: '预存电费数据导入',
             fileUpload: true,
-            labelWidth: 155,
+            labelWidth: 185,
             labelAlign: 'right',
             style: 'padding-top:10px',
-            url:'/ams/import/progress',
-            layout:'column',
-            items: [{
-                columnWidth:.6,
-                layout: 'form',
-                items: [
-                    {
-                        xtype:'textfield',
-                        allowBlank:false,
-                        fieldLabel:'预存数据',
-                        inputType:'file',
-                        name:'fileName'
-                    },{
-                        xtype:'textfield',
-                        fieldLabel:'预存电费数据文件模板上传',
-                        inputType:'file',
-                        name:'advanceTpl'
-                    },{
-                        xtype: 'compositefield',
-                        items:[{
-                            xtype:'displayfield',
-                            fieldLabel:'预存电费数据文件模板下载'
-                        },{
-                            html:'<a href="/ams/public/download/模板-欠费明细.xls"><img style="cursor:pointer" src="../images/icons/excel.png"/></a>'
-                        }]
-                    },{
-                        xtype: 'compositefield',
-                        items:[{xtype:'hidden'},{
-                            width:100,
-                            xtype:'button',
-                            text:'导入',
-                            handler:function(){
-                                infoSearch.getForm().submit({
-                                    success:function(){
-                                        alert("上传成功");
-                                    }
-                                })
+            url: '/ams/import/AdvanceUpload',
+            items: [
+                {
+                    xtype: 'fileuploadfield',
+                    fieldLabel: '预存数据',
+                    name: 'fileName',
+                    width: 300,
+                    buttonText: '更新文件'
+                },
+//                {
+//                    xtype: 'fileuploadfield',
+//                    fieldLabel: '预存数据文件模板上传',
+//                    name: 'arrarsTpl',
+//                    width: 300,
+//                    buttonText: '更新文件'
+//                },
+                {
+                    xtype: 'compositefield',
+                    items: [
+                        {
+                            xtype: 'displayfield',
+                            fieldLabel: '预存数据文件模板下载'
+                        },
+                        {
+                            html: '<a href="/ams/public/download/预收数据模板.xls"><img style="cursor:pointer" src="../images/icons/excel.png"/></a>'
+                        }
+                    ]
+                },
+                {
+                    xtype: 'button',
+                    width: 100,
+                    style: 'margin-left:190px',
+                    text: '导入',
+                    handler: function () {
+                        infoSearch.getForm().submit({
+                            success: function () {
+                                alert("上传成功");
+                            },
+                            failure: function (a, b) {
+                                console.log(a);
+                                alert(b.result.msg);
                             }
-                        }]
-                    }]
-            }]
+                        })
+                    }
+                }
+            ]
         });
 
         var searchTab = new Ext.TabPanel({
             activeTab: 0,
-            height:145,
-            plain:true,
-            defaults:{autoScroll: true},
-            items:[
+            height: 195,
+            plain: true,
+            region: 'north',
+            bodyStyle: "padding:20px;",
+            defaults: {autoScroll: true},
+            items: [
                 infoSearch
             ]
         });
-        var formpanels = new Ext.Panel({
-            region: 'center',
-            fileUpload: true,
-            autoScroll: true,
-            bodyStyle: "padding:20px;",
-            items: [
-                searchTab
-            ]
-        });
+
+
         new Ext.Viewport(
                 {
                     layout: 'border',
                     items: [
-                        formpanels
+                        new Ext.Panel({
+                            region: 'center',
+                            autoScroll: true,
+                            bodyStyle: "padding:20px;",
+                            items: [
+                                searchTab
+                            ]
+                        })
+
+
+
+
+
                     ]
                 });
     })

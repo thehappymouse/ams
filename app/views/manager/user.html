@@ -224,13 +224,26 @@
             {
                 fieldLabel: '密码',
                 xtype: 'textfield',
+                inputType: 'password',
                 name:'Password',
+                id: 'onePass',
                 width: 151
             },{
                 fieldLabel: '确认密码',
                 xtype: 'textfield',
+                inputType: 'password',
                 name:'AgainPassword',
-                width: 151
+                id: 'twoPass',
+                width: 151,
+                listeners:{
+                    blur:function(v){
+                        var pass = Ext.getCmp('onePass').getValue();
+                        var twoPass = Ext.getCmp('twoPass').getValue();
+                        if (pass != twoPass) {
+                            Ext.MessageBox.alert('提示','两次密码输入不一样');
+                        }
+                    }
+                }
             }]
         })
 
@@ -245,6 +258,16 @@
             buttons: [{
                 text: '确认',
                 handler: function(){
+                    var pass = Ext.getCmp('onePass').getValue();
+                    var twoPass = Ext.getCmp('twoPass').getValue();
+                    if (pass != twoPass) {
+                        Ext.MessageBox.alert('提示','两次密码输入不一样');
+                        return;
+                    }
+                    if (!modifyForm.getForm().isValid()) {
+                        Ext.MessageBox.alert('提示','请正确填写表单');
+                        return;
+                    }
                     modifyForm.getForm().submit({
                         success:function(v, action){
                             var re = Ext.decode(action.response.responseText);
@@ -263,6 +286,7 @@
             },{
                 text: '取消',
                 handler: function(){
+                    modifyForm.getForm().reset();
                     win.hide();
                 }
             }]

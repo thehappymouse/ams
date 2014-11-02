@@ -76,7 +76,7 @@ freeView = new Ext.grid.GridPanel(
                     if (v == 1) {
                         return "已结清";
                     } else {
-                        return "未结清";
+                        return "<a style='color:#804000'>未结清</a>";
                     }
                 }
             }, {
@@ -86,7 +86,7 @@ freeView = new Ext.grid.GridPanel(
                 dataIndex: 'IsCut',
                 renderer:function(v) {
                     if (v == 1) {
-                        return "已停电";
+                        return "<a style='color:blue'>已停电</a>";
                     } else {
                         return "未停电";
                     }
@@ -605,6 +605,8 @@ submit2Form = new Ext.FormPanel({
                         var text = Ext.decode(action.response.responseText);
                         Ext.MessageBox.alert('提示','信息录入成功');
                         freeView.store.reload();
+                        cuifeiView.store.reload();
+                        tingdianView.store.reload();
                         formWin.hide();
                     },
                     failure:function(v,action){

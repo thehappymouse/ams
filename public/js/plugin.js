@@ -79,5 +79,28 @@ Ext.grid.GridView.prototype.templates.cell = new Ext.Template(
   '</td>'   
 );
 
+spliceArr = function  (v)
+{
+    var arr = [];
+    Ext.each(v, function(item){
+        arr.push(item.data.sort);
+    })
+    if (arr.length == 0) {
+        return;
+    }
+    var tempArray = arr.slice(0);
+    for (var i = 0; i< tempArray.length; i++) {
+        for (var j = i + 1; j< tempArray.length; ) {
+            if (tempArray[i] == tempArray[j]) {
+                tempArray.splice(j,1);
+            } else {
+                j++;
+            }
+        }
+    }
+    return tempArray;
+}
+
+
 
 

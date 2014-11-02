@@ -5,21 +5,6 @@ class IndexController extends ControllerBase
     public function indexAction()
     {
         $this->view->name = $this->loginUser["Name"];
-//        $this->view->setTemplateAfter("empty");
-//        $rid = $this->loginUser["Role"];
-//        $role  = ARole::findFirst($rid);
-//        $page = $role->IndexPage;
-//        $page = $page ? $page : "/site/index2";
-//
-//        $page = substr($page, 1);
-//        $this->redirect($page);
-//
-//        if (in_array($this->loginUser["Role"], array("1"))) {
-//            $this->redirect("site/index");
-//
-//        } else {
-//            $this->redirect("site/index2");
-//        }
     }
 
     public function infobarAction()

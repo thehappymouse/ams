@@ -5,23 +5,11 @@ class SiteController extends ControllerBase
     //Home 个人排名指标柱形图
     public function getSingleBar()
     {
-
-//        [
-//                {name:'Jul 07', value: 245000, views: 3000000},
-//                {name:'Aug 07', value: 240000, views: 3200000},
-//                {name:'Sep 07', value: 355000, views: 3400000},
-//                {name:'Oct 07', value: 375000, views: 3500000},
-//                {name:'Nov 07', value: 490000, views: 3600000},
-//                {name:'Dec 07', value: 495000, views: 3000000},
-//                {name:'Jan 08', value: 520000, views: 3000000},
-//                {name:'Feb 08', value: 620000, views: 3000000}
-//            ]
         $users = User::find("Role=1");
 
         $uData = array();
         $data = array();
         foreach ($users as $user) {
-            $oneRes = array("User" => $user->Name);
             $seg = DataUtil::GetSegmentsByUid($user->ID);
             if (count($seg) == 0) {
                 $uData[$user->Name] = 0;
@@ -57,22 +45,6 @@ class SiteController extends ControllerBase
     {
         $seg = DataUtil::GetSegmentsByUid($this->loginUser["ID"]);
 
-
-//        [{
-//        season: '0次',
-//            total: 150
-//        },{
-//        season: '1次',
-//            total: 245
-//        },{
-//        season: '2次',
-//            total: 117
-//        },{
-//        season: '3次以上',
-//            total: 184
-//        }]
-
-        $dataLegend = array();
         $data = array();
         for ($i = 0; $i < 4; $i++) {
             $row = array();
@@ -98,11 +70,6 @@ class SiteController extends ControllerBase
             $row["total"] = $r->Count;
             $data[] = $row;
         }
-
-        if ($data[0] == 0 && $data[1] == 0 && $data[2] == 0 && $data[3] == 0) {
-            $data[0] = 1;
-        }
-
         return json_encode($data);
     }
 
@@ -143,15 +110,12 @@ class SiteController extends ControllerBase
             $builder = $this->getBuilder("Arrears", $seg);
 
             $builder->from("Arrears")->columns("YearMonth, count(DISTINCT CustomerNumber) AS Count");
-
             $builder->groupBy("YearMonth");
-//            $builder->andWhere("YearMonth > '20140101'");
             $rs = $builder->getQuery()->execute();
         } else {
 
         }
         $dataX = array();
-        $dataY = array();
         $data = array();
 
         for ($i = 1; $i <= (int)date('m'); $i++) {
@@ -165,28 +129,13 @@ class SiteController extends ControllerBase
                         $count += $r->Count;
                     }
                 }
-
             }
             $row = array();
             $row["name"] = $ym;
             $row["value"] = $count;
             $data[] = $row;
-            $dataY[] = $count;
         }
 
-        //将年份的20去掉
-        foreach ($dataX as $key => $value) {
-            $value = substr($value, 2);
-            $dataX[$key] = $value;
-        }
-
-        if (count($dataX) < 2) {
-            if (!isset($dataX[0])) $dataX[0] = 0;
-            $dataX[1] = $dataX[0];
-
-            if (!isset($dataY[0])) $dataY[0] = 0;
-            $dataY[] = $dataY[0];
-        }
 
         return json_encode($data);
     }

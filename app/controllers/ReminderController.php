@@ -42,21 +42,22 @@ class ReminderController extends ControllerBase
         $this->view->disable();
         $params = $this->request->get();
 
-        $countinfo  = array();
 
         list($total, $data, $conditions, $param) = CustomerHelper::ArrearsInfo($params);
-//        $builder = $this->modelsManager->createBuilder();
-//        $result = $builder->columns(array("Count(*) as Count, SUM(Money) as Money "))
-//            ->from("Arrears")
-//            ->andWhere($conditions)
-//            ->andWhere("IsClean=0")
-//            ->getQuery()->execute($param)->getFirst();
-//
-//        $count = $result->Count;
-//        $money = $result->Money;
-//        $countinfo = array("arrearsCount" => $count, "arrearsMoney" => $money);
+
+        $builder = $this->modelsManager->createBuilder();
+        $result = $builder->columns(array("Count(*) as Count, SUM(Money) as Money "))
+            ->from("Customer")
+            ->andWhere($conditions)
+            ->andWhere("IsClean=0")
+            ->getQuery()->execute($param)->getFirst();
+
+        $count = $result->Count;
+        $money = $result->Money;
+        $countinfo = array("arrearsCount" => $count, "arrearsMoney" => $money);
 
         $this->ajax->countInfo = $countinfo;
+
         $this->ajax->total = $total;
         $this->ajax->flushData($data);
     }
@@ -194,7 +195,6 @@ class ReminderController extends ControllerBase
 
         $ids = explode(",", $this->request->get("ID"));
 
-        $pressStyle = "";
         $pressPhoto = "";
         $pressPhone = $this->request->get("Phone");
 
@@ -243,7 +243,7 @@ class ReminderController extends ControllerBase
             $ar = Arrears::findFirst($press->Arrear);
 
             //        $press->UserID = ""
-            $press->UserName = $ar->Customer->SegUser;
+            $press->SegUser = $ar->SegUser;
             $press->CustomerNumber = $ar->Customer->Number;
             $press->Segment = $ar->Segment;
             $press->YearMonth = $ar->YearMonth;

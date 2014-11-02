@@ -1,8 +1,13 @@
 <script>
 Ext.onReady(function(){
+    var msgTip = new Ext.LoadMask(Ext.getBody(),{
+        msg:'Excel正在生成中',
+        removeMask : true
+    });
+    _pageSize = 5;
     /*三个动态框*/
     var teamCombox = new SettCombbox({
-        url:'/ams/Info/TeamList',
+        url:'/ams/Info/TeamList?ID=1&Type=1&All=1',
         fieldLabel: '管理班组',
         anchor:'95%',
         id:'team',
@@ -42,7 +47,6 @@ Ext.onReady(function(){
                     },
                     items:[
                         new Ext.form.DateField({
-                            renderTo: document.body,
                             plugins:'monthPickerPlugin',
                             name:'FromData',
                             width:82,
@@ -53,7 +57,6 @@ Ext.onReady(function(){
                             //   style: 'text-align:right;width:40px;',
                             value: '至: '
                         },new Ext.form.DateField({
-                            renderTo: document.body,
                             plugins:'monthPickerPlugin',
                             name:'ToData',
                             width:82,
@@ -85,13 +88,180 @@ Ext.onReady(function(){
         ]
     });
 
+    var PersonRecord = Ext.data.Record.create([
+        {name: 'YearMonth', type: 'string'},
+        {name: 'Action', type: 'string'},
+        {name: 'Name', type: 'string'},
+        {name: 'Value'},{name: 'sort'}
+    ]);
+
+    var myStore = new Ext.data.Store({
+        url: '/ams/a.json',
+        autoLoad: true,
+        baseParams: {
+            start: 0,
+            limit: _pageSize
+        },
+        reader: new Ext.data.JsonReader({
+            root: 'rows',
+            idProperty: 'id'
+        }, PersonRecord)
+    });
+
+    var chaobiaoPanel = new Ext.grid.PivotGrid({
+        store     : myStore,
+        aggregator: 'sum',
+        height    : 200,
+        title     : '抄表员',
+        measure   : 'Value',
+        viewConfig: {
+            autoFill:true,
+            title: '抄表员<br/>欠费年月'
+        },
+        tbar:[{
+            text:'上一页',
+            disabled:true,
+            id: 'lastOne'
+        },'->',{
+            text:'下一页',
+            disabled:true,
+            id: 'nextOne'
+        }],
+        leftAxis: [{
+            dataIndex: 'YearMonth'
+        }],
+        topAxis: [/*{
+         dataIndex: 'eyeColor'
+         },*/{
+
+            dataIndex: 'Name'
+        },{
+            dataIndex: 'Action'
+        }],
+        bbar:[{
+            text: 'excel',
+            iconCls: 'excel',
+            handler: function(btn, pressed){
+                if (chaobiaoPanel.getStore().data.length == 0) {
+                    Ext.MessageBox.alert('提示','请先查询数据');
+                    return;
+                }
+                msgTip.show();
+                infoSearch.getForm().submit({
+                    url:'/ams/export/ReportPress',
+                    success:function(v,action){
+                        var re = Ext.decode(action.response.responseText);
+                        msgTip.hide();
+                        Ext.MessageBox.alert('提示',"<a target='_blank' href='"+re.msg+"'>下载</a>");
+                    },
+                    failure:function(v,action) {
+                        msgTip.hide();
+                        Ext.MessageBox.alert('提示','创建失败');
+                    }
+                })
+            }
+        }]
+    });
+
+    chaobiaoPanel.getStore().on('load',function(v){
+        var total = v.totalLength;
+        var array = spliceArr(v.data.items);
+        Ext.getCmp('lastOne').setDisabled(array[4] == 5);
+        Ext.getCmp('nextOne').setDisabled(array[4] == total);
+    })
+
+
+    var groupPanel = new Ext.grid.PivotGrid({
+        store     : myStore,
+        aggregator: 'sum',
+        height    : 200,
+        title     : '班组情况',
+        measure   : 'Value',
+        viewConfig: {
+            autoFill:true,
+            title: '抄表员<br/>欠费年月'
+        },
+        tbar:[{
+            text:'上一页',
+            disabled:true,
+            id: 'last'
+        },'->',{
+            text:'下一页',
+            disabled:true,
+            id: 'next'
+        }],
+        leftAxis: [{
+            dataIndex: 'YearMonth'
+        }],
+        topAxis: [/*{
+         dataIndex: 'eyeColor'
+         },*/{
+
+            dataIndex: 'Name'
+        },{
+            dataIndex: 'Action'
+        }],
+        bbar:[{
+            text: 'excel',
+            iconCls: 'excel',
+            handler: function(btn, pressed){
+                if (groupPanel.getStore().data.length == 0) {
+                    Ext.MessageBox.alert('提示','请先查询数据');
+                    return;
+                }
+                msgTip.show();
+                infoSearch.getForm().submit({
+                    url:'/ams/export/ReportPress',
+                    success:function(v,action){
+                        var re = Ext.decode(action.response.responseText);
+                        msgTip.hide();
+                        Ext.MessageBox.alert('提示',"<a target='_blank' href='"+re.msg+"'>下载</a>");
+                    },
+                    failure:function(v,action) {
+                        msgTip.hide();
+                        Ext.MessageBox.alert('提示','创建失败');
+                    }
+                })
+            }
+        }]
+    });
+
+    groupPanel.getStore().on('load',function(v){
+        var total = v.totalLength;
+        var array = spliceArr(v.data.items);
+        Ext.getCmp('last').setDisabled(array[4] == 5);
+        Ext.getCmp('next').setDisabled(array[4] == total);
+    })
+
+    var chaobiaoTab = new Ext.TabPanel({
+        activeTab: 0,
+        plain:true,
+        autoWidth:true,
+        style: 'margin-top:15px',
+        items:[
+            chaobiaoPanel
+        ]
+    });
+
+    var groupTab = new Ext.TabPanel({
+        activeTab: 0,
+        plain:true,
+        autoWidth:true,
+        style: 'margin-top:15px',
+        items:[
+            groupPanel
+        ]
+    });
+
     var allPanel = new Ext.Panel({
         region: 'center',
         fileUpload: true,
         autoScroll: true,
         bodyStyle: "padding:20px;",
         items: [
-            searchPanel
+            searchPanel,
+            chaobiaoTab,
+            groupTab
         ]
     });
     new Ext.Viewport(

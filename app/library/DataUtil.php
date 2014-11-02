@@ -8,6 +8,43 @@
  */
 class DataUtil
 {
+
+    /**
+     * @param \Phalcon\Mvc\Model $model
+     */
+    public  static function getModelError($model)
+    {
+        $msgs = $model->getMessages();
+        if(count($msgs) > 0){
+            return $msgs[0]->getMessage();
+        }
+        else{
+            return "";
+        }
+    }
+
+    /**
+     * @param $uid
+     * @return string
+     */
+    public static function getSegName($uid)
+    {
+        if(($tid = User::IsAllUsers($uid))){
+            $users = User::find("TeamID=$tid");
+        }
+        else {
+            $users = User::find("ID=$uid");
+        }
+
+
+        $names = array();
+        foreach($users as $u){
+            $names[] = $u->Name;
+        }
+        $ss = "'" . implode("','", $names) . "'";
+        return $ss;
+    }
+
     /**
      * 获取 管理员名下的抄表段，仅抄表段
      * @param $uid

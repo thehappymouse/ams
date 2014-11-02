@@ -21,27 +21,20 @@ class CountHelper extends HelperBase
     {
         $p = new RequestParams($param);
         $uid = $p->get("Name"); //管理班组用户
-        $tid = $p->get("Team");
         $data = array();
 
+        $ss = DataUtil::getSegName($uid);
 
-        $ss = DataUtil::GetSegmentsStrByUid($uid);
-        $condition = " WHERE (a.PressTime BETWEEN :start: AND :end:)  AND a.Segment IN ($ss)";
+        $condition = " WHERE (a.PressTime BETWEEN :start: AND :end:) AND a.SegUser IN ($ss)";
 
         $query = "SELECT a.Arrear, b.Segment, a.CustomerNumber, b.ID, b.Name, b.Address, a.PressTime, a.PressStyle
                          FROM Press as a LEFT JOIN Customer as b  ON a.CustomerNumber = b.Number";
-        //排序
-        $condition_Sort = $condition;
-        if($p->numberSort) {
-            $condition_Sort .= " ORDER BY CustomerNumber " . ($p->numberSort == 1 ? "Desc ": "ASC ");
-        }
-        if($p->segmentSort) {
-            $condition_Sort .= " ORDER BY b.Segment " . ($p->segmentSort == 1 ? "Desc ": "ASC ");
-        }
+
 
         $param = array("start" => $p->FromData, "end" => $p->ToData);
 
-        $query .= self::addLimit($condition_Sort, $p->start, $p->limit);
+        $query .= self::addLimit($condition, (int)$p->start, $p->limit);
+
         $results = parent::getModelManager()->executeQuery($query, $param);
 
         foreach ($results as $rs) {
@@ -91,13 +84,12 @@ class CountHelper extends HelperBase
         $p = new RequestParams($param);
 
         $uid = $p->get("Name"); //管理班组用户
-        $tid = $p->get("Team");
 
-        $ss = DataUtil::GetSegmentsStrByUid($uid);
+        $ss = DataUtil::getSegName($uid);
 
         $query = "SELECT a.CutUserName, a.Arrear,b.Segment, a.CustomerNumber, b.ID, b.Name, b.Address, a.ResetTime, a.ResetStyle, a.ResetPhone
                          FROM Cutinfo as a LEFT JOIN Customer as b ON a.CustomerNumber = b.Number
-                         WHERE a.ResetTime != '' AND a.Segment IN ($ss)";
+                         WHERE a.ResetTime != '' AND a.CutUserName IN ($ss)";
 
         //排序
         if($p->numberSort) {
@@ -155,21 +147,13 @@ class CountHelper extends HelperBase
         $p = new RequestParams($param);
 
         $uid = $p->get("Name"); //管理班组用户
-        $tid = $p->get("Team");
-        $ss = DataUtil::GetSegmentsStrByUid($uid);
+        $ss = DataUtil::getSegName($uid);
 
-        $condition = " WHERE a.CutTime BETWEEN :start: AND :end:  AND a.Segment IN ($ss)";
+        $condition = " WHERE a.CutTime BETWEEN :start: AND :end:  AND a.CutUserName IN ($ss)";
 
         $query = "SELECT a.Arrear,b.Segment, a.Money, a.YearMonth, b.ID, a.CustomerNumber, b.Name, b.Address, a.CutTime, a.CutStyle
                          FROM Cutinfo as a LEFT JOIN Customer as b ON a.CustomerNumber = b.Number" . $condition;
 
-        //排序
-        if($p->numberSort) {
-            $query .= " ORDER BY CustomerNumber " . ($p->numberSort == 1 ? "Desc ": "ASC ");
-        }
-        if($p->segmentSort) {
-            $query .= " ORDER BY b.Segment " . ($p->segmentSort == 1 ? "Desc ": "ASC ");
-        }
 
         $param = array("start" => $p->FromData, "end" => $p->ToData);
 
@@ -215,7 +199,6 @@ class CountHelper extends HelperBase
     {
         $p = new RequestParams($params);
         $uid = $p->get("Name");
-        $tid = $p->get("Team");
         $start = $p->get("FromData");
         $end = $p->get("ToData");
 

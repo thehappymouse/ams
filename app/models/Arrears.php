@@ -73,6 +73,11 @@ class Arrears extends \Phalcon\Mvc\Model
     public $Segment;
 
     /**
+     * @var string
+     */
+    public $SegUser;
+
+    /**
      * Initialize method for model.
      */
     public function initialize()
@@ -138,7 +143,7 @@ class Arrears extends \Phalcon\Mvc\Model
             'IsClean' => 'IsClean', 
             'IsCut' => 'IsCut',
             'Segment' => 'Segment',
-            'Segment' => 'Segment',
+            'SegUser' => 'SegUser',
             'ChargeDate' => 'ChargeDate'
         );
     }

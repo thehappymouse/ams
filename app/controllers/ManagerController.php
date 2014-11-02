@@ -166,6 +166,34 @@ class ManagerController extends ControllerBase
     }
 
     /**
+     * 修改用户密码
+     */
+    public function ChangePasswordAction()
+    {
+        $uid = $this->loginUser["ID"];
+        $user = User::findFirst($uid);
+
+        $newpass = $this->request->get("newPassWord");
+        $oldpass = $this->request->get("oldPassWord");
+
+        if($user->Pass == sha1($oldpass)){
+
+            $user->Pass = sha1($newpass);
+            if($user->save()){
+                $this->ajax->flushOk("操作已成功");
+            }
+            else {
+                var_dump($user->getMessages());
+            }
+
+        }
+        else {
+            $this->ajax->flushError("原始密码不正确");
+        }
+
+    }
+
+    /**
      * 用户修改提交
      */
     public function UserEditAction()

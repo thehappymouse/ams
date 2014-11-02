@@ -61,7 +61,7 @@ class Press extends \Phalcon\Mvc\Model
      *
      * @var string
      */
-    public $UserName;
+    public $SegUser;
 
     /**
      *
@@ -112,7 +112,7 @@ class Press extends \Phalcon\Mvc\Model
             'PhoneType' => 'PhoneType', 
             'Phone' => 'Phone', 
             'UserID' => 'UserID', 
-            'UserName' => 'UserName', 
+            'SegUser' => 'SegUser',
             'Segment' => 'Segment',
             'YearMonth' => 'YearMonth',
             'Money' => 'Money',

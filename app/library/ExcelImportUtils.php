@@ -64,25 +64,37 @@ class ExcelImportUtils
 
     /**
      * 保存一个抄表段
+     * 2014-11-02 如果抄表段已存在，但抄表员名称不同：新建记录，记录抄表员和抄表段的关系。旧关系不动
      * @param array $row
      */
     private static function saveSegment(array $row)
     {
         $s = Segment::findFirst("Number = '$row[Segment]'");
 
-        if (null == $s) {
+
+        $user = User::findFirst(array("Name=:name:", "bind" => array("name" => $row["SegUser"])));
+        if(!$user){
+            $user = new User();
+            $user->Name = $row["SegUser"];
+            $user->TeamID = 1;
+            $user->Role = 1;
+            $user->RoleName = "抄表员";
+            $user->Pass = sha1("123");
+            if(!$user->save()){
+                throw new Exception(DataUtil::getModelError($s));
+            }
+        }
+
+        if (null == $s || $s->UserName != $user->Name) {
+
             $s = new Segment();
             $s->Number = $row["Segment"];
             $s->Name = $row["SegmentName"];
             $s->UserName = $row["SegUser"];
-
-            $user = User::findFirst(array("Name=:name:", "bind" => array("name" => $s->UserName)));
-            if ($user) {
-                $s->UserID = $user->ID;
-            }
+            $s->UserID = $user->ID;
 
             if (!$s->save()) {
-                var_dump($s->getMessages());
+                throw new Exception(DataUtil::getModelError($s));
             }
         }
 
@@ -104,11 +116,13 @@ class ExcelImportUtils
             $c->Number = $row["Number"];
             $c->Address = $row["Address"];
             $c->Balance = $row["Balance"];
-            $c->Segment = $row["Segment"];
-            $c->SegUser = $row["SegUser"];
+
             $c->CreateTime = $now;
             $c->LandlordPhone = $row["Phone"];
         }
+
+        $c->Segment = $row["Segment"];
+        $c->SegUser = $row["SegUser"];
 
         $r = $c->save();
 
@@ -129,7 +143,7 @@ class ExcelImportUtils
     public static function importArrears($filepath)
     {
         $data = ExcelImportUtils::readExcel($filepath);
-        if (count($data[0]) != 8) {
+        if (empty($data) || count($data[0]) != 8) {
             throw new Exception("数据格式不正确，请查正");
         }
 
@@ -145,6 +159,7 @@ class ExcelImportUtils
             $a->PressCount = 0;
             $a->CutCount = 0;
             $a->IsCut = 0;
+            $a->SegUser = $row["G"];
 
             $arr = array(
                 "Name" => $row["C"], "Segment" => $row["F"], "SegmentName" => "",
@@ -155,10 +170,16 @@ class ExcelImportUtils
 
             try {
 
-                if (Arrears::findFirst("YearMonth = $row[A] AND CustomerNumber = $row[B]") == null) {
+                if (($q = Arrears::findFirst("YearMonth = $row[A] AND CustomerNumber = $row[B]")) == null) {
                     $r = $a->save();
                     if (!$r) {
                         var_dump($a->getMessages());
+                    }
+                }
+                else {
+                    $q->SegUser = $a->SegUser;
+                    if(!$q->save()) {
+                        var_dump($q->getMessages());
                     }
                 }
 

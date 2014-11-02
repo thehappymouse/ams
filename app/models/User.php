@@ -73,7 +73,7 @@ class User extends \Phalcon\Mvc\Model
      * @return bool|int
      */
     public static function IsAllUsers($uid){
-        if(preg_match('/^tid_(\d{1,})/', $uid, $matches)){
+        if(preg_match('/^tid_(\d{1,})/', $uid, $matches) || preg_match('/^t_(\d{1,})/', $uid, $matches)){
             return $matches[1];
         }
         else {

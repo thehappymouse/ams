@@ -35,3 +35,7 @@
     background-image: url('../js/ext/date/spinner.gif');
     border-bottom-color: #b5b8c8;
 }
+
+.x-grid3-row td, .x-grid3-summary-row td {
+    font: normal 14px/15px arial, tahoma, helvetica, sans-serif;
+}

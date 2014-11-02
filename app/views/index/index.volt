@@ -16,6 +16,32 @@
 </STYLE>
 <script>
     $(document).ready(function () {
+    getNum = function() {
+            $.ajax({
+                dataType:'json',
+                url:'/ams/message/count',
+                type:'POST',
+                success:function(v) {
+                    var n="";
+                    if (v.success) {
+                        if (v.data > 0) {
+                            n = v.data;
+                        }
+                        $("#messageCount").remove();
+                        var tpl = "<div id='messageCount' style='color:red'>"+n+"</div>"
+                        $("#message").append(tpl);
+                    }
+                }
+            })
+        }
+
+        setT = function() {
+            getNum();
+            setTimeout('setT()',50000);
+        }
+
+        setT();
+
         var obj = {"#mainMenu_tab_1": "#mainMenu_menu_1", "#mainMenu_tab_2": "#mainMenu_menu_2", "#mainMenu_tab_3": "#mainMenu_menu_3", "#mainMenu_tab_4": "#mainMenu_menu_4", "#mainMenu_tab_5": "#mainMenu_menu_5", "#mainMenu_tab_6": "#mainMenu_menu_6"}
         $("UL:eq(0) LI").each(function (item) {
             var select = "#mainMenu_tab_" + (parseInt(item) + 1);
@@ -79,7 +105,7 @@
                 <TABLE class="buttonInfo" id="buttonInfo" cellSpacing="0" cellPadding="0"
                        border="0">
                     <TBODY>
-                    <TR><TD style="cursor:pointer;"><A title=消息 style="FONT-SIZE:14px;WIDTH: 100%; HEIGHT: 100%">
+                    <TR><TD style="cursor:pointer;" onclick="passWinAlert()"><A title=员工名 style="FONT-SIZE:14px;WIDTH: 100%; HEIGHT: 100%">
                                 <?php echo $name; ?>&nbsp;&nbsp;</A>
                         </TD>
                         <TD width="160">
@@ -87,7 +113,7 @@
                                  style="PADDING-RIGHT: 10px"></DIV>
                         </TD>
 
-                        <TD class="issueRegisterButton" style="cursor:pointer;" onclick="messageaAert()"><A title=消息
+                        <TD id="message" class="issueRegisterButton" style="cursor:pointer;" onclick="messageaAlert()"><A title=消息
                                                                                                             style="WIDTH: 100%; HEIGHT: 100%"></A>
                         </TD>
                         <TD class="logoutbutton" onclick="logout()" style="cursor:pointer;"><A title="退出"

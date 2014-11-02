@@ -1,8 +1,13 @@
+
 <script>
 Ext.onReady(function(){
+    var msgTip = new Ext.LoadMask(Ext.getBody(),{
+        msg:'Excel正在生成中',
+        removeMask : true
+    });
     /*三个动态框*/
     var teamCombox = new SettCombbox({
-        url:'/ams/Info/TeamList',
+        url:'/ams/Info/TeamList?ID=1&Type=1&All=1',
         fieldLabel: '管理班组',
         anchor:'95%',
         id:'team',
@@ -36,7 +41,7 @@ Ext.onReady(function(){
             items: [
                 {
                     xtype: 'compositefield',
-                    fieldLabel: '电费年月',
+                    fieldLabel: '工作时间',
                     defaults:{
                         xtype: 'datefield'
                     },
@@ -85,13 +90,161 @@ Ext.onReady(function(){
         ]
     });
 
+    var SaleRecord = Ext.data.Record.create([
+        {name: 'group',   type: 'string'},
+        {name: 'year',  type: 'string'},
+        {name: 'head',     type: 'string'},
+        {name: 'state',    type: 'string'},
+        {name: 'month',    type: 'int'},
+        {name: 'quarter',  type: 'int'},
+        {name: 'action',     type: 'string'},
+        {name: 'quantity', type: 'int'},
+        {name: 'value',    type: 'int'}
+    ]);
+
+    var myStore = new Ext.data.Store({
+        url: '/ams/b.json',
+        autoLoad: true,
+        reader: new Ext.data.JsonReader({
+            root: 'rows',
+            idProperty: 'id'
+        }, SaleRecord)
+    });
+
+    var pivotGrid = new Ext.grid.PivotGrid({
+        title     : '班组情况',
+        width     : 800,
+        height    : 212,
+        store     : myStore,
+        aggregator: 'sum',
+        measure   : 'value',
+        viewConfig: {
+            title: '信息'
+        },
+        leftAxis: [
+            {
+                width: 80,
+                dataIndex: 'group'
+            },
+            {
+                width: 90,
+                dataIndex: 'year'
+            },{
+                width: 90,
+                dataIndex: 'action'
+            }
+        ],
+        topAxis: [
+            {
+                dataIndex: 'head'
+            }
+        ],
+        bbar:[{
+            text: 'excel',
+            iconCls: 'excel',
+            handler: function(btn, pressed){
+                if (pivotGrid.getStore().data.length == 0) {
+                    Ext.MessageBox.alert('提示','请先查询数据');
+                    return;
+                }
+                msgTip.show();
+                infoSearch.getForm().submit({
+                    url:'/ams/export/ReportWork',
+                    success:function(v,action){
+                        var re = Ext.decode(action.response.responseText);
+                        msgTip.hide();
+                        Ext.MessageBox.alert('提示',"<a target='_blank' href='"+re.msg+"'>下载</a>");
+                    },
+                    failure:function(v,action) {
+                        msgTip.hide();
+                        Ext.MessageBox.alert('提示','创建失败');
+                    }
+                })
+            }
+        }]
+    });
+
+var peopleGrid = new Ext.grid.PivotGrid({
+        title     : '抄表员',
+        width     : 800,
+        height    : 212,
+        store     : myStore,
+        aggregator: 'sum',
+        measure   : 'value',
+        viewConfig: {
+            title: '信息'
+        },
+        leftAxis: [
+            {
+                width: 80,
+                dataIndex: 'group'
+            },
+            {
+                width: 90,
+                dataIndex: 'year'
+            },{
+                width: 90,
+                dataIndex: 'action'
+            }
+        ],
+        topAxis: [
+            {
+                dataIndex: 'head'
+            }
+        ],
+        bbar:[{
+            text: 'excel',
+            iconCls: 'excel',
+            handler: function(btn, pressed){
+                if (peopleGrid.getStore().data.length == 0) {
+                    Ext.MessageBox.alert('提示','请先查询数据');
+                    return;
+                }
+                msgTip.show();
+                infoSearch.getForm().submit({
+                    url:'/ams/export/ReportWork',
+                    success:function(v,action){
+                        var re = Ext.decode(action.response.responseText);
+                        msgTip.hide();
+                        Ext.MessageBox.alert('提示',"<a target='_blank' href='"+re.msg+"'>下载</a>");
+                    },
+                    failure:function(v,action) {
+                        msgTip.hide();
+                        Ext.MessageBox.alert('提示','创建失败');
+                    }
+                })
+            }
+        }]
+    });
+
+    var peoplePanel = new Ext.TabPanel({
+        // labelWidth: 85,
+        activeTab: 0,
+        // height:170,
+        plain:true,
+        style: 'margin-top:15px',
+        items:[
+            peopleGrid
+        ]
+    });
+    var pivotPanel = new Ext.TabPanel({
+       // labelWidth: 85,
+        activeTab: 0,
+       // height:170,
+        plain:true,
+        style: 'margin-top:15px',
+        items:[
+            pivotGrid
+        ]
+    });
     var allPanel = new Ext.Panel({
         region: 'center',
-        fileUpload: true,
-        autoScroll: true,
+        //autoScroll: true,
         bodyStyle: "padding:20px;",
         items: [
-            searchPanel
+            searchPanel,
+            pivotPanel,
+            peoplePanel
         ]
     });
     new Ext.Viewport(

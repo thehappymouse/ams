@@ -362,12 +362,10 @@ Ext.onReady(function(){
                         align:"center",
                         dataIndex: 'IsClean',
                         renderer:function(v) {
-                            if (v==2) {
-                                return "全部";
-                            } else if(v ==1) {
-                                return "是";
+                            if(v ==1) {
+                                return "已结清";
                             } else {
-                                return "否";
+                                return "<a style='color:#804000'>未结清</a>";
                             }
                         }
                     }, {
@@ -376,12 +374,10 @@ Ext.onReady(function(){
                         align:"center",
                         dataIndex: 'IsCut',
                         renderer:function(v) {
-                            if (v==2) {
-                                return "全部";
-                            } else if(v ==1) {
-                                return "是";
+                            if(v ==1) {
+                                return "<a style='color:blue'>已停电</a>";
                             } else {
-                                return "否";
+                                return "未停电";
                             }
                         }
                     }, {
