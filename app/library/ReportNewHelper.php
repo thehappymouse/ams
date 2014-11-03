@@ -63,11 +63,13 @@ class ReportNewHelper extends HelperBase
         } else {
             $users = User::find("TeamID=$id AND Role = " . ROLE_MATER);
         }
-
         $start = $p->get("FromData");
         $end = $p->get("ToData");
 
         $total = count($users);
+
+        //应收金额，欠费金额，应收户数，欠费户数
+        $alldata = array("Money" => 0, "ArrearMoney" => 0, "Count" => 0, "ArrearCount" => 0);
 
         $usercount = $pageStart;
         $index = 0;
@@ -75,17 +77,18 @@ class ReportNewHelper extends HelperBase
 
             if (++$index <= $pageStart) continue;
             if (++$usercount - $pageStart > $limit) break;
+
             $data = array("Name" => $user->Name);
             $data["sort"] = $usercount;
             $data2 = array("Name" => $user->Name);
             $data2["sort"] = $usercount;
 
+            $flag = false;
             $seg = DataUtil::GetSegmentsByUid($user->ID);
-            if (count($seg) == 0)  $seg = array("0");
+            if (count($seg) == 0) $seg = array("0");
             $results = self::getMonthArrears($seg, $start, $end);
             if (count($results) > 0) {
-//                $total++;
-
+                $flag = true;
                 foreach ($results as $rs) {
                     $clear = self::getMonthAlreadCleanArrears($seg, $rs->YearMonth);
 
@@ -95,10 +98,12 @@ class ReportNewHelper extends HelperBase
                     $data["Action"] = "欠费余额";
                     $data["Value"] = $rs->Money - $clear->Money;
                     $result[] = $data;
+                    $alldata["ArrearMoney"] += $data["Value"];
 
                     $data["Action"] = "应收电费";
                     $data["Value"] = $rs->Money;
                     $result[] = $data;
+                    $alldata["Money"] += (float)$rs->Money;
 
                     $data["Action"] = "回收率(%)";
                     $rate = 100 * $clear->Money / $rs->Money;
@@ -110,11 +115,14 @@ class ReportNewHelper extends HelperBase
 
                     $data2["Action"] = "欠费户数";
                     $data2["Value"] = $rs->Count - $clear->Count;
+                    $alldata["ArrearCount"] += $data2["Value"];
                     $hu_datas[] = $data2;
+
 
                     $data2["Action"] = "应收户数";
                     $data2["Value"] = $rs->Count;
                     $hu_datas[] = $data2;
+                    $alldata["Count"] += (int)$rs->Count;
 
                     $data2["Action"] = "回收率(%)";
                     $rate = 100 * $clear->Count / $rs->Count;
@@ -122,42 +130,78 @@ class ReportNewHelper extends HelperBase
                     $hu_datas[] = $data2;
                 }
             } else {
-                //金额回收率统计
+                if (count($result) < $total) {
+                    //金额回收率统计
+                    $data["Action"] = "欠费余额";
+                    $data["sort"] = $usercount;
+                    $result[] = $data;
+
+                    $data["Action"] = "应收电费";
+                    $result[] = $data;
+
+                    $data["Action"] = "回收率(%)";
+                    $result[] = $data;
+
+                    //户数回收率统计
+                    $data2["Action"] = "欠费户数";
+                    $data["sort"] = $usercount;
+                    $hu_datas[] = $data2;
+
+                    $data2["Action"] = "应收户数";
+                    $hu_datas[] = $data2;
+
+                    $data2["Action"] = "回收率(%)";
+                    $hu_datas[] = $data2;
+                }
+            }
+            if ($flag) {
+                //汇总
                 $data["Action"] = "欠费余额";
-                $data["sort"] = $usercount;
+                $data["YearMonth"] = "汇总";
+                $data["Value"] = $alldata["ArrearMoney"];
                 $result[] = $data;
 
+
                 $data["Action"] = "应收电费";
+                $data["YearMonth"] = "汇总";
+                $data["Value"] = $alldata["Money"];
                 $result[] = $data;
 
                 $data["Action"] = "回收率(%)";
+                $data["YearMonth"] = "汇总";
+                $rate = 100 - 100 * $alldata["ArrearMoney"] / $alldata["Money"];
+                $data["Value"] = number_format($rate, 2);
                 $result[] = $data;
 
-                //户数回收率统计
-                $data2["Action"] = "欠费户数";
-                $data["sort"] = $usercount;
-                $hu_datas[] = $data2;
+                //户数汇总
+                $data["Action"] = "欠费户数";
+                $data["YearMonth"] = "汇总";
+                $data["Value"] = $alldata["ArrearCount"];
+                $hu_datas[] = $data;
 
-                $data2["Action"] = "应收户数";
-                $hu_datas[] = $data2;
 
-                $data2["Action"] = "回收率(%)";
-                $hu_datas[] = $data2;
+                $data["Action"] = "应收户数";
+                $data["YearMonth"] = "汇总";
+                $data["Value"] = $alldata["Count"];
+                $hu_datas[] = $data;
+
+                $data["Action"] = "回收率(%)";
+                $data["YearMonth"] = "汇总";
+                $rate = 100 - 100 * $alldata["ArrearCount"] / $alldata["Count"];
+                $data["Value"] = number_format($rate, 2);
+                $hu_datas[] = $data;
             }
-
         }
-
 
         return array($hu_datas, $result, $total);
     }
 
-    private static function getFeeStatementsBySeg($seg, $name, $start = null, $end = null)
+    public static function getFeeStatementsBySeg($seg, $name, $start = null, $end = null)
     {
         $team = array();
         $years = array();
 
         $team["Name"] = $name;
-
 
         $allData = array("Rate" => 0, "count" => 0, "NoPressCount" => 0, "NoPressMoney" => 0); //汇总信息
 
@@ -180,7 +224,7 @@ class ReportNewHelper extends HelperBase
 
             if ($press) {
 
-                $data["Rate"] = number_format((100 * $press->Count / $rs->ArrearCount), 2, ".", "") . "%";
+                $data["Rate"] = number_format((100 * $press->Count / $rs->ArrearCount), 2, ".", ""); // . "%";
                 $data["NoPressCount"] = $rs->ArrearCount - $press->Count;
                 $data["NoPressMoney"] = $rs->Money - $press->Money;
             }
@@ -204,7 +248,7 @@ class ReportNewHelper extends HelperBase
     }
 
     /**
-     * 催费报表
+     * 催费报表  催费员 催费完成率    未催费户数    未催费金额
      */
     public static function Press(array $params)
     {
@@ -218,39 +262,65 @@ class ReportNewHelper extends HelperBase
             $mTeams = Team::find($tid);
         }
 
-        $start = $p->get("Fromdata");
-        $end = $p->get("Todata");
+        $start = $p->get("1FromData");
+        $end = $p->get("1ToData");
+        $userdata = array();
 
-        $teams = array();
-        $years = array();
-        $users = array();
+        $pagestart = (int)$p->get("start");
+        $index = $start + 1;
 
-        //班组情况统计
-        foreach ($mTeams as $mt) {
-            $seg = DataUtil::GetSegmengsByTid($mt->ID);
-
-            list($team, $years) = self::getFeeStatementsBySeg($seg, $mt->Name, $start, $end);
-            $teams[] = $team;
-        }
-
-
-        var_dump($teams);
-        exit;
+        $tids = array();
         //抄表员统计情况
         foreach ($mTeams as $mt) {
-            $mUsers = User::find("TeamID = $mt->ID");
-            foreach ($mUsers as $mU) {
-                $seg = DataUtil::GetSegmentsByUid($mU->ID);
-                if (count($seg) > 0) {
-                    list($uData, $a) = self::getFeeStatementsBySeg($seg, $mU->Name, $start, $end);
-                    $users[] = $uData;
+            $tids[] = $mt->ID;
+        }
+        $tids = implode(",", $tids);
+
+        $mUsers = User::find("TeamID IN($tids) AND Role = " . ROLE_MATER . " limit $pagestart,5");
+
+        foreach ($mUsers as $mU) {
+            $seg = DataUtil::GetSegmentsByUid($mU->ID);
+            if (count($seg) > 0) {
+                list($uData, $a) = self::getFeeStatementsBySeg($seg, $mU->Name, $start, $end);
+                $data = array("Name" => $mU->Name, "sort" => $index++);
+
+                if (!isset($uData["Data"])) continue;
+                //|| count($uData["Data"]) == 0) continue;
+
+                foreach ($uData["Data"] as $d) {
+                    $data["Action"] = "未催费金额";
+                    $data["Value"] = $d["NoPressMoney"];
+                    $data["YearMonth"] = $d["YearMonth"];
+                    $userdata[] = $data;
+
+
+                    $data["Action"] = "未催费户数";
+                    $data["Value"] = $d["NoPressCount"];
+                    $userdata[] = $data;
+
+                    $data["Action"] = "催费完成率";
+                    $data["Value"] = $d["Rate"];
+                    $userdata[] = $data;
                 }
+            } else {
+                $data = array("Name" => $mU->Name, "sort" => $index++);
+                $data["Action"] = "未催费金额";
+                $data["Value"] = "";
+                $data["YearMonth"] = "";
+                $userdata[] = $data;
+
+
+                $data["Action"] = "未催费户数";
+                $userdata[] = $data;
+
+                $data["Action"] = "催费完成率";
+                $userdata[] = $data;
+
             }
         }
 
-        return array($years, $teams, $users);
+        return array(User::count("TeamID IN($tids) AND Role = " . ROLE_MATER), $userdata);
     }
-
 
     private static function dayReportBySeg($seg, $start, $end)
     {

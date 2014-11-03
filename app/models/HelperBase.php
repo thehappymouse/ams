@@ -74,6 +74,7 @@ class HelperBase
             $builder->inWhere("Segment", $seg);
         }
         if ($start && $end) {
+
             $builder->andWhere("YearMonth BETWEEN '$start' AND '$end'");
         }
 

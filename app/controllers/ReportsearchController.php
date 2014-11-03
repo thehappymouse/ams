@@ -20,21 +20,18 @@ class  ReportsearchController extends ControllerBase
      */
     public function ElectricityAction()
     {
-        //TODO 用户排名没有计算
         list($years, $result, $total) = ReportNewHelper::Electricity($this->request->get());
-        echo json_encode(array("total" => $total, "rows" => $result, "h_rows" => $years));exit;
+        echo json_encode(array("total" => $total, "rows" => $result, "h_rows" => $years));
+        exit;
         $this->ajax->flushData(array("years" => $years, "result" => $result));
     }
 
-    public function UserAction($tid)
+    public function UserAction()
     {
-        $id = $tid;
-
-        $result = array();
-        $years = array();
+        $id = $this->request->get("Team");
 
         if ($id == -1) {
-            $sql = "SELECT  * from User WHERE Role = ". ROLE_MATER ." AND TeamID in (SELECT ID FROM Team WHERE Type = 1)";
+            $sql = "SELECT  * from User WHERE Role = " . ROLE_MATER . " AND TeamID in (SELECT ID FROM Team WHERE Type = 1)";
             $u = new User();
             $users = new Phalcon\Mvc\Model\Resultset\Simple(null, $u, $u->getReadConnection()->query($sql));
         } else {
@@ -43,10 +40,8 @@ class  ReportsearchController extends ControllerBase
 
         $uData = array();
         foreach ($users as $user) {
-            $oneRes = array("User" => $user->Name);
             $seg = DataUtil::GetSegmentsByUid($user->ID);
             if (count($seg) == 0) {
-                $uData[$user->Name] = 0;
                 continue;
             }
 
@@ -54,9 +49,11 @@ class  ReportsearchController extends ControllerBase
             $build->columns("SUM(Money) AS Money");
 
             $r = $build->getQuery()->execute()->getFirst();
-            $uData[$user->Name] = (int)$r->Money;
+            $data["name"] = $user->Name;
+            $data["views"] = (int)$r->Money;
+            $uData[] = $data;
         }
-        ImgHelper::BarChart($uData, "综合排名");
+        $this->ajax->flushData($uData);
     }
 
     /**
@@ -66,8 +63,6 @@ class  ReportsearchController extends ControllerBase
     private function sortByRate($data)
     {
     }
-
-
 
 
     /**
@@ -81,13 +76,102 @@ class  ReportsearchController extends ControllerBase
      */
     public function PressAction()
     {
-        list($years, $teams, $users) = ReportNewHelper::Press($this->request->get());
+        list($total, $users) = ReportNewHelper::Press($this->request->get());
 
-        echo json_encode(array("total" => 6, "rows" => $users, "h_rows" => $teams));exit;
+        echo json_encode(array("total" => $total, "rows" => $users));
+        exit;
 
-//        $this->ajax->flushData(array("years" => $years, "result" => $teams, "userdata" => $users));
     }
 
+    public function TeamPressAction()
+    {
+
+        $p = new RequestParams($this->request->get());
+
+        $tid = $p->get("Team");
+
+        if ($tid == -1) {
+            $mTeams = Team::find("Type=1");
+        } else {
+            $mTeams = Team::find($tid);
+        }
+
+        $start = $p->get("Fromdata");
+        $end = $p->get("Todata");
+
+        $teams = array();
+
+        $teamdata = array();
+        //班组情况统计
+        foreach ($mTeams as $mt) {
+            $seg = DataUtil::GetSegmengsByTid($mt->ID);
+
+            list($team, $years) = ReportNewHelper::getFeeStatementsBySeg($seg, $mt->Name, $start, $end);
+            $teams[] = $team;
+        }
+        $index = 1;
+        foreach ($teams as $team) {
+            $data = array("Name" => $team["Name"], "sort" => $index++);
+            foreach ($team["Data"] as $d) {
+                $data["Action"] = "未催费金额";
+                $data["Value"] = $d["NoPressMoney"];
+                $data["YearMonth"] = $d["YearMonth"];
+                $teamdata[] = $data;
+
+
+                $data["Action"] = "未催费户数";
+                $data["Value"] = $d["NoPressCount"];
+                $teamdata[] = $data;
+
+                $data["Action"] = "催费完成率";
+                $data["Value"] = $d["Rate"];
+                $teamdata[] = $data;
+            }
+        }
+
+        echo json_encode(array("total" => count($mTeams), "rows" => $teamdata));
+        exit;
+    }
+
+    public function TeamWorkAction()
+    {
+        $result = array();
+        list($teams, $users) = ReportNewHelper::Work($this->request->get());
+        foreach ($teams as $key => $t) {
+            $data = array("group" => $key, "year" => 2014);
+            foreach ($t as $key2 => $td) {
+                $data["action"] = ($key2 == "Count") ? "笔数" : "金额";
+
+                $data["head"] = "电话催费";
+                $data["value"] = $td["Phone"];
+                $result[] = $data;
+
+                $data["head"] = "通知单催费";
+                $data["value"] = $td["Notify"];
+                $result[] = $data;
+
+                $data["head"] = "停电";
+                $data["value"] = $td["Cut"];
+                $result[] = $data;
+
+                $data["head"] = "复电";
+                $data["value"] = $td["Reset"];
+                $result[] = $data;
+
+                $data["head"] = "回收电费";
+                $data["value"] = $td["Charge"];
+                $result[] = $data;
+
+                $data["head"] = "目前欠费";
+                $data["value"] = $td["Customer"];
+                $result[] = $data;
+
+            }
+        }
+
+        $this->ajax->flushData($result);
+        exit;
+    }
 
     /**
      * 每日工作报表
@@ -98,10 +182,46 @@ class  ReportsearchController extends ControllerBase
     public function WorkAction()
     {
 
-        list($teams, $users) = ReportHelper::Work($this->request->get());
+        $result = array();
+        list($teams, $users) = ReportNewHelper::Work($this->request->get());
 
+        foreach ($users as $key => $t) {
+            $data = array("group" => $key);
+            foreach ($t as $name => $user) {
+                $data["year"] = $name;
+                foreach ($user as $key2 => $td) {
+                    $data["action"] = ($key2 == "Count") ? "笔数" : "金额";
 
-        $this->ajax->flushData(array("team" => $teams, "user" => $users));
+                    $data["head"] = "电话催费";
+                    $data["value"] = $td["Phone"];
+                    $result[] = $data;
+
+                    $data["head"] = "通知单催费";
+                    $data["value"] = $td["Notify"];
+                    $result[] = $data;
+
+                    $data["head"] = "停电";
+                    $data["value"] = $td["Cut"];
+                    $result[] = $data;
+
+                    $data["head"] = "复电";
+                    $data["value"] = $td["Reset"];
+                    $result[] = $data;
+
+                    $data["head"] = "回收电费";
+                    $data["value"] = $td["Charge"];
+                    $result[] = $data;
+
+                    $data["head"] = "目前欠费";
+                    $data["value"] = $td["Customer"];
+                    $result[] = $data;
+                }
+            }
+
+        }
+
+        $this->ajax->flushData($result);
+        exit;
     }
 
 

@@ -87,14 +87,15 @@ class ExportController extends ControllerBase
             $objActSheet->setCellValue($one . "2", "催费完成率");
             $objActSheet->setCellValue($two . "2", "未催费户数");
             $objActSheet->setCellValue($end . "2", "未催费金额");
-
             if (isset($user["Data"])) {
                 $userinfo = $user["Data"];
                 foreach ($userinfo as $yearmonth => $info) {
-                    $row = $yearRow[$yearmonth];
-                    $objActSheet->setCellValue($one . $row, $info["Rate"]);
-                    $objActSheet->setCellValue($two . $row, $info["NoPressCount"]);
-                    $objActSheet->setCellValue($end . $row, $info["NoPressMoney"]);
+                    if (isset($yearRow[$yearmonth])) {
+                        $row = $yearRow[$yearmonth];
+                        $objActSheet->setCellValue($one . $row, $info["Rate"]);
+                        $objActSheet->setCellValue($two . $row, $info["NoPressCount"]);
+                        $objActSheet->setCellValue($end . $row, $info["NoPressMoney"]);
+                    }
                 }
             }
 
@@ -136,16 +137,9 @@ class ExportController extends ControllerBase
         $objPHPExcel->setActiveSheetIndex(0);
         $objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel2007');
 
-        $filename = "催费情况报表.xls";
+        $filename = "xls/催费情况报表.xls";
         $objWriter->save($filename);
-        $this->ajax->flushOk("/ams/public/xls/" . $filename);
-
-        //输出文档到页面
-//        $fileName = iconv("UTF-8", "gb2312", "催费情况报表");
-//        header('Content-Type: application/vnd.ms-excel');
-//        header('Content-Disposition: attachment;filename="' . $fileName . '"');
-//        header('Cache-Control: max-age=0');
-//        $objWriter->save("php://output");
+        $this->ajax->flushOk("/ams/public/" . $filename);
     }
 
     /**
@@ -154,6 +148,7 @@ class ExportController extends ControllerBase
     public function ReportWorkAction()
     {
         list($teams, $users) = ReportHelper::Work($this->request->get());
+
         $objPHPExcel = new PHPExcel();
         $objProps = $objPHPExcel->getProperties();
 
@@ -172,11 +167,12 @@ class ExportController extends ControllerBase
             $objActSheet->setCellValue(chr($col++) . 1, $h);
         }
 
+        $teamYstart = 2;
         foreach ($users as $key => $user) {
-            $objActSheet->mergeCells("A2:A" . ((count($user) * 2) + 1));
+            $objActSheet->mergeCells("A$teamYstart:A" . ((count($user) * 2) + $teamYstart -1));
+            $objActSheet->setCellValue("A$teamYstart", $key);
 
-            $objActSheet->setCellValue("A2", $key);
-            $y_start = 2;
+            $y_start = $teamYstart;
             foreach ($user as $uKey => $u) {
                 $objActSheet->mergeCells("B" . $y_start . ":B" . ($y_start + 1));
                 $objActSheet->setCellValue("B" . $y_start, $uKey);
@@ -193,9 +189,9 @@ class ExportController extends ControllerBase
                     }
                     $rowIndex++;
                 }
-
                 $y_start += 2;
             }
+            $teamYstart+= count($user) * 2;
         }
 
 
@@ -212,12 +208,13 @@ class ExportController extends ControllerBase
         foreach ($head as $h) {
             $objActSheet->setCellValue(chr($col++) . 1, $h);
         }
-
+        $y_start = 2;
         foreach ($teams as $key => $user) {
-            $objActSheet->mergeCells("A2:A" . ((count($user) * 1) + 1));
 
-            $objActSheet->setCellValue("A2", $key);
-            $y_start = 2;
+            $objActSheet->mergeCells("A$y_start:A" . ((count($user)) + $y_start - 1));
+
+            $objActSheet->setCellValue("A$y_start", $key);
+
             $objActSheet->setCellValue("B" . $y_start, "笔数");
             $objActSheet->setCellValue("B" . ($y_start + 1), "金额");
 
@@ -232,24 +229,16 @@ class ExportController extends ControllerBase
                 }
                 $rowIndex++;
             }
-
-
             $y_start += 2;
         }
 
         $objPHPExcel->setActiveSheetIndex(0);
         $objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel2007');
 
-        $filename = "每日工作报表.xls";
+        $filename = "xls/aa.xls";
+//        $filename = "xls/每日工作报表.xls";
         $objWriter->save($filename);
-        $this->ajax->flushOk("/ams/public/xls/" . $filename);
-
-
-//        $fileName = iconv("UTF-8", "gb2312", "每日工作报表");
-//        header('Content-Type: application/vnd.ms-excel');
-//        header('Content-Disposition: attachment;filename="' . $fileName . '"');
-//        header('Cache-Control: max-age=0');
-//        $objWriter->save("php://output");
+        $this->ajax->flushOk("/ams/public/" . $filename);
     }
 
     /**
@@ -648,7 +637,7 @@ class ExportController extends ControllerBase
         $params = $this->request->get();
         $headArr = $this->headArrear;
 
-        $params["start"]  = 0;
+        $params["start"] = 0;
         $params["limit"] = 100000; //不再需要分页
 
         list($total, $data, $countinfo) = CustomerHelper::Customers($params);

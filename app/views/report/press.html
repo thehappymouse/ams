@@ -1,5 +1,9 @@
 <script>
 Ext.onReady(function(){
+    chaobiaoSortLast = 0;
+    chaobiaoSortNext = 0;
+    groupSortLast = 0;
+    groupSortNext = 0;
     var msgTip = new Ext.LoadMask(Ext.getBody(),{
         msg:'Excel正在生成中',
         removeMask : true
@@ -54,7 +58,6 @@ Ext.onReady(function(){
                             format: 'Ym'
                         }),{
                             xtype: 'displayfield',
-                            //   style: 'text-align:right;width:40px;',
                             value: '至: '
                         },new Ext.form.DateField({
                             plugins:'monthPickerPlugin',
@@ -73,6 +76,13 @@ Ext.onReady(function(){
                 xtype:'button',
                 text:'查询',
                 handler:function(){
+                    var data = infoSearch.getForm().getValues();
+                    chaobiaoPanel.getStore().load({
+                        params: data
+                    });
+                    groupPanel.getStore().load({
+                        params:data
+                    });
                 }
             }]
         }]
@@ -92,16 +102,11 @@ Ext.onReady(function(){
         {name: 'YearMonth', type: 'string'},
         {name: 'Action', type: 'string'},
         {name: 'Name', type: 'string'},
-        {name: 'Value'},{name: 'sort'}
+        {name: 'Value', type: 'float'},{name: 'sort'}
     ]);
 
     var myStore = new Ext.data.Store({
-        url: '/ams/a.json',
-        autoLoad: true,
-        baseParams: {
-            start: 0,
-            limit: _pageSize
-        },
+        url: '/ams/reportsearch/press',
         reader: new Ext.data.JsonReader({
             root: 'rows',
             idProperty: 'id'
@@ -121,11 +126,37 @@ Ext.onReady(function(){
         tbar:[{
             text:'上一页',
             disabled:true,
-            id: 'lastOne'
+            id: 'lastOne',
+            handler:function(){
+                var data = infoSearch.getForm().getValues();
+                data.start = chaobiaoSortLast;
+                var arr =[];
+                chaobiaoPanel.getStore().load({
+                    params: data,
+                    callback:function(v) {
+                        arr = spliceArr(v);
+                        chaobiaoSortLast = arr[0] - 6;
+                        chaobiaoSortnext =  arr[arr.length - 1];
+                    }
+                });
+            }
         },'->',{
             text:'下一页',
             disabled:true,
-            id: 'nextOne'
+            id: 'nextOne',
+            handler:function(){
+                var data = infoSearch.getForm().getValues();
+                data.start = chaobiaoSortnext;
+                var arr =[];
+                chaobiaoPanel.getStore().load({
+                    params: data,
+                    callback:function(v, action) {
+                        arr = spliceArr(v);
+                        chaobiaoSortLast = arr[0] - 6;
+                        chaobiaoSortnext =  arr[arr.length - 1];
+                    }
+                });
+            }
         }],
         leftAxis: [{
             dataIndex: 'YearMonth'
@@ -133,6 +164,8 @@ Ext.onReady(function(){
         topAxis: [/*{
          dataIndex: 'eyeColor'
          },*/{
+            dataIndex: 'sort'
+        },{
 
             dataIndex: 'Name'
         },{
@@ -165,14 +198,23 @@ Ext.onReady(function(){
 
     chaobiaoPanel.getStore().on('load',function(v){
         var total = v.totalLength;
-        var array = spliceArr(v.data.items);
-        Ext.getCmp('lastOne').setDisabled(array[4] == 5);
-        Ext.getCmp('nextOne').setDisabled(array[4] == total);
+        if (total !=0) {
+            var array = spliceArr(v.data.items);
+            chaobiaoSortLast = array[0] - array.length;
+            chaobiaoSortnext =  array[array.length - 1];
+            Ext.getCmp('lastOne').setDisabled(array[0] == 1);
+            Ext.getCmp('nextOne').setDisabled(array[array.length - 1] == total);
+        }
     })
 
-
+    var hr_Store = new Ext.data.Store({
+        url: '/ams/reportsearch/teamPress',
+        reader: new Ext.data.JsonReader({
+            root: 'rows'
+        }, PersonRecord)
+    });
     var groupPanel = new Ext.grid.PivotGrid({
-        store     : myStore,
+        store     : hr_Store,
         aggregator: 'sum',
         height    : 200,
         title     : '班组情况',
@@ -184,18 +226,46 @@ Ext.onReady(function(){
         tbar:[{
             text:'上一页',
             disabled:true,
-            id: 'last'
+            id: 'last',
+            handler:function(){
+                var data = infoSearch.getForm().getValues();
+                data.start = groupSortnext;
+                var arr =[];
+                groupPanel.getStore().load({
+                    params: data,
+                    callback:function(v, action) {
+                        arr = spliceArr(v);
+                        groupSortLast = arr[0] - 6;
+                        groupSortnext =  arr[arr.length - 1];
+
+                    }
+                });
+            }
         },'->',{
             text:'下一页',
             disabled:true,
-            id: 'next'
+            id: 'next',
+            handler:function(){
+                var data = infoSearch.getForm().getValues();
+                data.start = groupSortnext;
+                var arr =[];
+                groupPanel.getStore().load({
+                    params: data,
+                    callback:function(v, action) {
+                        arr = spliceArr(v);
+                        groupSortLast = arr[0] - 6;
+                        groupSortnext =  arr[arr.length - 1];
+
+                    }
+                });
+            }
         }],
         leftAxis: [{
             dataIndex: 'YearMonth'
         }],
-        topAxis: [/*{
-         dataIndex: 'eyeColor'
-         },*/{
+        topAxis: [{
+            dataIndex: 'sort'
+        },{
 
             dataIndex: 'Name'
         },{
@@ -228,41 +298,42 @@ Ext.onReady(function(){
 
     groupPanel.getStore().on('load',function(v){
         var total = v.totalLength;
-        var array = spliceArr(v.data.items);
-        Ext.getCmp('last').setDisabled(array[4] == 5);
-        Ext.getCmp('next').setDisabled(array[4] == total);
+        if (total != 0) {
+            var array = spliceArr(v.data.items);
+            groupSortLast = array[0] - array.length;
+            groupSortnext =  array[array.length - 1];
+            Ext.getCmp('last').setDisabled(array[0] == 1);
+            Ext.getCmp('next').setDisabled(array[array.length - 1] == total);
+        }
     })
 
     var chaobiaoTab = new Ext.TabPanel({
         activeTab: 0,
         plain:true,
+        height:500,
         autoWidth:true,
         style: 'margin-top:15px',
         items:[
-            chaobiaoPanel
+            chaobiaoPanel,groupPanel
         ]
     });
 
-    var groupTab = new Ext.TabPanel({
-        activeTab: 0,
-        plain:true,
-        autoWidth:true,
-        style: 'margin-top:15px',
-        items:[
-            groupPanel
-        ]
-    });
+
 
     var allPanel = new Ext.Panel({
         region: 'center',
-        fileUpload: true,
         autoScroll: true,
         bodyStyle: "padding:20px;",
         items: [
             searchPanel,
-            chaobiaoTab,
-            groupTab
-        ]
+            chaobiaoTab
+        ],
+        listeners:{
+            tabchange:function(tp,p){
+                chaobiaoPanel.store.reload();
+                groupPanel.store.reload();
+            }
+        }
     });
     new Ext.Viewport(
             {
@@ -273,3 +344,8 @@ Ext.onReady(function(){
             });
 })
 </script>
+<style>
+    .x-grid3-row td, .x-grid3-summary-row td {
+        font: normal 11px/13px arial, tahoma, helvetica, sans-serif;
+    }
+</style>

@@ -165,6 +165,16 @@ class ManagerController extends ControllerBase
 
     }
 
+    public function ChangeIndexlineAction()
+    {
+
+        $key = "IndexLine";
+        $value = $this->request->get($key);
+        Config::setValue($key, $value);
+
+        $this->ajax->flushOk("操作已成功");
+    }
+
     /**
      * 修改用户密码
      */

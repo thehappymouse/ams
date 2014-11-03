@@ -23,19 +23,13 @@ class SiteController extends ControllerBase
             $uData[$user->Name] = (int)$r->Money;
         }
 
-        $datay = array();
-        $name = array();
-        $datay1 = array();
-        $datay2 = array();
         foreach ($uData as $key => $ud) {
-            $datay[] = $ud;
-            $name[] = $key;
-            $datay1[] = 55;
-            $datay2[] = 60;
 
             $row = array();
             $row["name"] = $key;
             $row["value"] = $ud;
+            $row["views"] = Config::getValue("IndexLine");
+            $row["avge"] = 80;
             $data[] = $row;
         }
         return json_encode($data);
@@ -206,7 +200,6 @@ class SiteController extends ControllerBase
      */
     private function getPressRate(array $seg)
     {
-        $data = array();
         $builder = $this->getBuilder("Arrears", $seg);
         $builder->columns("COUNT(DISTINCT CustomerNumber) as NoPressCustomer, COUNT(Money) as NoPressCount, SUM(Money) as NoPressMoney");
         $builder->andWhere("IsClean != 1");

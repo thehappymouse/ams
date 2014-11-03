@@ -1,4 +1,3 @@
-
 <script>
 Ext.onReady(function(){
     var msgTip = new Ext.LoadMask(Ext.getBody(),{
@@ -75,6 +74,13 @@ Ext.onReady(function(){
                 xtype:'button',
                 text:'查询',
                 handler:function(){
+                    var data = infoSearch.getForm().getValues();
+                    pivotGrid.getStore().load({
+                        params: data
+                    });
+                    peopleGrid.getStore().load({
+                        params:data
+                    });
                 }
             }]
         }]
@@ -103,11 +109,19 @@ Ext.onReady(function(){
     ]);
 
     var myStore = new Ext.data.Store({
-        url: '/ams/b.json',
-        autoLoad: true,
+        url: '/ams/reportsearch/work/',
         reader: new Ext.data.JsonReader({
-            root: 'rows',
-            idProperty: 'id'
+            root: 'data'
+//            root: 'rows'
+        }, SaleRecord)
+    });
+
+
+    var myStore2 = new Ext.data.Store({
+        url: '/ams/reportsearch/teamwork/',
+        reader: new Ext.data.JsonReader({
+            root: 'data'
+//            root: 'rows'
         }, SaleRecord)
     });
 
@@ -115,7 +129,7 @@ Ext.onReady(function(){
         title     : '班组情况',
         width     : 800,
         height    : 212,
-        store     : myStore,
+        store     : myStore2,
         aggregator: 'sum',
         measure   : 'value',
         viewConfig: {
@@ -126,10 +140,11 @@ Ext.onReady(function(){
                 width: 80,
                 dataIndex: 'group'
             },
+//            {
+//                width: 90,
+//                dataIndex: 'year'
+//            },
             {
-                width: 90,
-                dataIndex: 'year'
-            },{
                 width: 90,
                 dataIndex: 'action'
             }
@@ -224,26 +239,31 @@ var peopleGrid = new Ext.grid.PivotGrid({
         plain:true,
         style: 'margin-top:15px',
         items:[
-            peopleGrid
-        ]
+            peopleGrid,pivotGrid
+        ],
+        listeners:{
+            tabchange:function(tp,p){
+                peopleGrid.store.reload();
+                pivotGrid.store.reload();
+            }
+        }
     });
-    var pivotPanel = new Ext.TabPanel({
+   /* var pivotPanel = new Ext.TabPanel({
        // labelWidth: 85,
         activeTab: 0,
        // height:170,
         plain:true,
         style: 'margin-top:15px',
         items:[
-            pivotGrid
+
         ]
-    });
+    });*/
     var allPanel = new Ext.Panel({
         region: 'center',
         //autoScroll: true,
         bodyStyle: "padding:20px;",
         items: [
             searchPanel,
-            pivotPanel,
             peoplePanel
         ]
     });
@@ -256,3 +276,8 @@ var peopleGrid = new Ext.grid.PivotGrid({
             });
 })
 </script>
+<style>
+    .x-grid3-row td, .x-grid3-summary-row td {
+        font: normal 11px/13px arial, tahoma, helvetica, sans-serif;
+    }
+</style>

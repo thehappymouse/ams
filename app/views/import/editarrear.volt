@@ -164,7 +164,7 @@ Ext.onReady(function () {
             reserveScrollOffset: true,
             tbar: [
                 {
-                    text: '调整金额',
+                    text: '修改数据',
                     ref: '../del',
                     iconCls: 'del'
                 }
@@ -177,6 +177,11 @@ Ext.onReady(function () {
                     sortable: true,
                     dataIndex: 'Segment'
                 }, {
+                   header: '抄表员',
+                   align: "center",
+                   sortable: true,
+                   dataIndex: 'SegUser'
+               },{
                     header: '用户编号',
                     dataIndex: 'CustomerNumber',
                     align: "center",
@@ -195,7 +200,9 @@ Ext.onReady(function () {
                     dataIndex: 'Address'
                 }, {
                     header: '电费年月',
-                    dataIndex: 'YearMonth'
+                    dataIndex: 'YearMonth',
+                    sortable: true,
+                    align: "center"
                 },{
                     header: '电费金额',
                     sortable: true,
@@ -220,7 +227,9 @@ Ext.onReady(function () {
             }
             var rd = p.getSelectionModel().getSelections()[0];
             var Money = rd.get("Money");
+            var SegUser = rd.get("SegUser");
             Ext.getCmp("editMoney").setValue(Money);
+            Ext.getCmp("editName").setValue(SegUser);
             Ext.getCmp("arrearID").setValue(rd.get("ID"));
             win.show();
         })
@@ -232,20 +241,24 @@ Ext.onReady(function () {
         width: 360,
         height: 200,
         closeAction: 'hide',
-        title: '撤销收费',
+        title: '修改数据',
         bodyStyle:'padding-top:30px;background:white;',
         items: new Ext.FormPanel({
             labelAlign: 'right',
             url: '/ams/import/updatemoney',
             items: [
                 {
+                  xtype: 'textfield',
+                  fieldLabel: '抄表员',
+                  id: 'editName',
+                  name: 'Name'
+                },{
                     xtype: 'numberfield',
                     minValue: 0,
                     fieldLabel: '收费金额',
                     id: 'editMoney',
                     name: 'Money'
-                },
-                {
+                },{
                     xtype: 'hidden',
                     id: 'arrearID',
                     name: 'ID'

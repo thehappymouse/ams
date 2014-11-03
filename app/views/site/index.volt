@@ -93,11 +93,11 @@ Ext.onReady(function(){
         frame:true,
         labelAlign: 'right',
         style: 'padding-top:10px',
-        //url:'/ams/Charges/SearchFee',
+        url:'/ams/manager/changeindexline',
         defaultType: 'textfield',
         items: [{
                 fieldLabel: '指标',
-                name: 'Index',
+                name: 'IndexLine',
                 allowBlank:false
         }]
     });
@@ -111,11 +111,21 @@ Ext.onReady(function(){
             title: '指标设置',
             items:[setForm],
             buttons: [{
-                text: '确定'
+                text: '确定',
+                handler: function(){
+                    setForm.getForm().submit({
+                        success: function(v,action){
+                            Ext.MessageBox.alert("提示",action.result.msg)
+                            location.reload();
+                        },
+                        failure: function(){
+                            Ext.MessageBox.alert("提示",action.result.msg)
+                        }
+                    })
+                }
             },{
                 text: '关闭',
                 handler: function(){
-                    //setForm.getForm().reset();
                     setWin.hide();
                 }
             }]
@@ -123,7 +133,7 @@ Ext.onReady(function(){
 
      var tstore = new Ext.data.JsonStore(
      {
-         fields:['name', 'value', 'views'],
+         fields:['name', 'value', 'views', 'avge'],
          data: {{sig}}
 
      });
@@ -133,7 +143,7 @@ Ext.onReady(function(){
         title: '个人排名',
         frame:true,
         width:500,
-        height:170,
+        height:200,
         layout:'fit',
         tbar:[{
             text: '指标设置',
@@ -153,8 +163,10 @@ Ext.onReady(function(){
             tipRenderer : function(chart, record, index, series){
                 if(series.yField == 'value'){
                     return  "综合指标为" +Ext.util.Format.number(record.data.value, '0,0');
-                }else{
+                }else if(series.yField == 'views'){
                     return  "应完成的指标为" +Ext.util.Format.number(record.data.views, '0,0');
+                } else {
+                    return  "平均指标为" +Ext.util.Format.number(record.data.avge, '0,0');
                 }
             },
             chartStyle: {
@@ -211,7 +223,14 @@ Ext.onReady(function(){
                 style: {
                     color: 0x15428B
                 }
-            }]
+            },{
+                 type:'line',
+                 displayName: 'avge',
+                 yField: 'avge',
+                 style: {
+                     color: 0x69aBc8
+                 }
+             }]
         }
     });
 
@@ -227,7 +246,7 @@ var s2 = new Ext.data.JsonStore(
         {
             title: '欠费月份户数及金额的分布',
             region: 'center',
-            height: 150,
+            height: 200,
             flex: 1,
             items: {
                 xtype: 'linechart',

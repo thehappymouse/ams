@@ -1,6 +1,7 @@
 <script>
 var startdate = <?php echo $startdate; ?>;
 Ext.onReady(function(){
+    var arrearsMoney = 0;
     _pageSize = 50;
     var msgTip = new Ext.LoadMask(Ext.getBody(),{
         msg:'Excel正在生成中',
@@ -259,6 +260,7 @@ Ext.onReady(function(){
                             success:function(action,msg){
                                 var text = Ext.decode(msg.response.responseText);
                                 if (text.success) {
+                                    arrearsMoney = text.countInfo.arrearsMoney;
                                     listView.store.loadData(text);
                                     Ext.apply(listView.store.baseParams, infoSearch.getForm().getValues());
                                     return;
@@ -293,14 +295,30 @@ Ext.onReady(function(){
     var store = new Ext.data.JsonStore(
             {
                 url: '/ams/reminder/SearchFee',
-                root: 'data',
-                totalProperty: 'total',
                 baseParams: {
                     start: 0,
                     limit: 5
                 },
-                fields: reminderFields
+                fields: reminderFields,
+                root: 'data',
+                totalProperty: 'total'
             });
+
+//    var store = new Ext.data.JsonStore(
+//            {
+//                url: '/ams/reminder/SearchFee',
+//                root: 'data',
+//                totalProperty: 'total',
+//                baseParams: {
+//                    start: 0,
+//                    limit: 5
+//                },
+//                fields: reminderFields
+//            });
+
+    store.on("load", function(){
+        //alert(myReader.getMessage());
+    });
 
    // var singlem = new Ext.grid.CheckboxSelectionModel({singleSelect : true});
     var listView = new Ext.grid.EditorGridPanel(
@@ -466,10 +484,7 @@ listView.on('cellclick', function (grid, rowIndex, columnIndex, e) {
         var tpl = "";
         var total = p.totalLength;
         if (total != 0) {
-            Ext.each(p.data.items,function(item){
-                money += parseInt(item.data.Money);
-            })
-            tpl = '&nbsp;&nbsp;总共'+total+'位用户欠费，共计'+money+'元';
+            tpl = '&nbsp;&nbsp;总共'+total+'位用户欠费，共计'+arrearsMoney+'元';
         }
         Ext.getCmp('htmlID').update(tpl);
 

@@ -1,8 +1,9 @@
+<html>
 <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 <TITLE>欠费信息管理系统</TITLE>
 
 {{ stylesheet_link('css/ext-all.css') }}
-{{ javascript_include('js/ext/ext-base.js') }} 
+{{ javascript_include('js/ext/ext-base.js') }}
 {{ javascript_include('js/ext/ext-all.js') }}
 {{ javascript_include('js/ext/Date.js') }}
 {{ javascript_include('js/ext/ext-lang-zh_CN.js') }}
@@ -22,7 +23,7 @@
 
 {{ stylesheet_link('js/ext/ux/fileuploadfield/css/fileuploadfield.css') }}
 
-
+<script type="text/javascript">var _gaq = _gaq || []; _gaq.push(['_setAccount', 'UA-1396058-8']); _gaq.push(['_trackPageview']); (function() { var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true; ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js'; var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s); })();</script>
  <script>
 Ext.onReady(function(){
 messageaAlert = function(){
@@ -184,4 +185,4 @@ passWinAlert = function(){
                 background-color: #7bff7b;
             }
         </style>
-
+</html>
