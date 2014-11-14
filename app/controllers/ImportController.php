@@ -64,12 +64,15 @@ class  ImportController extends ControllerBase
         } else {
             if ($p->Number) {
                 if ($p->Number == "全部") { //选择了所有抄表段
+
                     if (($tid = User::IsAllUsers($p->Name))) { //选择了所有抄表员，则取其组下的抄表段
-                        $str = DataUtil::GetSegmentsStrByTid($p->Team);
+                        $arr = DataUtil::getTeamSegNameArray($p->Team);
                     } else {
-                        $str = DataUtil::GetSegmentsStrByUid($p->Name);
+                        $arr = DataUtil::getSegNameArray($p->Name);
                     }
-                    $conditions .= " AND Segment in ($str)";
+                    $str = "'" . implode("','", $arr) . "'";
+
+                    $conditions .= " AND SegUser in ($str)";
                 } else {
                     $conditions .= " AND Segment = :segment:";
                     $param["segment"] = $p->Number;
@@ -125,9 +128,10 @@ class  ImportController extends ControllerBase
             foreach ($files as $file) {
 
                 $savefile = $dir . $file->getName();
-                if (!strpos($file->getType(), "excel")) {
-                    $this->ajax->flushError("文件格式不正确，请选择excel文件再上传");
-                }
+
+//                if (!strpos($file->getType(), "excel")) {
+//                    $this->ajax->flushError("文件格式不正确，请选择excel文件再上传");
+//                }
 
                 if (move_uploaded_file($file->getTempName(), $savefile)) {
 

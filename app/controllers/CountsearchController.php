@@ -50,6 +50,7 @@ class CountsearchController extends ControllerBase
         list($totaldata, $data) = CountHelper::Charges($this->request->get());
 
         $this->ajax->total = $totaldata["Count"];
+        $this->ajax->TotalData = $totaldata;
         $this->ajax->flushData($data);//array("Data" => $data, "TotalData" => $totaldata));
     }
 
@@ -61,7 +62,7 @@ class CountsearchController extends ControllerBase
         list($totalData, $data) = CountHelper::DetailsFee($this->request->get());
 
         $this->ajax->total = $totalData["Count"];
-
+        $this->ajax->TotalData = $totalData;
         $this->ajax->flushData($data);
     }
 
@@ -75,8 +76,11 @@ class CountsearchController extends ControllerBase
         if ($data == null && $d2 == null) {
             $this->ajax->flushData($data);
         }
-
-        $this->ajax->data2 = $d2;
+        $str  = "";
+        foreach($d2 as $key => $v){
+            $str .= "$key 年，停电 $v[Count] 笔，金额为 $v[Money]；";
+        }
+        $this->ajax->data2 = $str;
         $this->ajax->total = $total["Count"];
         $this->ajax->flushData($data);
     }
@@ -91,7 +95,12 @@ class CountsearchController extends ControllerBase
             $this->ajax->flushData($data);
         }
 
-        $this->ajax->data2 = $d2;
+        $str  = "";
+        foreach($d2 as $key => $v){
+            $str .= "$key 年，复电 $v[Count] 笔，金额为 $v[Money]；";
+        }
+
+        $this->ajax->data2 = $str;
         $this->ajax->total = $total["Count"];
         $this->ajax->flushData($data);
 

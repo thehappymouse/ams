@@ -40,30 +40,32 @@ class MainTask extends \Phalcon\CLI\Task
     public function allControllerAction()
     {
         $cls = array(
-            "IndexController",
-            "SiteController",
-            "ChargesController",
-            "ReminderfeeController",
-            "ImportController",
-            "ReportController",
-            "ReportsearchController",
-            "InfoController",
-            "CountController",
-            "CountsearchController",
-            "JpgController",
-            "SystemlogController",
-            "PoppageController",
-            "ManagerController",
-            "CustomerController",
-            "ExportController",);
+//            "CaptchaController",
+//            "ChargesController",
+//            "CountController",
+//            "CountsearchController",
+//            "CustomerController",
+            "ExportController",
+//            "ImportController",
+//            "IndexController",
+//            "InfoController",
+//            "JpgController",
+//            "ManagerController",
+//            "MessageController",
+//            "PoppageController",
+//            "ReminderController",
+//            "ReportController",
+//            "ReportsearchController",
+//            "SiteController",
+//            "SystemController",
+//            "SystemlogController",
+
+        );
 
         foreach ($cls as $class) {
-
-
             $controller = strtolower(str_replace("Controller", "", $class));
             $ms = get_class_methods($class);
 //
-
             $format = '"%s" => array(%s),';
             $data = array();
             foreach ($ms as $m) {
@@ -83,7 +85,8 @@ class MainTask extends \Phalcon\CLI\Task
     public function advanceAction()
     {
         try {
-            ExcelImportUtils::importAdvance("/opt/lampp/htdocs/ams/app/cli/1.xls");
+            ExcelImportUtils::importAdvance("/opt/lampp/htdocs/ams/public/upload/1.xls");
+//            ExcelImportUtils::importAdvance("/opt/lampp/htdocs/ams/app/cli/1.xls");
         } catch (PHPExcel_Reader_Exception $e) {
             echo $e->getMessage();
         }

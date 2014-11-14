@@ -8,6 +8,13 @@
  */
 class ExcelImportUtils
 {
+    private static function readExcel($filepath)
+    {
+        $objPHPExcel = PHPExcel_IOFactory::load($filepath);
+        $sheetData = $objPHPExcel->getSheet(0)->toArray(null, true, true, true);
+
+        return array_slice($sheetData, 1);
+    }
 
     /**
      * 预收表格。此时应计算欠费记录，进行预收转逾期
@@ -17,24 +24,22 @@ class ExcelImportUtils
     {
 
         $data = ExcelImportUtils::readExcel($filepath);
-
         if (count($data[0]) != 12) {
             throw new Exception("数据格式不正确，请查正");
         }
 
         foreach ($data as $idx => $row) {
             $arr = array();
-            $arr["Name"] = $row["C"];
             $arr["Number"] = $row["B"];
             $arr["Balance"] = $row["G"];
-            $arr["Address"] = $row["D"];
-            $arr["Segment"] = $row["E"];
-            $arr["SegmentName"] = $row["F"];
-            $arr["SegUser"] = $row["L"];
-            $arr["Phone"] = "";
 
-            self::saveCustomer($arr);
-            self::saveSegment($arr);
+            $c = Customer::findFirst("Number = '$arr[Number]'");
+            if ($c) {
+                $c->Balance = $arr["Balance"];
+
+                $c->save();
+            }
+
             self::advancefee($arr);
         }
     }
@@ -71,16 +76,15 @@ class ExcelImportUtils
     {
         $s = Segment::findFirst("Number = '$row[Segment]'");
 
-
         $user = User::findFirst(array("Name=:name:", "bind" => array("name" => $row["SegUser"])));
-        if(!$user){
+        if (!$user) {
             $user = new User();
             $user->Name = $row["SegUser"];
             $user->TeamID = 1;
             $user->Role = 1;
             $user->RoleName = "抄表员";
             $user->Pass = sha1("123");
-            if(!$user->save()){
+            if (!$user->save()) {
                 throw new Exception(DataUtil::getModelError($s));
             }
         }
@@ -106,23 +110,24 @@ class ExcelImportUtils
      */
     private static function saveCustomer(array $row)
     {
+
         $c = Customer::findFirst("Number = '$row[Number]'");
 
         $now = date("Y-m-d H:i:s");
         if (null == $c) {
             $c = new Customer();
             $c->initialize();
-            $c->Name = $row["Name"];
             $c->Number = $row["Number"];
-            $c->Address = $row["Address"];
-            $c->Balance = $row["Balance"];
-
             $c->CreateTime = $now;
             $c->LandlordPhone = $row["Phone"];
         }
 
-        $c->Segment = $row["Segment"];
-        $c->SegUser = $row["SegUser"];
+        $c->Balance = $row["Balance"];
+
+        $c->Name = isset($row["Name"]) ? $row["Name"] : $c->Address;
+        $c->Address = isset($row["Address"]) ? $row["Address"] : $c->Address;
+        $c->Segment = isset($row["Segment"]) ? $row["Segment"] : $c->Segment;
+        $c->SegUser = isset($row["SegUser"]) ? $row["SegUser"] : $c->SegUser;
 
         $r = $c->save();
 
@@ -175,10 +180,9 @@ class ExcelImportUtils
                     if (!$r) {
                         var_dump($a->getMessages());
                     }
-                }
-                else {
+                } else {
                     $q->SegUser = $a->SegUser;
-                    if(!$q->save()) {
+                    if (!$q->save()) {
                         var_dump($q->getMessages());
                     }
                 }
@@ -191,13 +195,6 @@ class ExcelImportUtils
         }
     }
 
-    private static function readExcel($filepath)
-    {
-        $objPHPExcel = PHPExcel_IOFactory::load($filepath);
-        $sheetData = $objPHPExcel->getSheet(0)->toArray(null, true, true, true);
-
-        return array_slice($sheetData, 1);
-    }
 
     /**
      * 将数组生成表格，并下载
@@ -239,9 +236,10 @@ class ExcelImportUtils
                 $j = chr($span);
                 //按照B2,C2,D2的顺序逐个写入单元格数据
                 $cell = $objActSheet->getCell($j . $row);
+                $cell->setValueExplicit(PHPExcel_Cell_DataType::TYPE_STRING);
                 $cell->getStyle()->getNumberFormat()->setFormatCode(PHPExcel_Style_NumberFormat::FORMAT_TEXT);
                 $cell->getStyle()->getNumberFormat()->setFormatCode("@");
-                $cell->setValue((string)$rows[$key2]);
+                $cell->setValue((string)$rows[$key2] . " ");
 
                 //移动到当前行右边的单元格
                 $span++;

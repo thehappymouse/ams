@@ -1,8 +1,12 @@
-
 <script>
 Ext.onReady(function(){
+    tabTrue = false;
+    groupSortLast = 0;
+    groupSortNext = 0;
     zongheSortLast = 0;
     zongheSortNext = 0;
+    zSort = 0;
+    Type = 1;
     hushuoSortLast = 0;
     hushuoSortNext = 0;
     var msgTip = new Ext.LoadMask(Ext.getBody(),{
@@ -47,7 +51,7 @@ Ext.onReady(function(){
             items: [
                 {
                     xtype: 'compositefield',
-                    fieldLabel: '电费年月',
+                    fieldLabel: '收费年月',
                     defaults:{
                         xtype: 'datefield'
                     },
@@ -78,15 +82,47 @@ Ext.onReady(function(){
                 xtype:'button',
                 text:'查询',
                 handler:function(){
+                    tabTrue = true;
                     var data = infoSearch.getForm().getValues();
+                    data.Type = 1;
                     averagePanel.getStore().load({
-                        params: data
+                        params: data,
+                        callback:function(v,action){
+                            if (v.length == 0) {
+                                groupPanel.store.removeAll();
+                                Ext.MessageBox.alert("提示","电费回收率没有数据！");
+                            }
+                        }
                     });
+                    data.Type = 0;
                     hushuoPanel.getStore().load({
-                        params:data
+                        params:data,
+                        callback:function(v,action){
+                            if (v.length == 0) {
+                                groupPanel.store.removeAll();
+                                Ext.MessageBox.alert("提示","户数回收率没有数据！");
+                            }
+                        }
                     });
+                    data.Type = 2;
                     store.load({
-                        params:data
+                        params:data,
+                        callback:function(v,action){
+                            if (v.length == 0) {
+                                groupPanel.store.removeAll();
+                                Ext.MessageBox.alert("提示","欠费金额没有数据！");
+                            }
+                        }
+                    });
+                    data.Type = 1;
+                    groupPanel.getStore().load({
+                        params:data,
+                        callback:function(v,action){
+                            if (v.length == 0) {
+                                groupPanel.store.removeAll();
+                                Ext.MessageBox.alert("提示","班组没有数据！");
+                            }
+                        }
                     })
                 }
             }]
@@ -114,16 +150,14 @@ Ext.onReady(function(){
     var myStore = new Ext.data.Store({
         url: '/ams/reportsearch/electricity',
         reader: new Ext.data.JsonReader({
-            root: 'rows',
-            idProperty: 'id'
+            root: 'rows'
         }, PersonRecord)
     });
 
     var myStore2 = new Ext.data.Store({
         url: '/ams/reportsearch/electricity',
         reader: new Ext.data.JsonReader({
-            root: 'h_rows',
-            idProperty: 'id'
+            root: 'rows'
         }, PersonRecord)
     });
 
@@ -131,7 +165,7 @@ Ext.onReady(function(){
         store     : myStore,
         aggregator: 'sum',
         height    : 200,
-        title     : '综合排名',
+        title     : '电费回收率排名',
         measure   : 'Value',
         sortAscText : 'sort',
         viewConfig: {
@@ -143,11 +177,12 @@ Ext.onReady(function(){
             disabled:true,
             id: 'last',
             handler:function(){
-                var data = infoSearch.getForm().getValues();
-                data.start = zongheSortLast;
+                var pageData = infoSearch.getForm().getValues();
+                pageData.start = zongheSortLast;
+                pageData.Type = 1;
                 var arr =[];
                 averagePanel.getStore().load({
-                    params: data,
+                    params: pageData,
                     callback:function(v) {
                         arr = spliceArr(v);
                         zongheSortLast = arr[0] - 6;
@@ -159,11 +194,12 @@ Ext.onReady(function(){
            text:'下一页',
             disabled:true,
             handler:function(){
-                var data = infoSearch.getForm().getValues();
-                data.start = zongheSortnext;
+                var pageData = infoSearch.getForm().getValues();
+                pageData.Type = 1;
+                pageData.start = zongheSortnext;
                 var arr =[];
                 averagePanel.getStore().load({
-                    params: data,
+                    params: pageData,
                     callback:function(v, action) {
                         arr = spliceArr(v);
                         zongheSortLast = arr[0] - 6;
@@ -215,7 +251,7 @@ Ext.onReady(function(){
         var total = v.totalLength;
         if (total !=0) {
             var array = spliceArr(v.data.items);
-            zongheSortLast = array[0] - array.length;
+            zongheSortLast = array[0] - 6;
             zongheSortnext =  array[array.length - 1];
             Ext.getCmp('last').setDisabled(array[0] == 1);
             Ext.getCmp('next').setDisabled(array[array.length - 1] == total);
@@ -241,6 +277,7 @@ Ext.onReady(function(){
             handler:function(){
                 var data = infoSearch.getForm().getValues();
                 data.start = hushuoSortLast;
+                data.Type = 0;
                 var arr = [];
                 hushuoPanel.getStore().load({
                     params: data,
@@ -258,6 +295,7 @@ Ext.onReady(function(){
             handler:function(){
                 var data = infoSearch.getForm().getValues();
                 data.start = hushuoSortnext;
+                data.Type = 0;
                 var arr = [];
                 hushuoPanel.getStore().load({
                     params: data,
@@ -309,11 +347,117 @@ Ext.onReady(function(){
         var total = v.totalLength;
         if (total !=0) {
             var array = spliceArr(v.data.items);
-
+            hushuoSortLast = array[0] - 6;
             hushuoSortnext =  array[array.length - 1];
-            console.log(array);
             Ext.getCmp('lastOne').setDisabled(array[0] == 1);
             Ext.getCmp('nextOne').setDisabled(array[array.length - 1] == total);
+        }
+    })
+
+    var groupStore = new Ext.data.Store({
+        url: '/ams/reportsearch/teamelectricity',
+        reader: new Ext.data.JsonReader({
+            root: 'rows'
+        }, PersonRecord)
+    });
+    var groupPanel = new Ext.grid.PivotGrid({
+        store     : groupStore,
+        aggregator: 'sum',
+        height    : 300,
+        title     : '班组情况',
+        measure   : 'Value',
+        viewConfig: {
+            autoFill:true,
+            title: '抄表员<br/>欠费年月'
+        },
+        tbar:[{
+            text:'上一页',
+            disabled:true,
+            id: 'lastTwo',
+            handler:function(){
+                var data = infoSearch.getForm().getValues();
+                data.start = groupSortLast;
+                data.Type = Type;
+                var arr =[];
+                groupPanel.getStore().load({
+                    params: data,
+                    callback:function(v, action) {
+                        arr = spliceArr(v);
+                        groupSortLast = arr[0] - 6;
+                        groupSortnext =  arr[arr.length - 1];
+
+                    }
+                });
+            }
+        },'->',{
+            text:'下一页',
+            disabled:true,
+            id: 'nextTwo',
+            handler:function(){
+                var data = infoSearch.getForm().getValues();
+                data.start = groupSortnext;
+                data.Type = Type;
+                var arr =[];
+                groupPanel.getStore().load({
+                    params: data,
+                    callback:function(v, action) {
+                        arr = spliceArr(v);
+                        groupSortLast = arr[0] - 6;
+                        groupSortnext =  arr[arr.length - 1];
+
+                    }
+                });
+            }
+        }],
+        leftAxis: [{
+            dataIndex: 'YearMonth'
+        }],
+        topAxis: [{
+            dataIndex: 'sort'
+        },{
+
+            dataIndex: 'Name'
+        },{
+            dataIndex: 'Action'
+        }],
+        bbar:[{
+            text: 'excel',
+            iconCls: 'excel',
+            handler: function(btn, pressed){
+                if (groupPanel.getStore().data.length == 0) {
+                    Ext.MessageBox.alert('提示','请先查询数据');
+                    return;
+                }
+                var data = infoSearch.getForm().getValues();
+                msgTip.show();
+                infoSearch.getForm().submit({
+                    params: data,
+                    url:'/ams/export/ReportPress',
+                    success:function(v,action){
+                        var re = Ext.decode(action.response.responseText);
+                        msgTip.hide();
+                        Ext.MessageBox.alert('提示',"<a target='_blank' href='"+re.msg+"'>下载</a>");
+                    },
+                    failure:function(v,action) {
+                        msgTip.hide();
+                        Ext.MessageBox.alert('提示','创建失败');
+                    }
+                })
+            }
+        }]
+    });
+
+    groupPanel.getStore().on('load',function(v){
+        var total = v.totalLength;
+        if (total != 0) {
+            var array = spliceArr(v.data.items);
+            if (array == undefined) {
+                return;
+            }
+            groupSortLast = array[0] - 6;
+            groupSortnext =  array[array.length - 1];
+            Ext.getCmp('lastTwo').setDisabled(array[0] == 1);
+            Ext.getCmp('nextTwo').setDisabled(array[array.length - 1] == total);
         }
     })
 
@@ -406,22 +550,81 @@ Ext.onReady(function(){
         height:400,
         style: 'margin-top:15px',
         items:[
-            averagePanel,hushuoPanel
+            averagePanel,hushuoPanel,line
         ],
         listeners:{
             tabchange:function(tp,p){
-                averagePanel.store.reload();
-                hushuoPanel.store.reload();
+                if (!tabTrue) {
+                    return;
+                }
+                var groupData = infoSearch.getForm().getValues();
+
+                if (p.title == "户数回收率排名") {
+                    groupData.Type = 0;
+                    Type = 0;
+                    groupPanel.store.load({
+                        params:groupData,
+                        callback:function(v,action){
+                            if (v.length == 0) {
+                                groupPanel.store.removeAll();
+                                Ext.MessageBox.alert("提示","班组没有数据！");
+                            }
+                        }
+                    });
+                    hushuoPanel.store.load({
+                        params:groupData,
+                        callback:function(v,action){
+                            if (v.length == 0) {
+                                groupPanel.store.removeAll();
+                                Ext.MessageBox.alert("提示","户数回收率没有数据！");
+                            }
+                        }
+                    });
+                } else if(p.title == "电费回收率排名") {
+                    groupData.Type = 1;
+                    Type = 1;
+                    groupPanel.store.load({
+                        params:groupData,
+                        callback:function(v,action){
+                            if (v.length == 0) {
+                                groupPanel.store.removeAll();
+                                Ext.MessageBox.alert("提示","班组没有数据！");
+
+                            }
+                        }
+                    });
+                    averagePanel.store.load({
+                        params:groupData,
+                        callback:function(v,action){
+                            if (v.length == 0) {
+                                groupPanel.store.removeAll();
+                                Ext.MessageBox.alert("提示","电费回收率没有数据！");
+                            }
+                        }
+                    });
+                } else if(p.title == "欠费金额") {
+                    groupData.Type = 2;
+                    Type = 2;
+                    groupPanel.store.load({
+                        params:groupData,
+                        callback:function(v,action){
+                            if (v.length == 0) {
+                                groupPanel.store.removeAll();
+                                Ext.MessageBox.alert("提示","班组没有数据！");
+                            }
+                        }
+                    })
+                }
             }
         }
     });
-    var lineTab = new Ext.TabPanel({
+    var groupTab = new Ext.TabPanel({
         activeTab: 0,
         plain:true,
         autoWidth:true,
         style: 'margin-top:15px',
         items:[
-            line
+            groupPanel
         ]
     })
 
@@ -433,7 +636,8 @@ Ext.onReady(function(){
         items: [
             searchPanel,
             averageTab,
-            lineTab
+            groupTab
+
         ]
     });
     new Ext.Viewport(

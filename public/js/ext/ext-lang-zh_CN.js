@@ -99,6 +99,7 @@ if(Ext.DatePicker){
    });
 }
 
+
 if(Ext.PagingToolbar){
    Ext.apply(Ext.PagingToolbar.prototype, {
       beforePageText : "第",//update

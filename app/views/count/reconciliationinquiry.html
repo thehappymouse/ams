@@ -6,7 +6,7 @@ Ext.onReady(function(){
     });
     /*二个动态框*/
     var teamCombox = new SettCombbox({
-        url:'/ams/Info/TeamList?ID=1&Type=2&All=0',
+        url:'/ams/Info/TeamList?ID=1&Type=2&All=1',
         fieldLabel: '营业班组',
         anchor:'55%',
         id:'team',
@@ -76,7 +76,7 @@ Ext.onReady(function(){
                         {
                             xtype:'datetimefield',
                             format: 'Y-m-d H:i',
-                            value:new Date(new Date()-7*24*60*60*1000),
+                            value:currentDate,
                             name:'FromData',
                             width: 140
                         },{
@@ -302,6 +302,54 @@ Ext.onReady(function(){
                         dataIndex: 'Phone'
                     }]
             });
+
+    var  sfStore = new Ext.data.JsonStore(
+            {
+                id: 'tvliststore',
+                url: '/ams/CountSearch/ReconciliationInquiryList',
+                root: 'data',
+                fields: chargesMoneyFields
+            });
+
+    var   sfView = new Ext.grid.GridPanel(
+            {
+                store: sfStore,
+                multiSelect: true,
+                title: '收费员信息汇总',
+                stripeRows: true,
+                region: 'center',
+                autoHeight:true,
+                emptyText: '没有节目',
+                reserveScrollOffset: true,
+                viewConfig: {forceFit:true},
+                columns: [
+                    {
+                        header: '收费员',
+                        sortable: true,
+                        align:"center",
+                        dataIndex: 'Name'
+                    },  {
+                        header: '收费笔数',
+                        sortable: true,
+                        align:"center",
+                        dataIndex: 'ChargeCount'
+                    }, {
+                        header: '收费金额',
+                        sortable: true,
+                        align:"center",
+                        dataIndex: 'Money'
+                    }, {
+                        header: '签订费控数',
+                        sortable: true,
+                        align:"center",
+                        dataIndex: 'ControlCount'
+                    },{
+                        header: '登记电话',
+                        sortable: true,
+                        align:"center",
+                        dataIndex: 'Phone'
+                    }]
+            });
     var moneyTab = new Ext.TabPanel({
         labelWidth: 85,
         activeTab: 0,
@@ -324,6 +372,17 @@ Ext.onReady(function(){
         ]
     });
 
+    var sfTab = new Ext.TabPanel({
+        labelWidth: 85,
+        activeTab: 0,
+        plain:true,
+        style: 'margin-top:15px',
+        defaults:{autoScroll: true},
+        items:[
+            sfView
+        ]
+    });
+
     var allPanel = new Ext.Panel({
         region: 'center',
         fileUpload: true,
@@ -332,6 +391,7 @@ Ext.onReady(function(){
         items: [
             searchPanel,
             moneyTab,
+            sfTab,
             totalTab
         ]
     });

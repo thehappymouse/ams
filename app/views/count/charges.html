@@ -114,7 +114,7 @@ var infoSearch = new Ext.FormPanel({
                             Ext.apply(listView.store.baseParams, data);
                             listView.store.load({
                                 params : data,
-                                callback:function(v){
+                                callback:function(v,action){
                                     if (v.length == 0) {
                                         listView.store.removeAll();
                                         Ext.MessageBox.alert("提示","没有数据！");
@@ -255,10 +255,31 @@ var listView = new Ext.grid.EditorGridPanel(
                                 }
                             })
                         }
+                    },{
+                        id: 'htmlID',
+                        fieldLabel:''
                     }]
             })
         });
-
+    listView.getStore().on("load",function(p){
+        var tpl = "";
+        var data = infoSearch.getForm().getValues();
+        data.start = 0;data.limit = 5;
+        Ext.Ajax.request({
+            params:data,
+            url:'/ams/CountSearch/charges',
+            success: function(v, action){
+                var re =  Ext.decode(v.responseText);
+                var total = re.TotalData.Count;
+                var Money = re.TotalData.Money;
+                tpl  = '共计：'+total+'条，金额'+Money+'元';
+                Ext.getCmp('htmlID').setText(tpl);
+            },
+            failure: function(){
+                Ext.getCmp('htmlID').setText(tpl);
+            }
+        })
+    })
     listView.on('cellclick', function (grid, rowIndex, columnIndex, e) {
         var record = grid.getStore().getAt(rowIndex);
         var columnName = grid.getColumnModel().getDataIndex(columnIndex);

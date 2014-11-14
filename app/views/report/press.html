@@ -200,7 +200,10 @@ Ext.onReady(function(){
         var total = v.totalLength;
         if (total !=0) {
             var array = spliceArr(v.data.items);
-            chaobiaoSortLast = array[0] - array.length;
+            if (array == undefined) {
+                return;
+            }
+            chaobiaoSortLast = array[0] - 6;
             chaobiaoSortnext =  array[array.length - 1];
             Ext.getCmp('lastOne').setDisabled(array[0] == 1);
             Ext.getCmp('nextOne').setDisabled(array[array.length - 1] == total);
@@ -279,8 +282,10 @@ Ext.onReady(function(){
                     Ext.MessageBox.alert('提示','请先查询数据');
                     return;
                 }
+                var data = infoSearch.getForm().getValues();
                 msgTip.show();
                 infoSearch.getForm().submit({
+                    params: data,
                     url:'/ams/export/ReportPress',
                     success:function(v,action){
                         var re = Ext.decode(action.response.responseText);
@@ -300,7 +305,10 @@ Ext.onReady(function(){
         var total = v.totalLength;
         if (total != 0) {
             var array = spliceArr(v.data.items);
-            groupSortLast = array[0] - array.length;
+            if (array == undefined) {
+                return;
+            }
+            groupSortLast = array[0] - 6;
             groupSortnext =  array[array.length - 1];
             Ext.getCmp('last').setDisabled(array[0] == 1);
             Ext.getCmp('next').setDisabled(array[array.length - 1] == total);
@@ -315,7 +323,13 @@ Ext.onReady(function(){
         style: 'margin-top:15px',
         items:[
             chaobiaoPanel,groupPanel
-        ]
+        ],
+        listeners:{
+            tabchange:function(tp,p){
+                chaobiaoPanel.store.reload();
+                groupPanel.store.reload();
+            }
+        }
     });
 
 
@@ -327,13 +341,7 @@ Ext.onReady(function(){
         items: [
             searchPanel,
             chaobiaoTab
-        ],
-        listeners:{
-            tabchange:function(tp,p){
-                chaobiaoPanel.store.reload();
-                groupPanel.store.reload();
-            }
-        }
+        ]
     });
     new Ext.Viewport(
             {

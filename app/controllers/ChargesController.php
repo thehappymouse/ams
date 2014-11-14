@@ -176,8 +176,7 @@ class ChargesController extends ControllerBase
 
 
         $userTeam = Team::findFirst($this->loginUser["TeamID"]);
-        $segment = Segment::findFirst(array("Number=:num:", "bind" => array("num" => $ars->getFirst()->Segment)));
-        $manager = User::findFirst($segment->UserID);
+        $manager = User::findFirst(array("Name=:name:", "bind" => array("name" => $ars[0]->SegUser)));
 
         $errorCount = 0;
         foreach ($ars as $a) {
@@ -188,6 +187,7 @@ class ChargesController extends ControllerBase
             $c->Year = substr($a->YearMonth, 0, 4);
             $c->CustomerNumber = $customer;
             $c->Segment = $a->Segment;
+            $c->SegUser = $a->SegUser;
             $c->UserID = $this->loginUser["ID"];
             $c->UserName = $this->loginUser["Name"];
             $c->IsRent = $this->request->get("IsRent");
@@ -227,7 +227,7 @@ class ChargesController extends ControllerBase
         try {
             //发送消息到对应的抄表员，以便去复电。 根据客户编码，查找抄表段->抄表员和班长，写信
             $msg = new Message();
-            $msg->ToUserID = $segment->UserID;
+            $msg->ToUserID = $manager->ID;
             $msg->FromUserID = $this->loginUser["ID"];
             $msg->SendTime = $this->getDateTime();
             $msg->Sender = $this->loginUser["Name"];

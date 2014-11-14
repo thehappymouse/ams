@@ -88,7 +88,7 @@ class ControllerBase extends Controller
         $builder = $this->modelsManager->createBuilder();
         $builder->from($table);
         if ($seg) {
-            $builder->inWhere("Segment", $seg);
+            $builder->inWhere("SegUser", $seg);
         }
         if ($start && $end) {
             $builder->andWhere("YearMonth BETWEEN '$start' AND '$end'");

@@ -56,16 +56,17 @@ passWinAlert = function(){
                 emptyText: '没有数据',
                 viewConfig: {forceFit:true},
                 reserveScrollOffset: true,
+                autoExpandColumn: "Content",
                 columns: [
                     {
                         header: '内容',
-                        align:"center",
                         sortable: true,
                         dataIndex: 'Content'
                     }, {
                         header: '发件人',
                         dataIndex: 'Sender',
                         align:"center",
+                        width:50,
                         sortable: true,
                         editor:new Ext.form.TextField({
                             allowBlank:false
@@ -73,6 +74,7 @@ passWinAlert = function(){
                     }, {
                         header: '时间',
                         sortable: true,
+                        width:50,
                         align:"center",
                         dataIndex: 'SendTime'
                     }],
@@ -86,7 +88,7 @@ passWinAlert = function(){
             });
             var messageWin =new Ext.Window({
                 layout:'fit',
-                width:500,
+                width:700,
                 height:300,
                 closeAction:'hide',
                 plain: true,
@@ -117,7 +119,7 @@ passWinAlert = function(){
                             name: 'newPassWord',
                             id: 'newPassWord',
                             inputType: 'password',
-                            allowBlank:false,
+                            allowBlank:false
                         },{
                             fieldLabel: '确认密码',
                             name: 'aginPassWord',
@@ -176,6 +178,7 @@ passWinAlert = function(){
     <div class="container">
         {{ content() }}
     </div>
+    &nbsp;
 </div>
  <style>
             .x-grid-record-red table{

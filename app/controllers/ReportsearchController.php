@@ -1,5 +1,25 @@
 <?php
 
+function cmp_rate($a, $b)
+{
+    $a1 = $a["AllData"]["MoneyRate"];
+    $b1 = $b["AllData"]["MoneyRate"];
+    if ($a1 <= $b1) {
+        return 1;
+    } else {
+        return -1;
+    }
+}
+function cmp_hrate($a, $b)
+{
+    $a1 = $a["AllData"]["CountRate"];
+    $b1 = $b["AllData"]["CountRate"];
+    if ($a1 <= $b1) {
+        return 1;
+    } else {
+        return -1;
+    }
+}
 
 class  ReportsearchController extends ControllerBase
 {
@@ -8,6 +28,106 @@ class  ReportsearchController extends ControllerBase
     {
         $this->view->disable();
         parent::initialize();
+    }
+
+
+    public function echoElectricity($result, $start, $type = 0)
+    {
+        $limit = 5;
+        usort($result, 'cmp_rate');
+        for ($index = $start; $index < count($result) && $index < $limit + $start; $index++) {
+            $user = $result[$index];
+
+            $data = array("Name" => $user["Name"], "sort" => $index + 1);
+            foreach ($user["MonthDatas"] as $key => $ym) {
+                $data["YearMonth"] = $key;
+                $data["Action"] = "欠费余额";
+                $data["Value"] = $ym["ArrearMoney"];
+                $row[] = $data;
+
+                $data["Action"] = "应收电费";
+                $data["Value"] = $ym["uMoney"];
+                $row[] = $data;
+
+                $data["Action"] = "回收率(%)";
+                $data["Value"] = $ym["MoneyRate"];
+                $row[] = $data;
+            }
+
+            $data["Action"] = "欠费余额";
+            $data["YearMonth"] = "汇总";
+            $data["Value"] = $user["AllData"]["ArrearMoney"];
+            $row[] = $data;
+
+
+            $data["Action"] = "应收电费";
+            $data["YearMonth"] = "汇总";
+            $data["Value"] = $user["AllData"]["AllMoney"];
+            $row[] = $data;
+
+            $data["Action"] = "回收率(%)";
+            $data["YearMonth"] = "汇总";
+            $data["Value"] = $user["AllData"]["MoneyRate"];
+            $row[] = $data;
+
+        }
+
+        usort($result, 'cmp_hrate');
+        for ($index = $start; $index < count($result) && $index < $limit + $start; $index++) {
+            $user = $result[$index];
+
+            $data = array("Name" => $user["Name"], "sort" => $index  + 1);
+            foreach ($user["MonthDatas"] as $key => $ym) {
+                $data["YearMonth"] = $key;
+                $data["Action"] = "欠费户数";
+                $data["Value"] = $ym["ArrearHouse"];
+                $hrows[] = $data;
+
+                $data["Action"] = "应收户数";
+                $data["Value"] = $ym["uHouse"];
+                $hrows[] = $data;
+
+                $data["Action"] = "回收率(%)";
+                $data["Value"] = $ym["HouseRate"];
+                $hrows[] = $data;
+            }
+
+            $data["Action"] = "欠费户数";
+            $data["YearMonth"] = "汇总";
+            $data["Value"] = $user["AllData"]["ArrearMoney"];
+            $hrows[] = $data;
+
+
+            $data["Action"] = "应收户数";
+            $data["YearMonth"] = "汇总";
+            $data["Value"] = $user["AllData"]["ArrearCount"];
+            $hrows[] = $data;
+
+            $data["Action"] = "回收率(%)";
+            $data["YearMonth"] = "汇总";
+            $data["Value"] = $user["AllData"]["CountRate"];
+            $hrows[] = $data;
+
+        }
+        if($type){
+            echo json_encode(array("total" => count($result), "rows" => $row));
+        }
+        else{
+            echo json_encode(array("total" => count($result), "rows" => $hrows));
+        }
+        exit;
+    }
+
+
+    /**
+     * 班组电费回收数组
+     */
+    public function TeamElectricityAction()
+    {
+        $result = ReportNewHelper::TeamElectricity($this->request->get());
+        $start = (int)$this->request->get("start");
+
+        $this->echoElectricity($result, $start, $this->request->get("Type"));
     }
 
     /**
@@ -20,11 +140,12 @@ class  ReportsearchController extends ControllerBase
      */
     public function ElectricityAction()
     {
-        list($years, $result, $total) = ReportNewHelper::Electricity($this->request->get());
-        echo json_encode(array("total" => $total, "rows" => $result, "h_rows" => $years));
-        exit;
-        $this->ajax->flushData(array("years" => $years, "result" => $result));
+        list($result) = ReportNewHelper::Electricity($this->request->get());
+
+        $start = (int)$this->request->get("start");
+        $this->echoElectricity($result, $start, $this->request->get("Type"));
     }
+
 
     public function UserAction()
     {
@@ -40,7 +161,7 @@ class  ReportsearchController extends ControllerBase
 
         $uData = array();
         foreach ($users as $user) {
-            $seg = DataUtil::GetSegmentsByUid($user->ID);
+            $seg = DataUtil::getSegNameArray($user->ID);
             if (count($seg) == 0) {
                 continue;
             }
@@ -49,21 +170,13 @@ class  ReportsearchController extends ControllerBase
             $build->columns("SUM(Money) AS Money");
 
             $r = $build->getQuery()->execute()->getFirst();
+
             $data["name"] = $user->Name;
             $data["views"] = (int)$r->Money;
             $uData[] = $data;
         }
         $this->ajax->flushData($uData);
     }
-
-    /**
-     * 按照回收率进行排名
-     * @param $data
-     */
-    private function sortByRate($data)
-    {
-    }
-
 
     /**
      * 催费完成率
@@ -90,6 +203,11 @@ class  ReportsearchController extends ControllerBase
 
         $tid = $p->get("Team");
 
+        if (!$tid) {
+            echo json_encode(array("total" => 0, "rows" => array()));
+            exit;
+        }
+
         if ($tid == -1) {
             $mTeams = Team::find("Type=1");
         } else {
@@ -104,7 +222,7 @@ class  ReportsearchController extends ControllerBase
         $teamdata = array();
         //班组情况统计
         foreach ($mTeams as $mt) {
-            $seg = DataUtil::GetSegmengsByTid($mt->ID);
+            $seg = DataUtil::getSegNameArray($mt->ID);
 
             list($team, $years) = ReportNewHelper::getFeeStatementsBySeg($seg, $mt->Name, $start, $end);
             $teams[] = $team;
@@ -135,6 +253,10 @@ class  ReportsearchController extends ControllerBase
 
     public function TeamWorkAction()
     {
+        if (!$this->request->get("Team")) {
+            $this->ajax->flushData(array());
+        }
+
         $result = array();
         list($teams, $users) = ReportNewHelper::Work($this->request->get());
         foreach ($teams as $key => $t) {
@@ -183,6 +305,10 @@ class  ReportsearchController extends ControllerBase
     {
 
         $result = array();
+        if (!$this->request->get("Team")) {
+            $this->ajax->flushData($result);
+        }
+
         list($teams, $users) = ReportNewHelper::Work($this->request->get());
 
         foreach ($users as $key => $t) {

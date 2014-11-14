@@ -82,47 +82,68 @@ Ext.onReady(function () {
                 columnWidth: .25,
                 layout: 'form',
                 items: [peopleCombox,
-
                     {
                         xtype: 'compositefield',
-                        items: [
-                            {xtype: 'hidden'},
-                            {
-                                width: 100,
-                                xtype: 'button',
-                                text: '查询',
-                                handler: function () {
-                                    infoSearch.getForm().submit({
-                                        method: 'GET',
-                                        params: {
-                                            start: 0,
-                                            limit: _pageSize
-                                        },
-                                        success: function (action, msg) {
-                                            var text = Ext.decode(msg.response.responseText);
-                                            if (text.success) {
-                                                listView.store.loadData(text);
-                                                Ext.apply(listView.store.baseParams, infoSearch.getForm().getValues());
-                                            }
-                                        },
-                                        failure: function (action, msg) {
-                                            var text = Ext.decode(msg.response.responseText);
-                                            if (!text.success) {
-                                                listView.store.removeAll();
-                                                Ext.Msg.alert('提示', text.msg);
-                                            }
-                                        }
-                                    })
-                                }
-                            }
-                        ]
+                        fieldLabel: '停电时间',
+                        items:[
+                        {
+                            fieldLabel: '复电时间',
+                            xtype:'datetimefield',
+                            name:'FromData',
+                            value:new Date().format('Y-m-d'),
+                            width:82
+                        },{
+                            xtype: 'displayfield',
+                            //   style: 'text-align:right;width:40px;',
+                            value: '至: '
+                        },{
+                            fieldLabel: '复电时间',
+                            xtype:'datetimefield',
+                            value:new Date(),
+                            name:'ToData',
+                            width:82
+                        }]
                     }
                 ]
             },
             {
                 columnWidth: .25,
                 layout: 'form',
-                items: NumberCombox
+                items: [NumberCombox,
+                {
+                    xtype: 'compositefield',
+                    items: [
+                        {xtype: 'hidden'},
+                        {
+                            width: 100,
+                            xtype: 'button',
+                            text: '查询',
+                            handler: function () {
+                                infoSearch.getForm().submit({
+                                    method: 'GET',
+                                    params: {
+                                        start: 0,
+                                        limit: _pageSize
+                                    },
+                                    success: function (action, msg) {
+                                        var text = Ext.decode(msg.response.responseText);
+                                        if (text.success) {
+                                            listView.store.loadData(text);
+                                            Ext.apply(listView.store.baseParams, infoSearch.getForm().getValues());
+                                        }
+                                    },
+                                    failure: function (action, msg) {
+                                        var text = Ext.decode(msg.response.responseText);
+                                        if (!text.success) {
+                                            listView.store.removeAll();
+                                            Ext.Msg.alert('提示', text.msg);
+                                        }
+                                    }
+                                })
+                            }
+                        }
+                    ]
+                }]
             }
         ]
     });

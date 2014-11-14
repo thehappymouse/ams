@@ -51,19 +51,19 @@ class CountHelper extends HelperBase
                               GROUP BY PressStyle ORDER By PressStyle ASC";    //电话 0 ， 通知单 1
 
         $td = parent::getModelManager()->executeQuery($totalQuery, $param);
-        $totalData = array("Money" => 0, "Count" => 0, "Phone" => "", "Nofify" => 0);
+        $totalData = array("Money" => 0, "Count" => 0, "Phone" => "", "Notify" => 0);
         $index = 0;
         foreach ($td as $t) {
             $totalData["Count"] += $t->Count;
             if ($index == 0) $totalData["Phone"] = $t->Count;
             else {
-                $totalData["Nofify"] = $t->Count;
+                $totalData["Notify"] = $t->Count;
             }
             $index++;
         }
 
         //TODO 原生态sql查询。其条件与普通查询条件写法不一样？
-        $condition = " WHERE (a.PressTime BETWEEN :start AND :end)  AND a.Segment IN ($ss)";
+        $condition = " WHERE (a.PressTime BETWEEN :start AND :end)  AND a.SegUser IN ($ss)";
         $moneyQuery = " SELECT Sum(Money) as Money FROM Press WHERE `ID` IN (SELECT `ID` FROM Press as a  $condition GROUP BY Arrear )";
 
         $p = new Press();
@@ -206,26 +206,15 @@ class CountHelper extends HelperBase
             $end = $end . " 23:00:00";
         }
 
-        $ss = DataUtil::GetSegmentsStrByUid($uid);
-
-        $condition = " WHERE a.Segment IN ($ss) AND (Time between :start: AND :end:)";
+        $ss = DataUtil::getSegName($uid);
+        $condition = " WHERE a.SegUser IN ($ss) AND (Time between :start: AND :end:)";
 
         $query = "SELECT  a.YearMonth, a.Money, a.UserName, a.Time, a.LandlordPhone, a.IsRent,
                           c.ID, a.CustomerNumber, c.Segment, c.Name, c.Address
                           FROM Charge as a inner  join Customer as c on a.CustomerNumber = c.Number";
         $query .= $condition;
 
-        //排序
-        $condition_Sort = $condition;
-        if($p->numberSort) {
-            $query .= " ORDER BY CustomerNumber " . ($p->numberSort == 1 ? "Desc ": "ASC ");
-        }
-        if($p->segmentSort) {
-            $query .= " ORDER BY a.Segment " . ($p->segmentSort == 1 ? "Desc ": "ASC ");
-        }
-
         $query = parent::addLimit($query, $p->start, $p->limit);
-
         $results = parent::getModelManager()->executeQuery($query, array("start" => $start, "end" => $end));
 
         $data = array();
@@ -254,14 +243,26 @@ class CountHelper extends HelperBase
         $time = $p->get("FromData");
         $end = $p->get("ToData");
         $data = array();
-        if(User::IsAllUsers($uid)){
-            $users = User::find("TeamID = $tid");
-            $uid = array();
+
+        $arruid = array();
+        if($tid == -1)
+        {
+            $users = User::find("Role=" . ROLE_TOLL);
             foreach($users as $user){
-                $uid[] = $user->ID;
+                $arruid[] = $user->ID;
             }
-            $uid = "'" . implode("','", $uid) . "'";
         }
+        else if(User::IsAllUsers($uid)){
+            $users = User::find("TeamID = $tid");
+            foreach($users as $user){
+                $arruid[] = $user->ID;
+            }
+        }
+        else {
+            $arruid[] = $uid;
+        }
+
+        $uid = "'" . implode("','", $arruid) . "'";
 
         $cs = Charge::find(array("UserID IN ($uid) AND (Time BETWEEN :start: AND :end:)", "bind" => array("start" => $time, "end" => $end)));
 
@@ -303,7 +304,7 @@ class CountHelper extends HelperBase
     public static function Reconciliation(array $params)
     {
         $p = new RequestParams($params);
-        $gid = $p->get("Team");
+        $gid = (int)$p->get("Team");
         $time = $p->get("FromData");
         $end = $p->get("ToData");
 
@@ -313,6 +314,7 @@ class CountHelper extends HelperBase
         if($gid != -1){
             $condation .= "AND ChargeTeam = $gid";
         }
+
         $condation .= " GROUP BY ManageTeam, Year ORDER BY Year, ManageTeam";
 
         $results = parent::getModelManager()->executeQuery("SELECT

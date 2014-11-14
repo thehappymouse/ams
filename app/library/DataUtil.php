@@ -24,23 +24,55 @@ class DataUtil
     }
 
     /**
+     * 数组形式获取用户名称。
      * @param $uid
-     * @return string
+     * @return array
      */
-    public static function getSegName($uid)
+    public static function getSegNameArray($uid)
     {
         if(($tid = User::IsAllUsers($uid))){
-            $users = User::find("TeamID=$tid");
+            if($tid == -1){
+                $users = User::find("Role=" . ROLE_MATER);
+            }
+            else {
+                $users = User::find("TeamID=$tid AND Role=" . ROLE_MATER);
+            }
         }
         else {
             $users = User::find("ID=$uid");
         }
 
+        $names = array();
+        foreach($users as $u){
+            $names[] = $u->Name;
+        }
+        return $names;
+    }
+
+    public  static function getTeamSegNameArray($tid)
+    {
+        if($tid == -1){
+            $users = User::find("Role=" . ROLE_MATER);
+        }
+        else {
+            $users = User::find("TeamID=$tid AND Role=" . ROLE_MATER);
+        }
 
         $names = array();
         foreach($users as $u){
             $names[] = $u->Name;
         }
+        return $names;
+    }
+
+    /**
+     * 查询字符串形式返回用户名称
+     * @param $uid  uid  tid开头，表示全部  tid_1 表示1班全部  tid_-1表示所有班组
+     * @return string
+     */
+    public static function getSegName($uid)
+    {
+        $names = self::getSegNameArray($uid);
         $ss = "'" . implode("','", $names) . "'";
         return $ss;
     }
@@ -59,6 +91,7 @@ class DataUtil
         }
         return $data;
     }
+
 
     /**
      * 获取 管理员名下的抄表段集合
@@ -116,7 +149,7 @@ class DataUtil
     public static function GetSegmentDataByTid($tid)
     {
         $data = array();
-        $sql = "SELECT DISTINCT * from Segment WHERE UserID in (SELECT ID FROM User WHERE TeamID = ?) ORDER BY Number";
+        $sql = "SELECT DISTINCT * from SegmentLog WHERE UserID in (SELECT ID FROM User WHERE TeamID = ?) ORDER BY Number";
         $param = array($tid);
 
 

@@ -275,8 +275,10 @@ class ReminderController extends ControllerBase
      */
     public function AdvanceAction()
     {
-        $data = CustomerHelper::Advances($this->request->get());
+        list($total, $data) = CustomerHelper::Advances($this->request->get());
 
+        $this->ajax->TotalInfo = $total;
+        $this->ajax->total = $total["Count"];
         $this->ajax->flushData($data);
     }
 

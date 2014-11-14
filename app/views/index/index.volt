@@ -28,7 +28,7 @@
                             n = v.data;
                         }
                         $("#messageCount").remove();
-                        var tpl = "<div id='messageCount' style='color:red'>"+n+"</div>"
+                        var tpl = "<span id='messageCount' style='color:red'>"+n+"</span>"
                         $("#message").append(tpl);
                     }
                 }

@@ -45,7 +45,7 @@ class Segment extends \Phalcon\Mvc\Model
      */
     public function initialize()
     {
-        $this->setSource('Segment');
+        $this->setSource('SegmentLog');
     }
 
     /**

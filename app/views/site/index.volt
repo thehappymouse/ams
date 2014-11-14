@@ -145,12 +145,16 @@ Ext.onReady(function(){
         width:500,
         height:200,
         layout:'fit',
+<?php
+ if($lineshow) {
+?>
         tbar:[{
             text: '指标设置',
             handler: function(){
                 setWin.show();
             }
         }],
+        <?php }?>
         items: {
             xtype: 'columnchart',
             store: tstore,
@@ -246,7 +250,7 @@ var s2 = new Ext.data.JsonStore(
         {
             title: '欠费月份户数及金额的分布',
             region: 'center',
-            height: 200,
+            height: 180,
             flex: 1,
             items: {
                 xtype: 'linechart',
@@ -255,19 +259,109 @@ var s2 = new Ext.data.JsonStore(
                 yField: 'value'
             }
         });
+
+    var store = new Ext.data.JsonStore({
+            fields:['name', 'visits', 'views'],
+            data: [
+                {name:'Jul 07', visits: 245000},
+                {name:'Aug 07', visits: 240000},
+                {name:'Sep 07', visits: 355000},
+                {name:'Oct 07', visits: 375000},
+                {name:'Nov 07', visits: 490000},
+                {name:'Dec 07', visits: 495000},
+                {name:'Jan 08', visits: 520000},
+                {name:'Feb 08', visits: 620000}
+            ]
+        });
+    var centPanel = new Ext.Panel({
+          iconCls:'chart',
+          title: '昨日交费情况',
+          frame:true,
+          height:180,
+          layout:'fit',
+          items: {
+              xtype: 'columnchart',
+              store: store,
+              url:Ext.chart.Chart.CHART_URL,
+              xField: 'name',
+              yAxis: new Ext.chart.NumericAxis({
+                  displayName: 'Visits',
+                  labelRenderer : Ext.util.Format.numberRenderer('0,0')
+              }),
+              tipRenderer : function(chart, record, index, series){
+                   return '昨日交费情况' + Ext.util.Format.number(record.data.visits, '0,0');
+              },
+              chartStyle: {
+                  padding: 10,
+                  animationEnabled: true,
+                  font: {
+                      name: 'Tahoma',
+                      color: 0x444444,
+                      size: 11
+                  },
+                  dataTip: {
+                      padding: 5,
+                      border: {
+                          color: 0x99bbe8,
+                          size:1
+                      },
+                      background: {
+                          color: 0xDAE7F6,
+                          alpha: .9
+                      },
+                      font: {
+                          name: 'Tahoma',
+                          color: 0x15428B,
+                          size: 10,
+                          bold: true
+                      }
+                  },
+                  xAxis: {
+                      color: 0x69aBc8,
+                      majorTicks: {color: 0x69aBc8, length: 4},
+                      minorTicks: {color: 0x69aBc8, length: 2},
+                      majorGridLines: {size: 1, color: 0xeeeeee}
+                  },
+                  yAxis: {
+                      color: 0x69aBc8,
+                      majorTicks: {color: 0x69aBc8, length: 4},
+                      minorTicks: {color: 0x69aBc8, length: 2},
+                      majorGridLines: {size: 1, color: 0xdfe8f6}
+                  }
+              },
+              series: [{
+                  type: 'column',
+                  displayName: 'Page Views',
+                  yField: 'visits',
+                  style: {
+                      image:'bar.gif',
+                      mode: 'stretch',
+                      color:0x99BBE8
+                  }
+              }]
+          }
+      });
     var centerPanel = new Ext.Panel(
         {
-            region: 'center',
-            autoScroll:true,
+            height:600,
             layout: {
                 type  : 'vbox',
                 align : 'stretch',
                 pack  : 'start'
             },
             items:[
-                topPanel, bottomPanel
+                topPanel, centPanel,bottomPanel
             ]
         });
+        var cPanel = new Ext.Panel(
+                {
+                    region: 'center',
+
+                    autoScroll:true,
+                    items:[
+                        centerPanel
+                    ]
+                });
     var eastPanel = new Ext.Panel(
         {
             region: 'east',
@@ -308,7 +402,7 @@ var s2 = new Ext.data.JsonStore(
         e.cancel=true;
         return false;
     });
-    var    jiaoPanel = new Ext.grid.PropertyGrid({
+var jiaoPanel = new Ext.grid.PropertyGrid({
         width: 300,
         autoHeight: true,
         title:'昨日缴费情况',
@@ -358,7 +452,7 @@ var s2 = new Ext.data.JsonStore(
             },
             items: [
                 eastPanel,
-                centerPanel,
+                cPanel,
                 weastPanel
             ]
         });

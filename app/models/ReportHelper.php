@@ -14,7 +14,7 @@ class ReportHelper extends HelperBase
         $builder = parent::getModelManager()->createBuilder();
         $results = $builder->columns(array("SUM(Money) as Money", "count(Money) as ArrearCount", "YearMonth"))
             ->from("Arrears")
-            ->inWhere("Segment", $seg)
+            ->inWhere("SegUser", $seg)
             ->groupBy("YearMonth")
             ->getQuery()->execute();
         return $results;
@@ -25,6 +25,7 @@ class ReportHelper extends HelperBase
      */
     public static function Electricity(array $param)
     {
+
         $p = new RequestParams($param);
         $id = $p->get("Team");
 
@@ -44,7 +45,7 @@ class ReportHelper extends HelperBase
 
             $oneRes = array("User" => $user->Name);
 
-            $seg = DataUtil::GetSegmentsByUid($user->ID);
+            $seg = DataUtil::getSegNameArray($user->ID);
             if (count($seg) == 0) continue;
             $results = self::getMonthArrears($seg);
 
@@ -161,28 +162,37 @@ class ReportHelper extends HelperBase
             $mTeams = Team::find($tid);
         }
 
-        $start = $p->get("Fromdata");
-        $end = $p->get("Todata");
-
+        $start = $p->get("FromData");
+        $end = $p->get("ToData");
 
         $teams = array();
         $years = array();
         $users = array();
+        $ty = array();
 
         //班组情况统计
         foreach ($mTeams as $mt) {
 
-            $seg = DataUtil::GetSegmengsByTid($mt->ID);
+            $seg = DataUtil::getTeamSegNameArray($mt->ID);
 
             list($team, $years) = self::getFeeStatementsBySeg($seg, $mt->Name, $start, $end);
+            foreach($years as $t){
+                if(!in_array($t, $ty)){
+                    $ty[] = $t;
+                }
+            }
+
+
             $teams[] = $team;
         }
+
+        $years = $ty;
 
         //抄表员统计情况
         foreach ($mTeams as $mt) {
             $mUsers = User::find("TeamID = $mt->ID");
             foreach ($mUsers as $mU) {
-                $seg = DataUtil::GetSegmentsByUid($mU->ID);
+                $seg = DataUtil::getSegNameArray($mU->ID);
                 if (count($seg) > 0) {
                     list($uData, $a) = self::getFeeStatementsBySeg($seg, $mU->Name, $start, $end);
                     $users[] = $uData;
@@ -289,7 +299,7 @@ class ReportHelper extends HelperBase
         //班组情况统计
         foreach ($mTeams as $mt) {
 
-            $seg = DataUtil::GetSegmengsByTid($mt->ID);
+            $seg = DataUtil::getTeamSegNameArray($mt->ID);
 
             if (count($seg) == 0) continue;
 

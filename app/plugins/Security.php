@@ -70,24 +70,25 @@ class Security extends Phalcon\Mvc\User\Plugin
         }
 
         $adminResource = array(
-            "index" => array("index", "logout", "login", "logincheck", "message"),
-            "site" => array("index", "error", "index2"),
-            "charges" => array("charges", "withdrawn", "arrears", "index", "chargeinfo", "customer", "create", "cancel", "searchfee"),
-            "reminder" => array("reminder", "powerfailure", "cancel", "restoration", "receipts", "searchfee", "searchpress", "searchreset", "cut", "cancelpress", "press", "advance", "reset"),
-            "import" => array("arrears", "advance", "progress", "advanceupload", "arrearsupload"),
-            "report" => array("electricity", "press", "work"),
-            "reportsearch" => array("electricity", "user", "press", "work"),
-            "info" => array("teamlist", "userlist", "segmentlist"),
-            "count" => array("singleinquiries", "reconciliationinquiry", "detailsfee", "reconciliation", "charges", "press", "cut", "reset", "customer"),
-            "countsearch" => array("reconciliationinquiry", "reconciliation", "charges", "press", "cut", "reset", "customer"),
-            "jpg" => array("singlebar", "arrarscount", "cutcount", "arrarsmonth", "bar", "line", "pie"),
-            "systemlog" => array("index", "list"),
-            "poppage" => array("reminder", "powercut", "info", "modifyuser", "reminderfee", "userinfo", "cancel"),
-            "manager" => array("index", "userlist", "grouplist", "groupdel", "userdel", "build", "buildajax", "user", "group", "groupbuild", "systemlog", "useredit", "getgroup", "groupbuildajax"),
+            "captcha" => array("index"),
+            "charges" => array("charges", "withdrawn", "index", "chargeinfo", "customer", "arrears", "create", "searchfee", "cancel"),
+            "count" => array("singleinquiries", "singleinquirieslist", "reconciliationinquiry", "reconciliation", "charges", "press", "cut", "reset", "customer"),
+            "countsearch" => array("reconciliationinquiry", "reconciliationinquirylist", "reconciliation", "charges", "press", "cut", "reset", "customer"),
             "customer" => array("index", "update"),
-            "export" => array("reportpress", "reportwork", "advance", "reportcharge", "accountcheck", "reconciliation", "press", "reset", "countcut", "countcharges", "cut", "reminder"),
-
-            "message" => array("count", "list", "remove"),
+            "export" => array("reportpress",  "press", "reportwork", "advance", "reportcharge", "accountcheck", "reconciliation", "countpress", "reset", "countcut", "countcharges", "cut", "reminder"),
+            "import" => array("arrears", "advance", "editarrear", "updatemoney", "arrearslist", "progress", "advanceupload", "arrearsupload"),
+            "index" => array("index", "infobar", "logout", "message", "login", "logincheck"),
+            "info" => array("teamlist", "userlist", "segmentlist"),
+            "jpg" => array("singlebar", "arrarscount", "cutcount", "arrarsmonth", "bar", "line", "pie"),
+            "manager" => array("index", "userlist", "grouplist", "groupdel", "userdel", "build", "buildajax", "user", "group", "groupbuild", "systemlog", "changeindexline", "changepassword", "useredit", "getgroup", "groupbuildajax"),
+            "message" => array("index", "list", "count", "read", "remove"),
+            "poppage" => array("reminderfee", "reminder", "cancel", "powercut", "info", "userinfo", "modifyuser"),
+            "reminder" => array("reminder", "powerfailure", "cancel", "restoration", "receipts", "searchfee", "searchpress", "searchreset", "cut", "cancelpress", "press", "advance", "reset"),
+            "report" => array("electricity", "press", "work"),
+            "reportsearch" => array("electricity", "user", "press", "teampress", "teamwork", "work"),
+            "site" => array("index", "error", "index2"),
+            "system" => array("index", "config"),
+            "systemlog" => array("index", "list")
         );
 
         //抄表员
@@ -96,8 +97,8 @@ class Security extends Phalcon\Mvc\User\Plugin
             "index" => array("message", "index"),
             "poppage" => array("reminder", "powercut", "info", "userinfo", "reminderfee", "cancel"),
             "info" => array("teamlist", "userlist", "segmentlist"),
-            "export" => array("reportpress", "reportwork", "advance", "reportcharge", "accountcheck", "reconciliation", "press", "reset", "countcut", "countcharges", "cut", "reminder"),
-            "count" => array("press", "cut", "reset", "customer"),
+            "export" => array("reportpress", "reportwork", "advance", "reportcharge", "accountcheck", "reconciliation", "reset", "countcut", "countcharges", "cut", "reminder"),
+            "count" => array("press", "cut", "reset", "customer","singleinquirieslist"),
             "countsearch" => array("reconciliationinquiry", "reconciliation", "charges", "press", "cut", "reset", "customer"),
             "jpg" => array("singlebar", "arrarscount", "cutcount", "arrarsmonth", "bar", "line", "pie"),
             "reminder" => array("reminder", "powerfailure", "cancel", "restoration", "searchfee", "searchpress", "searchreset", "cut", "cancelpress", "press", "reset"),
@@ -110,9 +111,9 @@ class Security extends Phalcon\Mvc\User\Plugin
                 "searchreset", "cut", "cancelpress", "press", "advance", "reset", "receipts"),
             "report" => array("work", "electricity", "press"),
             "reportsearch" => array("work", "electricity", "press"),
-            "count" => array("press", "cut", "reset", "customer", "singleinquiries", "charges", "detailsfee"),
+            "count" => array("singleinquiries", "singleinquirieslist", "reconciliationinquiry", "reconciliation", "charges", "press", "cut", "reset", "customer"),
 
-            "export" => array("reportpress", "reportwork", "advance", "reportcharge", "accountcheck", "reconciliation", "press", "reset", "countcut", "countcharges", "cut", "reminder"),
+            "export" => array("reportpress", "reportwork", "advance", "reportcharge", "accountcheck", "reconciliation", "reset", "countcut", "countcharges", "cut", "reminder"),
             "import" => array("advance", "progress", "advanceupload", "arrears", "arrearsupload"),
         ));
 
@@ -121,7 +122,7 @@ class Security extends Phalcon\Mvc\User\Plugin
             "site" => array("index", "index2"),
             "index" => array("message", "index"),
             "poppage" => array("info", "cancel", "reminderfee", "powercut"),
-
+            "count" => array("customer", "reconciliationinquiry", "singleinquiries"),
             "reminder" => array("cancel", "restoration", "searchfee"),
             "info" => array("teamlist", "userlist", "segmentlist"),
             "charges" => array("charges", "arrears", "withdrawn", "index", "chargeinfo", "customer", "create", "cancel", "searchfee"),
@@ -131,9 +132,7 @@ class Security extends Phalcon\Mvc\User\Plugin
         $role_toll_leadResource = array_merge($role_tollResource, array(
             "count" => array("customer", "reconciliationinquiry", "singleinquiries"),
             "countsearch" => array("customer", "reconciliationinquiry"),
-
-            "export" => array("reportpress", "reportwork", "advance", "reportcharge", "accountcheck", "reconciliation", "press", "reset", "countcut", "countcharges", "cut", "reminder"),
-            "export" => array("reportpress", "reportwork", "advance", "reportcharge", "accountcheck", "reconciliation", "press", "reset", "countcut", "countcharges", "cut", "reminder"),
+            "export" => array("reportpress", "reportwork", "advance", "reportcharge", "accountcheck", "reconciliation", "reset", "countcut", "countcharges", "cut", "reminder"),
         ));
 
         //对账员
@@ -144,7 +143,7 @@ class Security extends Phalcon\Mvc\User\Plugin
             "poppage" => array("info", "cancel"),
             "count" => array("singleinquiries", "reconciliationinquiry", "reconciliation", "customer"),
             "countsearch" => array("reconciliationinquiry", "reconciliation", "customer"),
-            "export" => array("reportpress", "reportwork", "advance", "reportcharge", "accountcheck", "reconciliation", "press", "reset", "countcut", "countcharges", "cut", "reminder"),
+            "export" => array("reportpress", "reportwork", "advance", "reportcharge", "accountcheck", "reconciliation", "reset", "countcut", "countcharges", "cut", "reminder"),
         );
 
         //管理员
@@ -155,7 +154,7 @@ class Security extends Phalcon\Mvc\User\Plugin
             "reminder" => array("cancel", "restoration", "searchfee", "searchpress", "searchreset", "advance"),
             "countsearch" => array("reconciliationinquiry", "reconciliation", "charges", "press", "cut", "reset", "customer"),
             "count" => array("singleinquiries", "reconciliationinquiry", "reconciliation", "charges", "press", "cut", "reset", "customer"),
-            "export" => array("reportpress", "reportwork", "advance", "reportcharge", "accountcheck", "reconciliation", "press", "reset", "countcut", "countcharges", "cut", "reminder"),
+            "export" => array("reportpress", "reportwork", "advance", "reportcharge", "accountcheck", "reconciliation", "reset", "countcut", "countcharges", "cut", "reminder"),
             "systemlog" => array("index", "list"),
             "report" => array("electricity", "press", "work"),
             "poppage" => array("reminder", "powercut", "info", "modifyuser", "cancel"),
@@ -167,17 +166,21 @@ class Security extends Phalcon\Mvc\User\Plugin
         $publicResources = array(
             "index" => array("logout", "login", "logincheck"),
             "message" => array("count", "list", "remove"),
+            "manager" => array("changepassword"),
+            "countsearch" => array("reconciliationinquiry", "reconciliationinquirylist", "reconciliation", "charges", "press", "cut", "reset", "customer"),
             'site' => array('error')
         );
+
+
 
         $this->addAlcResource($acl, $adminResource);
 //            $this->addAlcResource($acl, $publicResources);
 
         //应用公共权限到所有角色
         foreach ($roles as $role) {
-            foreach ($publicResources as $resource => $actions) {
+            foreach ($publicResources as $controller => $actions) {
 //                    $acl->allow($role->getName(), $resource, '*');
-                $acl->allow($role->getName(), $resource, $actions);
+                $acl->allow($role->getName(), $controller, $actions);
             }
         }
 

@@ -115,6 +115,6 @@ class CountController extends ControllerBase
 
     public function customerAction()
     {
-
+        $this->view->startdate = Arrears::getStartDate();
     }
 }

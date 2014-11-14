@@ -3,7 +3,7 @@ Ext.onReady(function(){
     _pageSize = 50;
     /*三个动态框*/
     var teamCombox = new SettCombbox({
-        url:'/ams/Info/TeamList?ID=1&Type=1&All=0',
+        url:'/ams/Info/TeamList?ID=1&Type=1&All=1',
         fieldLabel: '管理班组',
         anchor:'95%',
         id:'team',
@@ -71,43 +71,8 @@ Ext.onReady(function(){
                 xtype: 'textfield'
             },
             items: [
-                teamCombox
-                ,{
-                    xtype: 'compositefield',
-                    fieldLabel: '停电时间',
-                    defaults:{
-                        xtype: 'datefield'
-                    },
-                    items:[
-                        {
-                            fieldLabel: '复电时间',
-                            xtype:'datetimefield',
-                            format: 'Y-m-d H:i',
-                            name:'FromData',
-                            value:new Date(new Date()-7*24*60*60*1000),
-                            width:82
-                        },{
-                            xtype: 'displayfield',
-                            //   style: 'text-align:right;width:40px;',
-                            value: '至: '
-                        },{
-                            fieldLabel: '复电时间',
-                            xtype:'datetimefield',
-                            format: 'Y-m-d H:i',
-                            value:new Date().format('Y-m-d H:i:s'),
-                            name:'ToData',
-                            width:82
-                        }]
-                }]
-        },{
-            columnWidth:.25,
-            layout: 'form',
-            defaults:{
-                xtype: 'textfield'
-            },
-            items: [
-                peopleCombox
-                ,new QuietCombox({
+                teamCombox,
+                new QuietCombox({
                     fieldLabel: '停电方式',
                     displayField:'Text',
                     valueField:'CutType',
@@ -115,7 +80,8 @@ Ext.onReady(function(){
                     fields:['Text','CutType'],
                     data   : [['全部', '2'],['是', '1'],['否', '0']],
                     anchor:'95%'
-                })]
+                })
+            ]
         },{
             columnWidth:.25,
             layout: 'form',
@@ -123,8 +89,7 @@ Ext.onReady(function(){
                 xtype: 'textfield'
             },
             items: [
-                NumberCombox
-                ,
+                peopleCombox,
                 new QuietCombox({
                     fieldLabel: '结清标志',
                     displayField:'Text',
@@ -133,7 +98,49 @@ Ext.onReady(function(){
                     fields:['Text','IsClean'],
                     data   : [['全部', '2'],['是', '1'],['否', '0']],
                     anchor:'95%'
-                })]
+                })
+            ]
+        },{
+            columnWidth:.25,
+            layout: 'form',
+            defaults:{
+                xtype: 'textfield'
+            },
+            items: [
+                NumberCombox,
+                {
+                    xtype: 'compositefield',
+                    items:[{xtype:'hidden'},{
+                        width:100,
+                        xtype:'button',
+                        text:'查询',
+                        handler:function(){
+                            infoSearch.getForm().submit({
+                                method:'GET',
+                                params: {
+                                    start: 0,
+                                    limit: _pageSize
+                                },
+                                success:function(action,msg){
+                                    var text = Ext.decode(msg.response.responseText);
+                                    if (text.success) {
+                                        listView.store.loadData(text);
+                                        Ext.apply(listView.store.baseParams, infoSearch.getForm().getValues());
+                                        return;
+                                    }
+                                },
+                                failure:function(action,msg) {
+                                    var text = Ext.decode(msg.response.responseText);
+                                    if (!text.success) {
+                                        listView.store.removeAll();
+                                        Ext.Msg.alert('提示',text.msg);return;
+                                    }
+                                }
+                            })
+                        }
+                    }
+                }
+            ]
         },{
             columnWidth:.25,
             layout: 'form',
@@ -142,37 +149,7 @@ Ext.onReady(function(){
                 xtype: 'textfield',
                 name: 'CustomerNumber',
                 anchor:'95%'
-            },{
-                xtype: 'compositefield',
-                items:[{xtype:'hidden'},{
-                    width:100,
-                    xtype:'button',
-                    text:'查询',
-                    handler:function(){
-                        infoSearch.getForm().submit({
-                            method:'GET',
-                            params: {
-                                start: 0,
-                                limit: _pageSize
-                            },
-                            success:function(action,msg){
-                                var text = Ext.decode(msg.response.responseText);
-                                if (text.success) {
-                                    listView.store.loadData(text);
-                                    Ext.apply(listView.store.baseParams, infoSearch.getForm().getValues());
-                                    return;
-                                }
-                            },
-                            failure:function(action,msg) {
-                                var text = Ext.decode(msg.response.responseText);
-                                if (!text.success) {
-                                    listView.store.removeAll();
-                                    Ext.Msg.alert('提示',text.msg);return;
-                                }
-                            }
-                        })
-                    }
-                }]
+            },]
             }]
         }]
     });
@@ -262,9 +239,11 @@ Ext.onReady(function(){
                         dataIndex: 'IsClean',
                         renderer:function(v) {
                             if (v == 1) {
-                                return "已结清";
-                            } else {
+                                return '已结清';
+                            } else if (v == 0){
                                 return "<a style='color:#804000'>未结清</a>";
+                            } else {
+                                return '预收转逾期';
                             }
                         }
                     }, {
@@ -363,8 +342,8 @@ Ext.onReady(function(){
                 hiddenName:'ResetType',
                 fields:['Text','ResetType'],
                 data   : [
-                    ['远程复电', '远程复电'],['表后开关上锁', '表后开关'],
-                            ['表前开关解锁', '表前开关解锁'],['拆表', '拆表']
+                    ['远程复电', '远程复电'],['现场复电', '现场复电'],
+                            ['电话指导客户复电', '电话指导客户复电']
                 ],
                 width: 151
             })

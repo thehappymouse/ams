@@ -5,7 +5,7 @@ Ext.onReady(function(){
         removeMask : true
     });
     var teamCombox = new SettCombbox({
-        url:'/ams/Info/TeamList?ID=1&Type=2&All=0',
+        url:'/ams/Info/TeamList?ID=1&Type=2&All=1',
         fieldLabel: '营业班组',
         anchor:'95%',
         id:'team',
@@ -45,7 +45,7 @@ Ext.onReady(function(){
                     items:[
                         {
                             xtype:'datetimefield',
-                            value:new Date(new Date()-7*24*60*60*1000),
+                            value:currentDate,
                             name:'FromData',
                             width: 140
                         },{
@@ -161,9 +161,21 @@ Ext.onReady(function(){
                 }
             })
         }
-     }]
+     },{
+            xtype:"label",
+            id:'labellID',
+            fieldLabel: '123'
+    }]
 });
-
+    listView.getStore().on("load",function(p){
+        var total = p.totalLength;
+        var money = 0;
+        Ext.each(p.data.items, function(it){
+            money += parseInt(it.data.Money);
+        })
+        var tpl  = '共计：'+total+'条，金额'+money+'元';
+        Ext.getCmp('labellID').setText(tpl);
+    })
     var infoPanel = new Ext.TabPanel({
         labelWidth: 85,
         activeTab: 0,

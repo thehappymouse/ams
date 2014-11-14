@@ -66,24 +66,19 @@ var infoSearch = new Ext.FormPanel({
             ,{
                 xtype: 'compositefield',
                 fieldLabel: '催费时间',
-                defaults:{
-                    xtype: 'datefield'
-                },
                 items:[
                     {
                         xtype:'datetimefield',
-                        format: 'Y-m-d H:i',
                         name:'FromData',
-                        value:new Date(new Date()-7*24*60*60*1000),
+                        value:new Date().format('Y-m-d'),
                         width: 140
                     },{
                         xtype: 'displayfield',
                         value: '至: '
                     },{
                         xtype:'datetimefield',
-                        format: 'Y-m-d H:i',
                         name:'ToData',
-                        value:new Date().format('Y-m-d H:i:s'),
+                        value:new Date(),
                         width: 140
                     }]
             }]
@@ -110,6 +105,12 @@ var infoSearch = new Ext.FormPanel({
                             Ext.apply(listView.store.baseParams, data);
                             listView.store.load({
                                 params : data,
+                                callback:function(v,action){
+                                    if (v.length == 0) {
+                                        listView.store.removeAll();
+                                        Ext.MessageBox.alert("提示","没有数据！");
+                                    }
+                                },
                                 add: false
                             });
                         }
@@ -183,11 +184,6 @@ var listView = new Ext.grid.EditorGridPanel(
                     width:200,
                     dataIndex: 'Address'
                 }, {
-                    header: '电费年月',
-                    sortable: true,
-                    align:"center",
-                    dataIndex: 'YearMonth'
-                }, {
                     header: '电费金额',
                     sortable: true,
                     align:"center",
@@ -232,9 +228,29 @@ var listView = new Ext.grid.EditorGridPanel(
                                 }
                             })
                         }
+                    },{
+                        id: 'htmlID',
+                        fieldLabel:''
                     }]
             })
         });
+    listView.getStore().on("load",function(p){
+        var tpl = "";
+        var data = infoSearch.getForm().getValues();
+        data.start = 0;data.limit = 5;
+        Ext.Ajax.request({
+            params:data,
+            url:'/ams/countsearch/cut',
+            success: function(v, action){
+                var re =  Ext.decode(v.responseText);
+                tpl = re.data2;
+                Ext.getCmp('htmlID').setText(tpl);
+            },
+            failure: function(){
+                Ext.getCmp('htmlID').setText(tpl);
+            }
+        })
+    })
     listView.on('cellclick', function (grid, rowIndex, columnIndex, e) {
         var record = grid.getStore().getAt(rowIndex);
         var columnName = grid.getColumnModel().getDataIndex(columnIndex);

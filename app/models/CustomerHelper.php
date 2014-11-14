@@ -123,6 +123,7 @@ class CustomerHelper extends HelperBase
             $customer = Customer::findFirst($id);
 
             $cut->CutUserName = $customer->SegUser;
+            $cut->SegUser = $customer->SegUser;
             $cut->CustomerNumber = $customer->Number;
             $cut->Segment = $customer->Segment;
             $cut->Money = $customer->Money;
@@ -165,12 +166,15 @@ class CustomerHelper extends HelperBase
 
         $team = $p->get("Team");
 
-        $seg = DataUtil::GetSegmengsByTid($team);
+        $seg = DataUtil::getTeamSegNameArray($team);
 
         $data = array();
         if (count($seg) > 0) {
             $builder = parent::getBuilder("Customer", $seg);
             $builder->andWhere("IsClean=2");
+            $builder->limit($p->get("limit"), $p->get("start"));
+
+
             $rs = $builder->getQuery()->execute();
             foreach ($rs as $r) {
                 $row = $r->dump();
@@ -179,7 +183,16 @@ class CustomerHelper extends HelperBase
                 $data[] = $row;
             }
         }
-        return $data;
+
+        //总计数据
+
+        $builder = parent::getBuilder("Customer", $seg);
+        $v = $builder->andWhere("IsClean=2")
+                ->columns("Count(*) as Count, SUM(Balance) as Balance")->getQuery()->execute()->getFirst();
+        $b = number_format($v->Balance, 2, ".", "");
+        $totalInfo = array("Count" => $v->Count, "Money" => $b);
+
+        return array($totalInfo, $data);
     }
 
     /**
@@ -276,7 +289,7 @@ class CustomerHelper extends HelperBase
                 $param["PressCount"] = $p->ReminderFeeValue;
             }
 
-            //催费次数
+            //欠费次数
             if ($p->ArrearsItemsValue && (int)$p->ArrearsItemsValue > 0) {
                 if ($p->ArrearsItems == 1) $word = ">=";
                 else $word = "<";
@@ -307,7 +320,6 @@ class CustomerHelper extends HelperBase
 
         $conditions_mini = $conditions;
         $conditions .= " limit $p->start, $p->limit";
-
 
         $results = Customer::find(array($conditions, "bind" => $param));
         foreach ($results as $rs) {

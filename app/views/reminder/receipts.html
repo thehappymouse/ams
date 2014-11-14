@@ -6,7 +6,7 @@ Ext.onReady(function(){
         removeMask : true
     });
     var teamCombox = new SettCombbox({
-        url:'/ams/Info/TeamList?ID=1&Type=1&All=0',
+        url:'/ams/Info/TeamList?ID=1&Type=1&All=1',
         fieldLabel: '管理班组',
         anchor:'95%',
         id:'searchTeam',
@@ -36,6 +36,7 @@ Ext.onReady(function(){
                     text:'查询',
                     handler:function(){
                         var number = Ext.getCmp('searchTeam').getValue();
+                        Ext.apply(listView.store.baseParams, {Team : number });
                         listView.store.removeAll();
                         listView.store.load({
                             params : {Team : number },
@@ -57,6 +58,7 @@ Ext.onReady(function(){
                 url: 'Advance',
                 root: 'data',
                 totalProperty: 'total',
+                url : "/ams/reminder/Advance",
                 baseParams: {
                     start: 0,
                     limit: _pageSize
@@ -141,24 +143,32 @@ Ext.onReady(function(){
                                     }
                                 })
                             }
+                        },{
+                            xtype:"label",
+                            id:'htmlID',
+                            fieldLabel: ''
                         }]
                 })
             });
-    listView.on("render",  function(p,e){
-
-        /* p.canCel.setHandler(function(b, e){
-         if (p.getSelectionModel().getSelections().length == 0) {
-         Ext.Msg.alert('提示','请选择用户！');
-         return;
-         }
-         var SegmentNumber = p.getSelectionModel().getSelections()[0].data.CustomerNumber;
-         freeView.store.load({
-         params : {Number : SegmentNumber },
-         add: false
-         })
-         win.show();
-         })*/
+    listView.getStore().on("load",function(p){
+        var tpl = "";
+        var number = Ext.getCmp('searchTeam').getValue();
+        Ext.Ajax.request({
+            params: {Team : number , start: 0, limit:5},
+            url:'/ams/reminder/Advance',
+            success: function(v, action){
+                var re =  Ext.decode(v.responseText);
+                var total = re.TotalInfo.Count;
+                var money = re.TotalInfo.Money;
+                tpl = '预收转逾期电费'+total+'笔，预售电费金额总计'+money+'元';
+                Ext.getCmp('htmlID').setText(tpl);
+           },
+            failure: function(){
+                Ext.getCmp('htmlID').setText(tpl);
+              }
+        })
     })
+
 
     var infoPanel = new Ext.TabPanel({
         labelWidth: 85,

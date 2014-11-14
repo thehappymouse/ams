@@ -52,6 +52,12 @@ Ext.onReady(function () {
                                 listView.store.load({
                                     params : {ID : number },
                                     scope: store,
+                                    callback:function(v,action){
+                                        if (v.length == 0) {
+                                            listView.store.removeAll();
+                                            Ext.MessageBox.alert("提示","没有数据！");
+                                        }
+                                    },
                                     add: false
                                 })
                             },
@@ -208,8 +214,10 @@ Ext.onReady(function () {
                     renderer:function(v) {
                         if (v == 1) {
                             return '已结清';
-                        } else {
+                        } else if (v == 0){
                             return "<a style='color:#804000'>未结清</a>";
+                        } else {
+                            return '预收转逾期';
                         }
                     }
                 }, {

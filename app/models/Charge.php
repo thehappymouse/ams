@@ -77,6 +77,11 @@ class Charge extends \Phalcon\Mvc\Model
      * @var string
      */
     public $Segment;
+    /**
+     *
+     * @var string
+     */
+    public $SegUser;
 
     /**
      * @var integer
@@ -123,6 +128,7 @@ class Charge extends \Phalcon\Mvc\Model
             'ManageTeam' => 'ManageTeam',
             'Segment' => 'Segment',
             'Year' => 'Year',
+            'SegUser' => 'SegUser',
             'LandlordPhone' => 'LandlordPhone',
             'RenterPhone' => 'RenterPhone'
         );

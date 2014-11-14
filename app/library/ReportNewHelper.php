@@ -9,37 +9,141 @@
  */
 class ReportNewHelper extends HelperBase
 {
-    /**
-     * 获取抄表段集合下的欠费总户数，总金额，欠费年月
-     * @param array $seg
-     * @return mixed
-     */
-    private static function getMonthArrears(array $seg, $start, $end)
+
+    private static function itemElctricity($name, $seguser, $month_arr)
     {
-        $builder = parent::getModelManager()->createBuilder();
-        $results = $builder->columns(array("SUM(Money) as Money", "count(Money) as Count", "YearMonth"))
-            ->from("Arrears")
-            ->andWhere("YearMonth between :start: and :end:")
-            ->inWhere("Segment", $seg)
-            ->groupBy("YearMonth")
-            ->getQuery()->execute(array("start" => $start, "end" => $end));
-        return $results;
+        $data = array(
+            "Name" => $name,
+            "MonthDatas" => array(),
+            //用户汇总数据   应收金额，欠费金额，应收户数，欠费户数
+            "AllData" => array("AllMoney" => 0, "ArrearMoney" => 0, "AllCount" => 0, "ArrearCount" => 0)
+        );
+
+
+        foreach ($month_arr as $key => $month) {
+            $clear = self::getSegUserMonthCharge($seguser, $month);
+
+            $results = parent::getModelManager()->createBuilder()->columns(array("SUM(Money) as Money", "SUM(House) as House"))
+                ->from("Usermoney")
+                ->inWhere("UserName", $seguser)
+                ->andWhere("Month", $key)
+                ->getQuery()->execute();
+            $udata = $results[0];
+
+            $umoney = 0;
+            $uhouse = 0;
+            if ($udata) {
+                $umoney = $udata->Money;
+                $uhouse = $udata->House;
+            }
+            $row = array(
+                "ArrearMoney" => $umoney, //欠费余额
+                "uMoney" => $umoney, //应收电费
+                "uHouse" => $umoney, //应收户数
+                "ArrearHouse" => $uhouse, //欠费户数
+                "MoneyRate" => 0,
+                "HouseRate" => 0
+            );
+
+            if ($clear) {
+
+                $row["ArrearMoney"] = $umoney - $clear->Money; //欠费余额
+                $row["ArrearHouse"] = $uhouse - $clear->Count; //欠费户数
+                $row["MoneyRate"] = number_format(null == $umoney ? 100 : 100 * $clear->Money / $umoney, 2);
+                $row["HouseRate"] = number_format(null == $umoney ? 100 : 100 * $clear->Count / $uhouse, 2);
+            }
+
+            $data["AllData"]["ArrearMoney"] += $row["ArrearMoney"];
+            $data["AllData"]["AllMoney"] += $umoney;
+            $data["AllData"]["ArrearCount"] += $row["ArrearHouse"];
+            $data["AllData"]["AllCount"] += $uhouse;
+
+            $data["MonthDatas"][$key] = $row;
+        }
+
+        if ($data["AllData"]["AllMoney"] > 0) {
+            $data["AllData"]["MoneyRate"] = 100 - $data["AllData"]["ArrearMoney"] * 100 / $data["AllData"]["AllMoney"];
+            $data["AllData"]["MoneyRate"] = number_format($data["AllData"]["MoneyRate"], 2);
+        } else {
+            $data["AllData"]["MoneyRate"] = 0;
+        }
+
+        if ($data["AllData"]["AllCount"] > 0) {
+            $data["AllData"]["CountRate"] = 100 - $data["AllData"]["ArrearCount"] * 100 / $data["AllData"]["AllCount"];
+            $data["AllData"]["CountRate"] = number_format($data["AllData"]["CountRate"], 2);
+        } else {
+            $data["AllData"]["CountRate"] = 0;
+        }
+
+        return $data;
     }
 
     /**
-     * 获取抄表段下 指定 月份 结清的户数，金额
-     * @param array $seg
+     * 班组情况下的电费回收报表
      */
-    public static function getMonthAlreadCleanArrears(array $seg, $yearmonth)
+    public static function TeamElectricity(array $param)
+    {
+        $p = new RequestParams($param);
+        $id = $p->get("Team");
+        $start = $p->get("FromData");
+        $end = $p->get("ToData");
+
+        if ($id == "-1") {
+            $teams = Team::find("Type=1");
+
+        } else {
+            $teams = Team::find($id);
+        }
+
+        $month_arr = self::getMonths($start, $end); //显示的月份
+
+        $result = array();
+
+        foreach ($teams as $user) {
+
+            $seguser = DataUtil::getTeamSegNameArray($user->ID);
+
+            $result[] = self::itemElctricity($user->Name, $seguser, $month_arr);
+        }
+        return $result;
+    }
+
+    public static function getMonths($start, $end)
+    {
+
+        $year1 = substr($start, 0, 4);
+        $year2 = substr($end, 0, 4);
+
+        $m1 = (int)substr($start, 4, 2);
+        $m2 = (int)substr($end, 4, 2);
+
+        $year = $year2 - $year1;
+        if ($m2 > $m1) {
+            $month = $m2 - $m1;
+        }
+
+        $month = $year * 12 + $month;
+
+        $arr = array();
+        for ($i = 0; $i <= $month; $i++) {
+            $key = date("Ym", mktime(0, 0, 0, $m1 + $i, 1, $year1));
+            $arr[$key][] = date("Y-m-d H:i:s", mktime(0, 0, 0, $m1 + $i, 1, $year1));
+            $arr[$key][] = date("Y-m-d H:i:s", mktime(23, 59, 59, $m1 + $i + 1, null, $year1));
+        }
+
+        return $arr;
+    }
+
+    private static function getSegUserMonthCharge($seg, $month)
     {
         $builder = parent::getModelManager()->createBuilder();
-        $results = $builder->columns(array("SUM(Money) as Money", "count(Money) as Count", "YearMonth"))
-            ->from("Arrears")
-            ->andWhere("IsClean=1")
-            ->andWhere("YearMonth=\"$yearmonth\"")
-            ->inWhere("Segment", $seg)
-            ->getQuery()->execute();
-        return $results[0];
+        $results = $builder->columns(array("SUM(Money) as Money", "Count( DISTINCT CustomerNumber) AS Count", "SegUser"))
+            ->from("Charge")
+            ->andWhere("Time BETWEEN :start: and :end:")
+            ->inWhere("SegUser", $seg)
+            ->groupBy("SegUser")
+            ->getQuery()->execute(array("start" => $month[0], "end" => $month[1]));
+        return $results->getFirst();
     }
 
     /**
@@ -49,151 +153,25 @@ class ReportNewHelper extends HelperBase
     {
         $p = new RequestParams($param);
         $id = $p->get("Team");
-
-        $pageStart = (int)$p->get("start");
-        $limit = 5;
-
-        $result = array();
-        $hu_datas = array();
-
-        if ($id == -1) {
-            $sql = "SELECT  * from User WHERE Role = " . ROLE_MATER . " AND TeamID in (SELECT ID FROM Team WHERE Type = 1)";
-            $u = new User();
-            $users = new Phalcon\Mvc\Model\Resultset\Simple(null, $u, $u->getReadConnection()->query($sql));
-        } else {
-            $users = User::find("TeamID=$id AND Role = " . ROLE_MATER);
-        }
         $start = $p->get("FromData");
         $end = $p->get("ToData");
 
-        $total = count($users);
+        $month_arr = self::getMonths($start, $end); //显示的月份
 
-        //应收金额，欠费金额，应收户数，欠费户数
-        $alldata = array("Money" => 0, "ArrearMoney" => 0, "Count" => 0, "ArrearCount" => 0);
 
-        $usercount = $pageStart;
-        $index = 0;
+        $result = array();
+
+        $condation = "Role = " . ROLE_MATER;
+        if ($id != -1) {
+            $condation .= " AND TeamID=$id";
+        }
+        $users = User::find($condation);
         foreach ($users as $user) {
 
-            if (++$index <= $pageStart) continue;
-            if (++$usercount - $pageStart > $limit) break;
 
-            $data = array("Name" => $user->Name);
-            $data["sort"] = $usercount;
-            $data2 = array("Name" => $user->Name);
-            $data2["sort"] = $usercount;
-
-            $flag = false;
-            $seg = DataUtil::GetSegmentsByUid($user->ID);
-            if (count($seg) == 0) $seg = array("0");
-            $results = self::getMonthArrears($seg, $start, $end);
-            if (count($results) > 0) {
-                $flag = true;
-                foreach ($results as $rs) {
-                    $clear = self::getMonthAlreadCleanArrears($seg, $rs->YearMonth);
-
-                    //金额回收率统计
-                    $data["YearMonth"] = $rs->YearMonth;
-
-                    $data["Action"] = "欠费余额";
-                    $data["Value"] = $rs->Money - $clear->Money;
-                    $result[] = $data;
-                    $alldata["ArrearMoney"] += $data["Value"];
-
-                    $data["Action"] = "应收电费";
-                    $data["Value"] = $rs->Money;
-                    $result[] = $data;
-                    $alldata["Money"] += (float)$rs->Money;
-
-                    $data["Action"] = "回收率(%)";
-                    $rate = 100 * $clear->Money / $rs->Money;
-                    $data["Value"] = number_format($rate, 2);
-                    $result[] = $data;
-
-                    //户数回收率统计
-                    $data2["YearMonth"] = $rs->YearMonth;
-
-                    $data2["Action"] = "欠费户数";
-                    $data2["Value"] = $rs->Count - $clear->Count;
-                    $alldata["ArrearCount"] += $data2["Value"];
-                    $hu_datas[] = $data2;
-
-
-                    $data2["Action"] = "应收户数";
-                    $data2["Value"] = $rs->Count;
-                    $hu_datas[] = $data2;
-                    $alldata["Count"] += (int)$rs->Count;
-
-                    $data2["Action"] = "回收率(%)";
-                    $rate = 100 * $clear->Count / $rs->Count;
-                    $data2["Value"] = number_format($rate, 2);
-                    $hu_datas[] = $data2;
-                }
-            } else {
-                if (count($result) < $total) {
-                    //金额回收率统计
-                    $data["Action"] = "欠费余额";
-                    $data["sort"] = $usercount;
-                    $result[] = $data;
-
-                    $data["Action"] = "应收电费";
-                    $result[] = $data;
-
-                    $data["Action"] = "回收率(%)";
-                    $result[] = $data;
-
-                    //户数回收率统计
-                    $data2["Action"] = "欠费户数";
-                    $data["sort"] = $usercount;
-                    $hu_datas[] = $data2;
-
-                    $data2["Action"] = "应收户数";
-                    $hu_datas[] = $data2;
-
-                    $data2["Action"] = "回收率(%)";
-                    $hu_datas[] = $data2;
-                }
-            }
-            if ($flag) {
-                //汇总
-                $data["Action"] = "欠费余额";
-                $data["YearMonth"] = "汇总";
-                $data["Value"] = $alldata["ArrearMoney"];
-                $result[] = $data;
-
-
-                $data["Action"] = "应收电费";
-                $data["YearMonth"] = "汇总";
-                $data["Value"] = $alldata["Money"];
-                $result[] = $data;
-
-                $data["Action"] = "回收率(%)";
-                $data["YearMonth"] = "汇总";
-                $rate = 100 - 100 * $alldata["ArrearMoney"] / $alldata["Money"];
-                $data["Value"] = number_format($rate, 2);
-                $result[] = $data;
-
-                //户数汇总
-                $data["Action"] = "欠费户数";
-                $data["YearMonth"] = "汇总";
-                $data["Value"] = $alldata["ArrearCount"];
-                $hu_datas[] = $data;
-
-
-                $data["Action"] = "应收户数";
-                $data["YearMonth"] = "汇总";
-                $data["Value"] = $alldata["Count"];
-                $hu_datas[] = $data;
-
-                $data["Action"] = "回收率(%)";
-                $data["YearMonth"] = "汇总";
-                $rate = 100 - 100 * $alldata["ArrearCount"] / $alldata["Count"];
-                $data["Value"] = number_format($rate, 2);
-                $hu_datas[] = $data;
-            }
+            $result[] = self::itemElctricity($user->Name, array($user->Name), $month_arr);
         }
-
-        return array($hu_datas, $result, $total);
+        return array($result);
     }
 
     public static function getFeeStatementsBySeg($seg, $name, $start = null, $end = null)
@@ -255,6 +233,9 @@ class ReportNewHelper extends HelperBase
         $p = new RequestParams($params);
 
         $tid = $p->get("Team");
+        if (!$tid) {
+            return array(0, array());
+        }
 
         if ($tid == -1) {
             $mTeams = Team::find("Type=1");
@@ -262,12 +243,12 @@ class ReportNewHelper extends HelperBase
             $mTeams = Team::find($tid);
         }
 
-        $start = $p->get("1FromData");
-        $end = $p->get("1ToData");
+        $start = $p->get("FromData");
+        $end = $p->get("ToData");
         $userdata = array();
 
         $pagestart = (int)$p->get("start");
-        $index = $start + 1;
+        $index = $pagestart + 1;
 
         $tids = array();
         //抄表员统计情况
@@ -278,15 +259,14 @@ class ReportNewHelper extends HelperBase
 
         $mUsers = User::find("TeamID IN($tids) AND Role = " . ROLE_MATER . " limit $pagestart,5");
 
+
         foreach ($mUsers as $mU) {
-            $seg = DataUtil::GetSegmentsByUid($mU->ID);
-            if (count($seg) > 0) {
-                list($uData, $a) = self::getFeeStatementsBySeg($seg, $mU->Name, $start, $end);
-                $data = array("Name" => $mU->Name, "sort" => $index++);
+            $seg = DataUtil::getSegNameArray($mU->ID);
 
-                if (!isset($uData["Data"])) continue;
-                //|| count($uData["Data"]) == 0) continue;
+            list($uData, $a) = self::getFeeStatementsBySeg($seg, $mU->Name, $start, $end);
+            $data = array("Name" => $mU->Name, "sort" => $index++);
 
+            if (isset($uData["Data"])) {
                 foreach ($uData["Data"] as $d) {
                     $data["Action"] = "未催费金额";
                     $data["Value"] = $d["NoPressMoney"];
@@ -302,8 +282,9 @@ class ReportNewHelper extends HelperBase
                     $data["Value"] = $d["Rate"];
                     $userdata[] = $data;
                 }
+
+
             } else {
-                $data = array("Name" => $mU->Name, "sort" => $index++);
                 $data["Action"] = "未催费金额";
                 $data["Value"] = "";
                 $data["YearMonth"] = "";
@@ -417,7 +398,7 @@ class ReportNewHelper extends HelperBase
         //班组情况统计
         foreach ($mTeams as $mt) {
 
-            $seg = DataUtil::GetSegmengsByTid($mt->ID);
+            $seg = DataUtil::getTeamSegNameArray($mt->ID);
 
             if (count($seg) == 0) continue;
 
@@ -430,7 +411,7 @@ class ReportNewHelper extends HelperBase
         foreach ($mTeams as $mt) {
             $mUsers = User::find("TeamID = $mt->ID AND Role=" . ROLE_MATER);
             foreach ($mUsers as $mU) {
-                $seg = DataUtil::GetSegmentsByUid($mU->ID);
+                $seg = DataUtil::getSegNameArray($mU->ID);
                 if (count($seg) > 0) {
                     $team = self::dayReportBySeg($seg, $start, $end);
                 }

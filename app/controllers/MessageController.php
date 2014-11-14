@@ -24,7 +24,11 @@ class MessageController extends ControllerBase
         $md = Message::find($conditions);
         $data = array();
         foreach($md as $m){
-            $data[] = $m->dump();
+            $row = $m->dump();
+
+            $row["Content"] = "[$m->RefCustomer] $m->Content";
+
+            $data[] = $row;
             $m->IsRead = 1;
             $m->save();
         }

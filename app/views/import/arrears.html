@@ -1,6 +1,9 @@
 <script>
 Ext.onReady(function () {
-
+    var msgTip = new Ext.LoadMask(Ext.getBody(),{
+        msg:'文件正在导入中',
+        removeMask : true
+    });
     var infoSearch = new Ext.FormPanel({
         title: '每月欠费数据导入',
         fileUpload: true,
@@ -41,13 +44,15 @@ Ext.onReady(function () {
                 style: 'margin-left:190px',
                 text: '导入',
                 handler: function () {
+                    msgTip.show();
                     infoSearch.getForm().submit({
                         success: function () {
-                            alert("上传成功");
+                            msgTip.hide();
+                            Ext.MessageBox.alert('提示', "上传成功");
                         },
                         failure: function (a, b) {
-                            console.log(a);
-                            alert(b.result.msg);
+                            msgTip.hide();
+                            Ext.MessageBox.alert('提示', b.result.msg);
                         }
                     })
                 }

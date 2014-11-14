@@ -10,7 +10,7 @@ class SiteController extends ControllerBase
         $uData = array();
         $data = array();
         foreach ($users as $user) {
-            $seg = DataUtil::GetSegmentsByUid($user->ID);
+            $seg = DataUtil::getSegNameArray($user->ID);
             if (count($seg) == 0) {
                 $uData[$user->Name] = 0;
                 continue;
@@ -37,7 +37,7 @@ class SiteController extends ControllerBase
 
     public function getArrarsCount()
     {
-        $seg = DataUtil::GetSegmentsByUid($this->loginUser["ID"]);
+        $seg = DataUtil::getSegNameArray($this->loginUser["ID"]);
 
         $data = array();
         for ($i = 0; $i < 4; $i++) {
@@ -69,7 +69,7 @@ class SiteController extends ControllerBase
 
     public function getCut()
     {
-        $seg = DataUtil::GetSegmentsByUid($this->loginUser["ID"]);
+        $seg = DataUtil::getSegNameArray($this->loginUser["ID"]);
 
         $data = array(
             array("season" => "已停电", "total" => 0),
@@ -98,7 +98,7 @@ class SiteController extends ControllerBase
     public function getArrarsMonth()
     {
 
-        $seg = DataUtil::GetSegmentsByUid($this->loginUser["ID"]);
+        $seg = DataUtil::getSegNameArray($this->loginUser["ID"]);
         $rs = array();
         if ($seg) {
             $builder = $this->getBuilder("Arrears", $seg);
@@ -142,7 +142,7 @@ class SiteController extends ControllerBase
     {
         $data = array("CustomerCount" => 0, "ArrearCount" => 0, "Money" => 0, "Rate" => 0, "CountRate" => 0, "UserIndex" => 0);
 
-        $seg = DataUtil::GetSegmentsByUid($this->loginUser["ID"]);
+        $seg = DataUtil::getSegNameArray($this->loginUser["ID"]);
         $data = array("Rate" => 0, "CountRate" => 0, "UserIndex" => 0, "CustomerCount" => 0, "ArrearCount" => 0, "Money" => 0);
 
         $press = array("Rate" => 0, "NoPressCustomer" => 0, "NoPressMoney" => 0);
@@ -154,10 +154,9 @@ class SiteController extends ControllerBase
             $data = array_merge($data, (array)$result);
 
             $builder = $this->getBuilder("Arrears", $seg);
-            $builder->columns("COUNT( DISTINCT CustomerNumber) as count, SUM(Money) as Money");
+            $builder->columns("COUNT( DISTINCT CustomerNumber) as Count, SUM(Money) as Money");
             $builder->andWhere("IsClean = 1");
             $r = $builder->getQuery()->execute()->getFirst();
-
             $data["Rate"] = number_format((100 * $r->Money / $data["Money"]), 2, ".", "") . "%";
             $data["CountRate"] = number_format((100 * $r->Count / $data["CustomerCount"]), 2, ".", "") . "%";
 
@@ -187,7 +186,7 @@ class SiteController extends ControllerBase
         $this->view->arrcount = $this->getArrarsCount();
         $this->view->sig = $this->getSingleBar();
         $this->view->yy = $this->getArrarsMonth();
-
+        $this->view->lineshow = $this->loginUser["Role"] == ROLE_ADMIN;
         $this->view->yesterday = $yestarday;
     }
 

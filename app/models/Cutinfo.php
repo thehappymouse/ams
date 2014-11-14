@@ -29,6 +29,12 @@ class Cutinfo extends \Phalcon\Mvc\Model
 
     /**
      *
+     * @var string
+     */
+    public $SegUser;
+
+    /**
+     *
      * @var integer
      */
     public $CutUser;
@@ -113,6 +119,7 @@ class Cutinfo extends \Phalcon\Mvc\Model
             'Segment' => 'Segment',
             'CustomerNumber' => 'CustomerNumber',
             'YearMonth' => 'YearMonth',
+            'SegUser' => 'SegUser',
             'Money' => 'Money',
             'ResetPhone' => 'ResetPhone'
         );

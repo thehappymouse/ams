@@ -66,11 +66,11 @@ class ExportController extends ControllerBase
             $yearRow[$year] = $row - 1;
         }
 
+
         $allInfoRow = $row;
         $objActSheet->setCellValue("A" . $row++, "汇总");
         $indexRow = $row;
         $objActSheet->setCellValue("A" . $row++, "排名");
-
         $col = ord("B");
         $index = 0;
         foreach ($data as $user) {
@@ -87,10 +87,14 @@ class ExportController extends ControllerBase
             $objActSheet->setCellValue($one . "2", "催费完成率");
             $objActSheet->setCellValue($two . "2", "未催费户数");
             $objActSheet->setCellValue($end . "2", "未催费金额");
+
             if (isset($user["Data"])) {
                 $userinfo = $user["Data"];
+
                 foreach ($userinfo as $yearmonth => $info) {
+
                     if (isset($yearRow[$yearmonth])) {
+
                         $row = $yearRow[$yearmonth];
                         $objActSheet->setCellValue($one . $row, $info["Rate"]);
                         $objActSheet->setCellValue($two . $row, $info["NoPressCount"]);
@@ -235,8 +239,7 @@ class ExportController extends ControllerBase
         $objPHPExcel->setActiveSheetIndex(0);
         $objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel2007');
 
-        $filename = "xls/aa.xls";
-//        $filename = "xls/每日工作报表.xls";
+        $filename = "xls/每日工作报表.xls";
         $objWriter->save($filename);
         $this->ajax->flushOk("/ams/public/" . $filename);
     }

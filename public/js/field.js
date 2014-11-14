@@ -5,7 +5,7 @@ var ArrarsinfoFields = [
     'CustomerNumber',
     'CustomerName',
     'Address',
-    'YearMonth',
+    'YearMonth','SegUser',
     'Money', 'IsSpecial',
     'IsClean', 'IsCut',
     'PressCount', 'CutCount'

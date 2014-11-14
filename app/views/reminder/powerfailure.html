@@ -4,7 +4,7 @@ Ext.onReady(function(){
     _pageSize = 50;
     /*三个动态框*/
     var teamCombox = new SettCombbox({
-        url:'/ams/Info/TeamList?ID=1&Type=1&All=0',
+        url:'/ams/Info/TeamList?ID=1&Type=1&All=1',
         fieldLabel: '管理班组',
         anchor:'95%',
         id:'team',
@@ -81,7 +81,6 @@ Ext.onReady(function(){
                     },
                     items:[
                         new Ext.form.DateField({
-                            renderTo: document.body,
                             plugins:'monthPickerPlugin',
                             name:'FromData',
                             width:82,
@@ -92,10 +91,9 @@ Ext.onReady(function(){
                             //   style: 'text-align:right;width:40px;',
                             value: '至: '
                         },new Ext.form.DateField({
-                            renderTo: document.body,
                             plugins:'monthPickerPlugin',
                             name:'ToData',
-                            value:new Date().format('Ym'),
+                            value:new Date(new Date().setMonth(new Date().getMonth() - 2)).format('Ym'),
                             width:82,
                             format: 'Ym'
                         })]
@@ -137,7 +135,7 @@ Ext.onReady(function(){
                             valueField:'Arrears',
                             hiddenName:'Arrears',
                             fields:['Text','Arrears'],
-                            data   : [['≥', '2'],['<', '0'],['=', '1']]
+                            data   : [['≥', '1'],['<', '0']]
                         }),{
                             name: 'ArrearsValue',
                             xtype: 'textfield',
@@ -153,7 +151,7 @@ Ext.onReady(function(){
                             valueField:'ArrearsItems',
                             hiddenName:'ArrearsItems',
                             fields:['Text','ArrearsItems'],
-                            data   : [['≥', '2'],['<', '0'],['=', '1']]
+                            data   : [['≥', '1'],['<', '0']]
                         }),{
                             name: 'ArrearsItemsValue',
                             xtype: 'textfield',
@@ -188,10 +186,11 @@ Ext.onReady(function(){
                             valueField:'ReminderFee',
                             hiddenName:'ReminderFee',
                             fields:['Text','ReminderFee'],
-                            data   : [['≥', '2'],['<', '0'],['=', '1']]
+                            data   : [['≥', '1'],['<', '0']]
                         }),{
                             name: 'ReminderFeeValue',
                             xtype: 'textfield',
+                            value: 1,
                             width:132
                         }],
                     anchor:'95%'
@@ -214,7 +213,7 @@ Ext.onReady(function(){
                             valueField:'PowerOutages',
                             hiddenName:'PowerOutages',
                             fields:['Text','PowerOutages'],
-                            data   : [['≥', '2'],['<', '0'],['=', '1']]
+                            data   : [['≥', '1'],['<', '0']]
                         }),{
                             name: 'PowerOutagesValue',
                             xtype: 'textfield',
@@ -360,9 +359,11 @@ Ext.onReady(function(){
                         dataIndex: 'IsClean',
                         renderer:function(v) {
                             if (v == 1) {
-                                return "已结清";
-                            } else {
+                                return '已结清';
+                            } else if (v == 0){
                                 return "<a style='color:#804000'>未结清</a>";
+                            } else {
+                                return '预收转逾期';
                             }
                         }
                     }, {

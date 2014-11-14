@@ -66,14 +66,11 @@ var infoSearch = new Ext.FormPanel({
             ,{
                 xtype: 'compositefield',
                 fieldLabel: '收费时间',
-                defaults:{
-                    xtype: 'datefield'
-                },
                 items:[
                     {
                         xtype:'datetimefield',
                         name:'FromData',
-                        value:new Date(new Date()-7*24*60*60*1000),
+                        value:new Date().format('Y-m-d'),
                         width: 140
                     },{
                         xtype: 'displayfield',
@@ -81,9 +78,8 @@ var infoSearch = new Ext.FormPanel({
                         value: '至: '
                     },{
                         xtype:'datetimefield',
-                        format: 'Y-m-d H:i',
                         name:'ToData',
-                        value:new Date().format('Y-m-d H:i:s'),
+                        value: new Date(),
                         width: 140
                     }]
             }]
@@ -209,9 +205,11 @@ var listView = new Ext.grid.EditorGridPanel(
                     dataIndex: 'IsClean',
                     renderer:function(v) {
                         if (v == 1) {
-                            return '是';
+                            return '已结清';
+                        } else if (v == 0){
+                            return "<a style='color:#804000'>未结清</a>";
                         } else {
-                            return '否';
+                            return '预收转逾期';
                         }
                     }
                 }, {
@@ -254,9 +252,29 @@ var listView = new Ext.grid.EditorGridPanel(
                                 }
                             })
                         }
+                    },{
+                        id: 'htmlID',
+                        fieldLabel:''
                     }]
             })
         });
+    listView.getStore().on("load",function(p){
+        var tpl = "";
+        var data = infoSearch.getForm().getValues();
+        data.start = 0;data.limit = 5;
+        Ext.Ajax.request({
+            params:data,
+            url:'/ams/countsearch/reset',
+            success: function(v, action){
+                var re =  Ext.decode(v.responseText);
+                tpl = re.data2;
+                Ext.getCmp('htmlID').setText(tpl);
+            },
+            failure: function(){
+                document.getElementById("htmlID").parentNode.previousSibling.innerHTML = tpl;
+            }
+        })
+    })
     listView.on('cellclick', function (grid, rowIndex, columnIndex, e) {
         var record = grid.getStore().getAt(rowIndex);
         var columnName = grid.getColumnModel().getDataIndex(columnIndex);

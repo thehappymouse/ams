@@ -44,26 +44,23 @@ Ext.onReady(function(){
                     defaults:{
                         xtype: 'datefield'
                     },
-                    items:[
-                        new Ext.form.DateField({
-                            renderTo: document.body,
-                            plugins:'monthPickerPlugin',
-                            name:'FromData',
-                            width:100,
-                            value:new Date(new Date()-7*24*60*60*1000),
-                            format: 'Y-m-d'
-                        }),{
-                            xtype: 'displayfield',
-                            //   style: 'text-align:right;width:40px;',
-                            value: '至: '
-                        },new Ext.form.DateField({
-                            renderTo: document.body,
-                            plugins:'monthPickerPlugin',
-                            name:'ToData',
-                            width:100,
-                            value:new Date().format('Y-m-d'),
-                            format: 'Y-m-d'
-                        })]
+                    items:[{
+                        xtype: 'datefield',
+                        name:'FromData',
+                        width:100,
+                        value:new Date(new Date()-7*24*60*60*1000),
+                        format: 'Y-m-d'
+                    },{
+                        xtype: 'displayfield',
+                        //   style: 'text-align:right;width:40px;',
+                        value: '至: '
+                    },{
+                        xtype: 'datefield',
+                        name:'ToData',
+                        width:100,
+                        value: new Date(),
+                        format: 'Y-m-d'
+                    }]
                 }
             ]
         },{
@@ -112,7 +109,6 @@ Ext.onReady(function(){
         url: '/ams/reportsearch/work/',
         reader: new Ext.data.JsonReader({
             root: 'data'
-//            root: 'rows'
         }, SaleRecord)
     });
 
@@ -121,7 +117,6 @@ Ext.onReady(function(){
         url: '/ams/reportsearch/teamwork/',
         reader: new Ext.data.JsonReader({
             root: 'data'
-//            root: 'rows'
         }, SaleRecord)
     });
 
@@ -235,7 +230,7 @@ var peopleGrid = new Ext.grid.PivotGrid({
     var peoplePanel = new Ext.TabPanel({
         // labelWidth: 85,
         activeTab: 0,
-        // height:170,
+        height:500,
         plain:true,
         style: 'margin-top:15px',
         items:[
@@ -260,7 +255,7 @@ var peopleGrid = new Ext.grid.PivotGrid({
     });*/
     var allPanel = new Ext.Panel({
         region: 'center',
-        //autoScroll: true,
+        autoScroll: true,
         bodyStyle: "padding:20px;",
         items: [
             searchPanel,

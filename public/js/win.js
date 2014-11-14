@@ -74,9 +74,11 @@ freeView = new Ext.grid.GridPanel(
                 dataIndex: 'IsClean',
                 renderer:function(v) {
                     if (v == 1) {
-                        return "已结清";
-                    } else {
+                        return '已结清';
+                    } else if (v == 0){
                         return "<a style='color:#804000'>未结清</a>";
+                    } else {
+                        return '预收转逾期';
                     }
                 }
             }, {
@@ -260,12 +262,13 @@ arrarsPanel = new Ext.FormPanel({
         ]
     },{
         xtype: 'compositefield',
-        items:[{
-            fieldLabel: '备注',
-            name: 'Desc',
-            xtype:'textfield',
-            width:380
-        },{
+        items:[
+            new Ext.form.TextArea({
+                name: 'Desc',
+                width:380,
+                height:50,
+                fieldLabel:'备注'
+        }),{
             width:90,
             xtype:'button',
             text:'修改',
@@ -352,27 +355,18 @@ cuifeiView.on('cellclick', function (grid, rowIndex, columnIndex, e) {
 })
 lookImg = function(v)
 {
-    var tpl = "<img src='/ams"+v+"' />";
-    var imgPanel = new Ext.Panel({
-        region: 'center',
-        autoScroll: true,
-        bodyStyle: "padding:10px;",
-        items: [
-            {
-                html:tpl
-            }
-        ]
-    })
+    var tpl = "<img width='400'  src='/ams"+v+"' />";
 
     var imgWin = new Ext.Window({
-        layout:'fit',
-        height:400,
-        width:400,
         title:'催费照片',
-        autoScroll:true,
+        autoHeight:true,
+        width:400,
         closeAction:'hide',
-        plain: true,
-        items:[imgPanel],
+       // plain: true,
+        autoScroll: true,
+        items:[{
+            html:tpl
+        }],
         buttons: [{
             text: '关闭',
             handler: function(){
@@ -442,7 +436,7 @@ tingdianView = new Ext.grid.GridPanel( {
  arrarsTab = new Ext.TabPanel({
     labelWidth: 85,
     activeTab: 0,
-    height:175,
+    height:200,
     plain:true,
     defaults:{autoScroll: true},
     items:[

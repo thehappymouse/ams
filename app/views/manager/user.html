@@ -1,6 +1,6 @@
 <script type="text/javascript">
     Ext.onReady(function(){
-
+        _pageSize = 50;
         del = function (value) {
             Ext.Msg.confirm('提示','是否删除此人物',function(btn){
                 if(btn == 'no') {
@@ -32,7 +32,7 @@
                     autoLoad:true,
                     baseParams: {
                         start: 0,
-                        limit: 5
+                        limit: _pageSize
                     },
                     fields: ['ID','Name','TeamName','RoleName']
                 });
@@ -73,7 +73,7 @@
                             }
                         }],
                     bbar: new Ext.PagingToolbar({
-                        pageSize: 5,
+                        pageSize: _pageSize,
                         store: store,
                         displayMsg: "显示{0}条到{1}条记录，总共{2}条记录",
                         emptyMsg: "没有数据记录",

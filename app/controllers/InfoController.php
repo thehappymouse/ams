@@ -76,6 +76,7 @@ class InfoController extends ControllerBase
     {
         $uid = $this->request->get("ID");
 
+
         if(($tid = User::IsAllUsers($uid))){
 
             $seg = DataUtil::GetSegmentDataByTid($tid);
@@ -87,7 +88,6 @@ class InfoController extends ControllerBase
 //        $all = array("ID" => "-1", "Name" => "全部");
         $all = array("ID" => "全部", "Name" => "全部");
         $arr[] = $all;
-
         foreach ($seg as $s) {
             $a["ID"]  = $s["Number"];
             $a["Name"] = $s["Number"];

@@ -29,6 +29,7 @@ Ext.onReady(function(){
     //监听store加载
     function comboxLoad(aCombox, bCombox, url)
     {
+
         aCombox.store.on('load',function(){
             bCombox.store.load({
                 url: url,
@@ -82,7 +83,6 @@ Ext.onReady(function(){
                     },
                     items:[
                     new Ext.form.DateField({
-                        renderTo: document.body,
                         plugins:'monthPickerPlugin',
                         name:'FromData',
                         value:startdate,
@@ -92,7 +92,6 @@ Ext.onReady(function(){
                         xtype: 'displayfield',
                         value: '至: '
                     },new Ext.form.DateField({
-                            renderTo: document.body,
                             plugins:'monthPickerPlugin',
                             name:'ToData',
                             width:82,
@@ -362,10 +361,12 @@ Ext.onReady(function(){
                         align:"center",
                         dataIndex: 'IsClean',
                         renderer:function(v) {
-                            if(v ==1) {
-                                return "已结清";
-                            } else {
+                            if (v == 1) {
+                                return '已结清';
+                            } else if (v == 0){
                                 return "<a style='color:#804000'>未结清</a>";
+                            } else {
+                                return '预收转逾期';
                             }
                         }
                     }, {

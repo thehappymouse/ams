@@ -52,6 +52,12 @@ Ext.onReady(function(){
                         Ext.apply(listView.store.baseParams, infoSearch.getForm().getValues());
                         listView.store.load({
                             params : data,
+                            callback:function(v,action){
+                                if (v.length == 0) {
+                                    listView.store.removeAll();
+                                    Ext.MessageBox.alert("提示","没有数据！");
+                                }
+                            },
                             add: false
                         });
                     }

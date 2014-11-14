@@ -100,6 +100,10 @@ spliceArr = function  (v)
     }
     return tempArray;
 }
+arrearsMoney = 0;
+
+var myDate = new Date();
+currentDate = myDate.getFullYear()+"-"+(parseInt(myDate.getMonth()+1) < 10 ? "0"+parseInt(myDate.getMonth()+1) : parseInt(myDate.getMonth()+1))+"-"+(myDate.getDate() < 10 ?"0"+myDate.getDate() : myDate.getDate())+" 00:00:00";
 
 
 
