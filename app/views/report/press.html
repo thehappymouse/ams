@@ -116,8 +116,8 @@ Ext.onReady(function(){
     var chaobiaoPanel = new Ext.grid.PivotGrid({
         store     : myStore,
         aggregator: 'sum',
-        height    : 200,
         title     : '抄表员',
+        autoHeight:true,
         measure   : 'Value',
         viewConfig: {
             autoFill:true,
@@ -219,8 +219,8 @@ Ext.onReady(function(){
     var groupPanel = new Ext.grid.PivotGrid({
         store     : hr_Store,
         aggregator: 'sum',
-        height    : 200,
         title     : '班组情况',
+        autoHeight:true,
         measure   : 'Value',
         viewConfig: {
             autoFill:true,
@@ -318,7 +318,6 @@ Ext.onReady(function(){
     var chaobiaoTab = new Ext.TabPanel({
         activeTab: 0,
         plain:true,
-        height:500,
         autoWidth:true,
         style: 'margin-top:15px',
         items:[

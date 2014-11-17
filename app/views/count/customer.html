@@ -260,6 +260,7 @@ var infoSearch = new Ext.FormPanel({
                             var text = Ext.decode(msg.response.responseText);
                             if (!text.success) {
                                 listView.store.removeAll();
+                                Ext.getCmp('bbar').updateInfo();
                                 Ext.Msg.alert('提示',text.msg);return;
                             }
                         }
@@ -429,6 +430,7 @@ var listView = new Ext.grid.EditorGridPanel(
             bbar: new Ext.PagingToolbar({
                 pageSize: _pageSize,
                 store: store,
+                id: 'bbar',
                 displayMsg: "显示{0}条到{1}条记录，总共{2}条记录",
                 emptyMsg: "没有数据记录",
                 displayInfo: true,

@@ -78,7 +78,10 @@ Ext.onReady(function(){
                     valueField:'CutType',
                     hiddenName:'CutType',
                     fields:['Text','CutType'],
-                    data   : [['全部', '2'],['是', '1'],['否', '0']],
+                    data   : [
+                        ['远程停电', '远程停电'],['表后开关上锁', '表后开关'],
+                        ['表前开关', '表前开关'] ,['表前开关上锁', '表前开关上锁'],['拆表', '拆表']
+                    ],
                     anchor:'95%'
                 })
             ]
@@ -107,8 +110,8 @@ Ext.onReady(function(){
                 xtype: 'textfield'
             },
             items: [
-                NumberCombox,
-                {
+                NumberCombox
+                ,{
                     xtype: 'compositefield',
                     items:[{xtype:'hidden'},{
                         width:100,
@@ -133,12 +136,13 @@ Ext.onReady(function(){
                                     var text = Ext.decode(msg.response.responseText);
                                     if (!text.success) {
                                         listView.store.removeAll();
+                                        Ext.getCmp('bbar').updateInfo();
                                         Ext.Msg.alert('提示',text.msg);return;
                                     }
                                 }
                             })
                         }
-                    }
+                    }]
                 }
             ]
         },{
@@ -149,7 +153,6 @@ Ext.onReady(function(){
                 xtype: 'textfield',
                 name: 'CustomerNumber',
                 anchor:'95%'
-            },]
             }]
         }]
     });
@@ -278,6 +281,7 @@ Ext.onReady(function(){
                 bbar: new Ext.PagingToolbar({
                     pageSize: _pageSize,
                     store: store,
+                    id: 'bbar',
                     displayMsg: "显示{0}条到{1}条记录，总共{2}条记录",
                     emptyMsg: "没有数据记录",
                     displayInfo: true
@@ -306,24 +310,6 @@ Ext.onReady(function(){
             Ext.getCmp('Phone').setValue(phone);
         }
     })
-    listView.on("render",  function(p,e){
-
-        /* p.canCel.setHandler(function(b, e){
-         if (p.getSelectionModel().getSelections().length == 0) {
-         Ext.Msg.alert('提示','请选择用户！');
-         return;
-         }
-         var SegmentNumber = p.getSelectionModel().getSelections()[0].data.CustomerNumber;
-         freeView.store.load({
-         params : {Number : SegmentNumber },
-         add: false
-         })
-         })*/
-    })
-
-
-
-
     var submitForm = new Ext.FormPanel({
         labelWidth: 85,
         defaults:{

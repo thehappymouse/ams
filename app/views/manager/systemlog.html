@@ -55,6 +55,7 @@ Ext.onReady(function(){
                             callback:function(v,action){
                                 if (v.length == 0) {
                                     listView.store.removeAll();
+                                    Ext.getCmp('bbar').updateInfo();
                                     Ext.MessageBox.alert("提示","没有数据！");
                                 }
                             },
@@ -147,6 +148,7 @@ Ext.onReady(function(){
                 bbar: new Ext.PagingToolbar({
                     pageSize: 5,
                     store: store,
+                    id: 'bbar',
                     displayMsg: "显示{0}条到{1}条记录，总共{2}条记录",
                     emptyMsg: "没有数据记录",
                     displayInfo: true

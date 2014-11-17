@@ -131,6 +131,7 @@ class CustomerHelper extends HelperBase
 
             if ($r) {
                 $customer->IsCut = 1;
+                $customer->CutStyle = $cut->CutStyle;
                 $customer->CutCount += 1;
                 $customer->save();
                 $success = true;
@@ -211,7 +212,6 @@ class CustomerHelper extends HelperBase
             if ($c["IsCut"]) $countinfo["cutCount"]++;
         }
 
-
         return array($total, $data, $countinfo);
     }
 
@@ -261,6 +261,11 @@ class CustomerHelper extends HelperBase
             if ($p->PowerCutLogo != null && $p->PowerCutLogo != 2) {
                 $conditions .= " AND IsCut = :IsCut:";
                 $param["IsCut"] = $p->PowerCutLogo;
+            }
+
+            if ($p->CutType){
+                $conditions .= " AND CutStyle = :cutstyle:";
+                $param["cutstyle"] = $p->CutType;
             }
 
             //是否结清

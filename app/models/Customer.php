@@ -186,6 +186,11 @@ class Customer extends \Phalcon\Mvc\Model
      *
      * @var string
      */
+    public $CutStyle;
+    /**
+     *
+     * @var string
+     */
     public $LastDate;
 
     /**
@@ -248,6 +253,7 @@ class Customer extends \Phalcon\Mvc\Model
             'LastDate' => 'LastDate',
             'FirstDate' => 'FirstDate',
             'AllArrearCount' => 'AllArrearCount',
+            'CutStyle' => 'CutStyle',
             'PressCount' => 'PressCount'
         );
     }

@@ -114,7 +114,7 @@ Ext.onReady(function(){
                                     params : data,
                                     callback:function(v){
                                         if (v.length == 0) {
-                                            Ext.MessageBox.alert('提示',"此班组下没有数据");
+                                            Ext.MessageBox.alert('提示',"没有收费明细数据");
                                             listView.store.removeAll();
                                             totalView.store.removeAll();
                                         }
@@ -123,6 +123,22 @@ Ext.onReady(function(){
                                 });
                                 totalView.store.load({
                                     params : data,
+                                    callback:function(v){
+                                        if (v.length == 0) {
+                                            Ext.MessageBox.alert('提示',"没有收费员信息汇总");
+                                            totalView.store.removeAll();
+                                        }
+                                    },
+                                    add: false
+                                });
+                                sfView.store.load({
+                                    params : data,
+                                    callback:function(v){
+                                        if (v.length == 0) {
+                                            Ext.MessageBox.alert('提示',"没有汇总信息");
+                                            sfView.store.removeAll();
+                                        }
+                                    },
                                     add: false
                                 });
                             }
@@ -306,9 +322,9 @@ Ext.onReady(function(){
     var  sfStore = new Ext.data.JsonStore(
             {
                 id: 'tvliststore',
-                url: '/ams/CountSearch/ReconciliationInquiryList',
+                url: '/ams/CountSearch/ChargeCount',
                 root: 'data',
-                fields: chargesMoneyFields
+                fields: ['UserName', 'ControlCount', 'Count', 'Money']
             });
 
     var   sfView = new Ext.grid.GridPanel(
@@ -327,12 +343,12 @@ Ext.onReady(function(){
                         header: '收费员',
                         sortable: true,
                         align:"center",
-                        dataIndex: 'Name'
+                        dataIndex: 'UserName'
                     },  {
                         header: '收费笔数',
                         sortable: true,
                         align:"center",
-                        dataIndex: 'ChargeCount'
+                        dataIndex: 'Count'
                     }, {
                         header: '收费金额',
                         sortable: true,
@@ -343,11 +359,6 @@ Ext.onReady(function(){
                         sortable: true,
                         align:"center",
                         dataIndex: 'ControlCount'
-                    },{
-                        header: '登记电话',
-                        sortable: true,
-                        align:"center",
-                        dataIndex: 'Phone'
                     }]
             });
     var moneyTab = new Ext.TabPanel({

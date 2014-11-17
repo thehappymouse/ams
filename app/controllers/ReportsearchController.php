@@ -166,8 +166,8 @@ class  ReportsearchController extends ControllerBase
                 continue;
             }
 
-            $build = $this->getBuilder("Charge", $seg);
-            $build->columns("SUM(Money) AS Money");
+            $build = $this->getBuilder("Arrears", $seg);
+            $build->columns("SUM(Money) AS Money")->andWhere("IsClean=0");
 
             $r = $build->getQuery()->execute()->getFirst();
 

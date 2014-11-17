@@ -33,6 +33,44 @@ class CountsearchController extends ControllerBase
     }
 
     /**
+     * 对账查询 子表  显示 收费员的收费情况
+     */
+    public function ChargeCountAction()
+    {
+        $uid = $this->request->get("Name");
+
+        if(($tid = User::IsAllUsers($uid))){
+            if($tid == -1){
+                $users = User::find("Role=" . ROLE_TOLL);
+            }
+            else {
+                $users = User::find("TeamID=$tid AND Role=" . ROLE_TOLL);
+            }
+        }
+        else {
+            $users = User::find("ID=$uid");
+        }
+
+        $data = array();
+        foreach($users as $user){
+
+            $b = $this->getBuilder("Charge");
+            $c = $b->columns(array("UserID", "SUM(Money) AS Money", "count(ID) as Count", "Sum(IsControl) as ControlCount "))
+                ->andWhere("UserID=$user->ID")
+                ->getQuery()->execute()->getFirst();
+            if($c){
+                $row = array();
+                $row["UserName"] = $user->Name;
+                $row["Money"] = $c->Money;
+                $row["Count"] = $c->Count;
+                $row["ControlCount"] = $c->ControlCount;
+                $data[] = $row;
+            }
+        }
+        $this->ajax->flushData($data);
+    }
+
+    /**
      * 对账查询--》 财务
      */
     public function ReconciliationAction()

@@ -85,8 +85,8 @@ class ReminderController extends ControllerBase
         $params = $this->request->get();
         $params["PowerCutLogo"] = 1;
 
-        $start = $params["FromData"];
-        $end = $params["ToData"];
+//        $start = $params["FromData"];
+//        $end = $params["ToData"];
 
         unset($params["FromData"]);
         unset($params["ToData"]);
@@ -97,9 +97,9 @@ class ReminderController extends ControllerBase
         foreach ($data as $key => $row) {
 
             $cut = Cutinfo::findFirst("Arrear = " . $row["ID"]);
-            if ($cut->CutTime > $end || $cut->CutTime < $start) {
-                continue;
-            }
+//            if ($cut->CutTime > $end || $cut->CutTime < $start) {
+//                continue;
+//            }
             //添加停电信息到数据中
             if ($cut) {
                 $row["CutStyle"] = $cut->CutStyle;

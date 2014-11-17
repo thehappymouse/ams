@@ -84,25 +84,24 @@ Ext.onReady(function () {
                 items: [peopleCombox,
                     {
                         xtype: 'compositefield',
-                        fieldLabel: '停电时间',
+                        fieldLabel: '电费年月',
                         items:[
-                        {
-                            fieldLabel: '复电时间',
-                            xtype:'datetimefield',
+                        new Ext.form.DateField({
+                            plugins:'monthPickerPlugin',
                             name:'FromData',
-                            value:new Date().format('Y-m-d'),
-                            width:82
-                        },{
+                            width:82,
+                            value:new Date().format('Ym')-1,
+                            format: 'Ym'
+                        }),{
                             xtype: 'displayfield',
-                            //   style: 'text-align:right;width:40px;',
                             value: '至: '
-                        },{
-                            fieldLabel: '复电时间',
-                            xtype:'datetimefield',
-                            value:new Date(),
-                            name:'ToData',
-                            width:82
-                        }]
+                        },new Ext.form.DateField({
+                          plugins:'monthPickerPlugin',
+                          name:'ToData',
+                          width:82,
+                          value:new Date().format('Ym'),
+                          format: 'Ym'
+                      })]
                     }
                 ]
             },
@@ -136,6 +135,7 @@ Ext.onReady(function () {
                                         var text = Ext.decode(msg.response.responseText);
                                         if (!text.success) {
                                             listView.store.removeAll();
+                                            Ext.getCmp('bbar').updateInfo();
                                             Ext.Msg.alert('提示', text.msg);
                                         }
                                     }
@@ -233,6 +233,7 @@ Ext.onReady(function () {
             bbar: new Ext.PagingToolbar({
                 pageSize: _pageSize,
                 store: store,
+                id: 'bbar',
                 displayMsg: "显示{0}条到{1}条记录，总共{2}条记录",
                 emptyMsg: "没有数据记录",
                 displayInfo: true

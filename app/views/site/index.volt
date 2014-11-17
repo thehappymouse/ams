@@ -386,12 +386,13 @@ var s2 = new Ext.data.JsonStore(
             borderWidth: 'Border Width'
         },
         source: {
+
+            '排名': '{{arrear["UserIndex"]}}',
             '欠费户数': '{{arrear["CustomerCount"]}}',
             '欠费笔数': '{{arrear["ArrearCount"]}}',
             '欠费金额': '{{arrear["Money"]}}',
             '电费回收率': '{{arrear["Rate"]}}',
-            '户数回收率': '{{arrear["CountRate"]}}',
-            '个人排名': '{{arrear["UserIndex"]}}'
+            '户数回收率': '{{arrear["CountRate"]}}'
         },
         viewConfig : {
             forceFit: true,

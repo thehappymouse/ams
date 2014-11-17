@@ -50,6 +50,9 @@ class  ImportController extends ControllerBase
 
     }
 
+    /**
+     * 欠费数据查询
+     */
     public function arrearslistAction()
     {
         $p = new RequestParams($this->request->get());
@@ -80,6 +83,12 @@ class  ImportController extends ControllerBase
             }
         }
 
+        //电费年月查询
+        if ($p->FromData && $p->ToData) {
+            $conditions .= " AND  (YearMonth BETWEEN :start: AND :end:)";
+            $param["start"] = $p->FromData;
+            $param["end"] = $p->ToData;
+        }
 
         $conditions_mini = $conditions;
         $conditions .= " limit $p->start, $p->limit";

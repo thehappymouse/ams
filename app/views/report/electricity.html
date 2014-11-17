@@ -164,7 +164,8 @@ Ext.onReady(function(){
     var averagePanel = new Ext.grid.PivotGrid({
         store     : myStore,
         aggregator: 'sum',
-        height    : 200,
+        //height    : 200,
+        autoHeight: true,
         title     : '电费回收率排名',
         measure   : 'Value',
         sortAscText : 'sort',
@@ -262,8 +263,9 @@ Ext.onReady(function(){
     var hushuoPanel = new Ext.grid.PivotGrid({
         store     : myStore2,
         aggregator: 'sum',
-        height    : 200,
-        //autoHeight:true,
+        //height    : 400,
+
+        autoHeight:true,
         title     : '户数回收率排名',
         measure   : 'Value',
         viewConfig: {
@@ -363,7 +365,7 @@ Ext.onReady(function(){
     var groupPanel = new Ext.grid.PivotGrid({
         store     : groupStore,
         aggregator: 'sum',
-        height    : 300,
+        autoHeight:true,
         title     : '班组情况',
         measure   : 'Value',
         viewConfig: {
@@ -482,7 +484,7 @@ Ext.onReady(function(){
         title: '欠费金额',
         frame:true,
         width:500,
-        height:300,
+        autoHeight: true,
         layout:'fit',
         items: {
             xtype: 'columnchart',
@@ -546,8 +548,6 @@ Ext.onReady(function(){
     var averageTab = new Ext.TabPanel({
         activeTab: 0,
         plain:true,
-        autoWidth:true,
-        height:400,
         style: 'margin-top:15px',
         items:[
             averagePanel,hushuoPanel,line

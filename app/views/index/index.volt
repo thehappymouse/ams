@@ -108,7 +108,7 @@
                     <TR><TD style="cursor:pointer;" onclick="passWinAlert()"><A title=员工名 style="FONT-SIZE:14px;WIDTH: 100%; HEIGHT: 100%">
                                 <?php echo $name; ?>&nbsp;&nbsp;</A>
                         </TD>
-                        <TD width="160">
+                        <TD width="120">
                             <DIV class="time" id="serverDateField"
                                  style="PADDING-RIGHT: 10px"></DIV>
                         </TD>

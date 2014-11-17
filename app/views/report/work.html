@@ -123,7 +123,7 @@ Ext.onReady(function(){
     var pivotGrid = new Ext.grid.PivotGrid({
         title     : '班组情况',
         width     : 800,
-        height    : 212,
+        autoHeight:true,
         store     : myStore2,
         aggregator: 'sum',
         measure   : 'value',
@@ -177,7 +177,7 @@ Ext.onReady(function(){
 var peopleGrid = new Ext.grid.PivotGrid({
         title     : '抄表员',
         width     : 800,
-        height    : 212,
+        autoHeight:true,
         store     : myStore,
         aggregator: 'sum',
         measure   : 'value',
@@ -230,7 +230,6 @@ var peopleGrid = new Ext.grid.PivotGrid({
     var peoplePanel = new Ext.TabPanel({
         // labelWidth: 85,
         activeTab: 0,
-        height:500,
         plain:true,
         style: 'margin-top:15px',
         items:[

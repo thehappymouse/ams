@@ -269,6 +269,7 @@ Ext.onReady(function(){
                                 var text = Ext.decode(msg.response.responseText);
                                 if (!text.success) {
                                     listView.store.removeAll();
+                                    Ext.getCmp('bbar').updateInfo();
                                     Ext.Msg.alert('提示',text.msg);return;
                                 }
                             }
@@ -411,6 +412,7 @@ Ext.onReady(function(){
                 bbar: new Ext.PagingToolbar({
                     pageSize: _pageSize,
                     store: store,
+                    id: 'bbar',
                     displayMsg: "显示{0}条到{1}条记录，总共{2}条记录",
                     emptyMsg: "没有数据记录",
                     displayInfo: true
@@ -441,14 +443,6 @@ Ext.onReady(function(){
                  add: false
              })
              win.show();
-             /*Ext.Ajax.request({
-                 url:'/ems/reminder/cancelpress',
-                 params:{ID : idString },
-                 success:function(){
-                     listView.store.removeAll();
-                     listView.store.reload();
-                 }
-             })*/
          })
     });
 

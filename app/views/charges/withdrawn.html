@@ -261,19 +261,12 @@ Ext.onReady(function(){
                                 var text = Ext.decode(msg.response.responseText);
                                 if (!text.success) {
                                     listView.store.removeAll();
+                                    Ext.getCmp('bbar').updateInfo();
                                     Ext.Msg.alert('提示',text.msg);return;
                                 }
                             }
                         })
                     }
-                    /*listeners : {
-                     render : function() {//渲染后添加click事件
-                     Ext.fly(this.el).on('click',function(e, t) {
-                     //console.log(infoSearch.getForm().getValues());return;
-
-                     });
-                     }
-                     }*/
                 }]
 
             }]
@@ -408,6 +401,7 @@ Ext.onReady(function(){
                 },
                 bbar: new Ext.PagingToolbar({
                     pageSize: _pageSize,
+                    id : 'bbar',
                     store: store,
                     displayMsg: "显示{0}条到{1}条记录，总共{2}条记录",
                     emptyMsg: "没有数据记录",

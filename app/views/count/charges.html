@@ -117,6 +117,7 @@ var infoSearch = new Ext.FormPanel({
                                 callback:function(v,action){
                                     if (v.length == 0) {
                                         listView.store.removeAll();
+                                        Ext.getCmp('bbar').updateInfo();
                                         Ext.MessageBox.alert("提示","没有数据！");
                                     }
                                 },
@@ -231,6 +232,7 @@ var listView = new Ext.grid.EditorGridPanel(
                 store: store,
                 displayMsg: "显示{0}条到{1}条记录，总共{2}条记录",
                 emptyMsg: "没有数据记录",
+                id: 'bbar',
                 displayInfo: true,
                 items:[
                     '-', {

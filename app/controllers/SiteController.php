@@ -1,5 +1,16 @@
 <?php
 
+function cmp_rate($a, $b)
+{
+    $a1 = $a["Rate"];
+    $b1 = $b["Rate"];
+    if ($a1 <= $b1) {
+        return 1;
+    } else {
+        return -1;
+    }
+}
+
 class SiteController extends ControllerBase
 {
     //Home 个人排名指标柱形图
@@ -134,19 +145,151 @@ class SiteController extends ControllerBase
         return json_encode($data);
     }
 
+    private function teamindex($teamid)
+    {
+        $data = array();
+        $teams = Team::find("Type=1");
+
+        foreach ($teams as $u) {
+            $seg = DataUtil::getTeamSegNameArray($u->ID);
+            $d = $this->qianfeiqingkuangBySeg($seg);
+            $d["key"] = $u->ID;
+            $data[] = $d;
+        }
+        $sort = 1;
+        foreach ($data as $d) {
+            if ($teamid == $d["key"]) {
+                break;
+            }
+            $sort++;
+        }
+
+        return $sort;
+    }
+
+    /**
+     * 按电费回收率，计算用户排名
+     * @param $uname
+     * @return int
+     */
+    private function userindex($uname)
+    {
+        $data = array();
+        $users = User::find("TeamID=1");
+        foreach ($users as $u) {
+            $seg = array($u->Name);
+            $d = $this->qianfeiqingkuangBySeg($seg);
+            $d["key"] = $u->ID;
+            $data[] = $d;
+        }
+        $sort = 0;
+
+        foreach ($data as $d) {
+            if ($uname == $d["key"]) {
+                break;
+            }
+            ++$sort;
+        }
+        return $sort;
+    }
+
+    private function qianfeiqingkuangBySeg($seg)
+    {
+        $data = array("Rate" => 0, "CountRate" => 0, "UserIndex" => 0, "CustomerCount" => 0, "ArrearCount" => 0, "Money" => 0);
+
+        if (count($seg) > 0) {
+
+
+            //按电费回收率进行排名
+//            $data["UserIndex"] = $r->Money;
+
+            $builder = $this->getBuilder("Arrears", $seg);
+            $builder->columns(array("COUNT(DISTINCT CustomerNumber) AS CustomerCount", "COUNT(ID) AS ArrearCount", "SUM(Money) AS Money"));
+            $result = $builder->getQuery()->execute()->getFirst();
+            $data = array_merge($data, (array)$result);
+
+            $builder = $this->getBuilder("Usermoney");
+            $builder->columns(array("SUM(Money) as Money", "SUM(House) as Count"));
+            $builder->inWhere("UserName", $seg);
+
+            $udata = (array)$builder->getQuery()->execute()->getFirst();
+
+            if ($udata["Money"]) {
+                $data["Rate"] = number_format((100 * $data["Money"] / $udata["Money"]), 2, ".", "") . "%";
+                $data["CountRate"] = number_format((100 * $data["CustomerCount"] / $udata["Count"]), 2, ".", "") . "%";
+            }
+
+        }
+        return $data;
+    }
+
+    /**
+     * 欠费情况 抄表员登录，统计个人情况。班长登录，统计班组情况
+     */
+    private function qianfeiqingkuang()
+    {
+
+        if (ROLE_MATER == $this->loginUser["Role"]) {
+            $seg = DataUtil::getSegNameArray($this->loginUser["ID"]);
+        } else if (ROLE_MATER_LEAD == $this->loginUser["Role"]) {
+
+            $seg = DataUtil::getTeamSegNameArray($this->loginUser["TeamID"]);
+        }
+
+        $data = $this->qianfeiqingkuangBySeg($seg);
+
+        if (ROLE_MATER == $this->loginUser["Role"]) {
+            $seg = DataUtil::getSegNameArray($this->loginUser["ID"]);
+
+
+            $data["UserIndex"] = $this->userindex($this->loginUser["ID"]);
+
+        } else if (ROLE_MATER_LEAD == $this->loginUser["Role"]) {
+
+            $seg = DataUtil::getTeamSegNameArray($this->loginUser["TeamID"]);
+            $data["UserIndex"] = $this->teamindex($this->loginUser["TeamID"]);
+        }
+
+
+        return $data;
+    }
+
+    /**
+     * 昨日檄费
+     */
+    private function yestoryday_jifei()
+    {
+        $yestarday = array("Count" => 0, "Money" => 0);
+
+        if (ROLE_MATER == $this->loginUser["Role"]) {
+            $seg = DataUtil::getSegNameArray($this->loginUser["ID"]);
+        } else if (ROLE_MATER_LEAD == $this->loginUser["Role"]) {
+            $seg = DataUtil::getTeamSegNameArray($this->loginUser["TeamID"]);
+        }
+
+        $builder = $this->getBuilder("Charge", $seg);
+        $builder->columns("COUNT( DISTINCT CustomerNumber) as Count, SUM(Money) as Money");
+        $builder->andWhere("Time BETWEEN :yd: AND :today:");
+
+        $r = $builder->getQuery()->execute(array("yd" => $this->getDate(time() - 24 * 3600), "today" => $this->getDate()))->getFirst();
+
+        $yestarday = (array)$r;
+        return $yestarday;
+    }
+
     /**
      * 催费员登录，个人情况统计.
      * 个人排名，需要统计所有抄表员的收费情况后得到排名
      */
     public function indexAction()
     {
-        $data = array("CustomerCount" => 0, "ArrearCount" => 0, "Money" => 0, "Rate" => 0, "CountRate" => 0, "UserIndex" => 0);
+        $this->qianfeiqingkuang();
 
         $seg = DataUtil::getSegNameArray($this->loginUser["ID"]);
         $data = array("Rate" => 0, "CountRate" => 0, "UserIndex" => 0, "CustomerCount" => 0, "ArrearCount" => 0, "Money" => 0);
 
         $press = array("Rate" => 0, "NoPressCustomer" => 0, "NoPressMoney" => 0);
-        $yestarday = array("Count" => 0, "Money" => 0);
+
         if (count($seg) > 0) {
             $builder = $this->getBuilder("Arrears", $seg);
             $builder->columns(array("COUNT(DISTINCT CustomerNumber) AS CustomerCount", "COUNT(ID) AS ArrearCount", "SUM(Money) AS Money"));
@@ -161,15 +304,9 @@ class SiteController extends ControllerBase
             $data["CountRate"] = number_format((100 * $r->Count / $data["CustomerCount"]), 2, ".", "") . "%";
 
 
-            $data["UserIndex"] = $r->Money;
-
             $builder = $this->getBuilder("Charge", $seg);
             $builder->columns("COUNT( DISTINCT CustomerNumber) as Count, SUM(Money) as Money");
             $builder->andWhere("Time BETWEEN :yd: AND :today:");
-
-            $r = $builder->getQuery()->execute(array("yd" => $this->getDate(time() - 24 * 3600), "today" => $this->getDate()))->getFirst();
-
-            $yestarday = (array)$r;
 
             $press = array();
             //抄表段 催费统计信息
@@ -180,6 +317,7 @@ class SiteController extends ControllerBase
             $press["NoPressMoney"] = $r->NoPressMoney;
         }
 
+        $data = $this->qianfeiqingkuang();
         $this->view->arrear = $data;
         $this->view->press = $press;
         $this->view->cutinfo = $this->getCut();
@@ -187,7 +325,7 @@ class SiteController extends ControllerBase
         $this->view->sig = $this->getSingleBar();
         $this->view->yy = $this->getArrarsMonth();
         $this->view->lineshow = $this->loginUser["Role"] == ROLE_ADMIN;
-        $this->view->yesterday = $yestarday;
+        $this->view->yesterday = $this->yestoryday_jifei();
     }
 
 

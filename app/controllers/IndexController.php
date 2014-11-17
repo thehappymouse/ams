@@ -47,9 +47,9 @@ class IndexController extends ControllerBase
         $name = $this->request->get("UserName");
         $pass = $this->request->get("Password");
 
-        if (!Dog::check()) {
+//        if (!Dog::check()) {
 //            $this->ajax->flushError("授权文件错误");
-        }
+//        }
 
 
         $r = User::findFirst(array("Name=:name: AND Pass=:pass:",

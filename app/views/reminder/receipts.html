@@ -43,6 +43,7 @@ Ext.onReady(function(){
                             callback:function(ecords, options, success){
                                 if (!success) {
                                     Ext.Msg.alert('提示','此班组下没有数据');
+                                    Ext.getCmp('bbar').updateInfo();
                                 }
                             },
                             add: false
@@ -115,6 +116,7 @@ Ext.onReady(function(){
                 bbar: new Ext.PagingToolbar({
                     pageSize: _pageSize,
                     store: store,
+                    id: 'bbar',
                     displayMsg: "显示{0}条到{1}条记录，总共{2}条记录",
                     emptyMsg: "没有数据记录",
                     displayInfo: true,
