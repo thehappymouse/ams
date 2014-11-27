@@ -41,6 +41,7 @@ class ReportHelper extends HelperBase
         }
 
 
+
         foreach ($users as $user) {
 
             $oneRes = array("User" => $user->Name);

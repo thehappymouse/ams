@@ -173,7 +173,7 @@ class ExportController extends ControllerBase
 
         $teamYstart = 2;
         foreach ($users as $key => $user) {
-            $objActSheet->mergeCells("A$teamYstart:A" . ((count($user) * 2) + $teamYstart -1));
+            $objActSheet->mergeCells("A$teamYstart:A" . ((count($user) * 2) + $teamYstart - 1));
             $objActSheet->setCellValue("A$teamYstart", $key);
 
             $y_start = $teamYstart;
@@ -195,7 +195,7 @@ class ExportController extends ControllerBase
                 }
                 $y_start += 2;
             }
-            $teamYstart+= count($user) * 2;
+            $teamYstart += count($user) * 2;
         }
 
 
@@ -494,7 +494,8 @@ class ExportController extends ControllerBase
 
         $floor = "共计：电话催费%s笔，通知单催费%s笔，共%s元。";
 
-        $floor = sprintf($floor, $totalData["Phone"], $totalData["Nofify"], $totalData["Money"]);
+
+        $floor = sprintf($floor, $totalData["Phone"], $totalData["Notify"], $totalData["Money"]);
 
         try {
             $filename = ExcelImportUtils::arrayToExcel("催费明细查询", $head, $data, $floor, true);
@@ -630,6 +631,46 @@ class ExportController extends ControllerBase
 
         $filename = ExcelImportUtils::arrayToExcel("客户分类统计", $headArr, $data, null, true);
         $this->ajax->flushOk("/ams/public/xls/" . $filename);
+    }
+
+    /**
+     * 导出客户的欠费明细
+     * 1, 查出
+     * 2，查出关联欠费数据
+     */
+    public function arrearsAction()
+    {
+        $params = $this->request->get();
+
+        $params["start"] = 0;
+        $params["limit"] = 100000; //不再需要分页
+
+        list($total, $data, $countinfo) = CustomerHelper::Customers($params);
+
+        $customers = array();
+        $address = array();
+        foreach ($data as $d) {
+            $customers[] = $d["Number"];
+            $address[$d["Number"]] = $d["Address"];
+        }
+        $customers = "'" . implode("','", $customers) . "'";
+        $cu = Arrears::find("CustomerNumber IN ($customers)");
+        $data = array();
+        foreach ($cu as $c) {
+            $row = $c->dump();
+            $row["Name"] = $c->CustomerName;
+            $row["Address"] = $address[$c->CustomerNumber];
+            $data[] = $row;
+        }
+
+        $headArr = $this->headCount;
+        $headArr["IsClean"] = "结清标志";
+
+        $floor = "共：%s条记录，欠费用户：%s 位，停电用户：%s位，特殊用户：%s位";
+        $floor = sprintf($floor, count($data), $countinfo["allCustomer"], $countinfo["cutCount"], $countinfo["specialCount"]);
+
+        $filename = ExcelImportUtils::arrayToExcel("欠费详情", $headArr, $data, $floor, true);
+        $this->ajax->flushOk("/ams/public/" . $filename);
     }
 
     /**

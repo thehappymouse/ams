@@ -23,11 +23,12 @@ class ReportNewHelper extends HelperBase
         foreach ($month_arr as $key => $month) {
             $clear = self::getSegUserMonthCharge($seguser, $month);
 
-            $results = parent::getModelManager()->createBuilder()->columns(array("SUM(Money) as Money", "SUM(House) as House"))
+            $b = parent::getModelManager()->createBuilder()->columns(array("SUM(Money) as Money", "SUM(House) as House"))
                 ->from("Usermoney")
+                ->andWhere("Month=:key:", array("key" => $key))
                 ->inWhere("UserName", $seguser)
-                ->andWhere("Month", $key)
-                ->getQuery()->execute();
+                ->getQuery();
+            $results =  $b->execute();
             $udata = $results[0];
 
             $umoney = 0;
@@ -36,6 +37,7 @@ class ReportNewHelper extends HelperBase
                 $umoney = $udata->Money;
                 $uhouse = $udata->House;
             }
+
             $row = array(
                 "ArrearMoney" => $umoney, //欠费余额
                 "uMoney" => $umoney, //应收电费
@@ -167,8 +169,6 @@ class ReportNewHelper extends HelperBase
         }
         $users = User::find($condation);
         foreach ($users as $user) {
-
-
             $result[] = self::itemElctricity($user->Name, array($user->Name), $month_arr);
         }
         return array($result);
@@ -180,6 +180,7 @@ class ReportNewHelper extends HelperBase
         $years = array();
 
         $team["Name"] = $name;
+        $team["Data"] = array();
 
         $allData = array("Rate" => 0, "count" => 0, "NoPressCount" => 0, "NoPressMoney" => 0); //汇总信息
 
@@ -266,6 +267,9 @@ class ReportNewHelper extends HelperBase
             list($uData, $a) = self::getFeeStatementsBySeg($seg, $mU->Name, $start, $end);
             $data = array("Name" => $mU->Name, "sort" => $index++);
 
+            $allmoney = 0;
+            $allcount = 0;
+
             if (isset($uData["Data"])) {
                 foreach ($uData["Data"] as $d) {
                     $data["Action"] = "未催费金额";
@@ -284,21 +288,40 @@ class ReportNewHelper extends HelperBase
                 }
 
 
-            } else {
+                //添加汇总信息
+                $data["YearMonth"] = "汇总";
+
                 $data["Action"] = "未催费金额";
-                $data["Value"] = "";
-                $data["YearMonth"] = "";
+                $data["Value"] = $uData["AllData"]["NoPressMoney"];
                 $userdata[] = $data;
 
 
                 $data["Action"] = "未催费户数";
+                $data["Value"] = $uData["AllData"]["NoPressCount"];
                 $userdata[] = $data;
 
+
                 $data["Action"] = "催费完成率";
+                $data["Value"] = $uData["AllData"]["Rate"];
                 $userdata[] = $data;
 
             }
+//            else {
+//                $data["Action"] = "未催费金额";
+//                $data["Value"] = "";
+//                $data["YearMonth"] = "";
+//                $userdata[] = $data;
+//
+//
+//                $data["Action"] = "未催费户数";
+//                $userdata[] = $data;
+//
+//                $data["Action"] = "催费完成率";
+//                $userdata[] = $data;
+//
+//            }
         }
+
 
         return array(User::count("TeamID IN($tids) AND Role = " . ROLE_MATER), $userdata);
     }

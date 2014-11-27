@@ -85,23 +85,23 @@ Ext.onReady(function () {
                     {
                         xtype: 'compositefield',
                         fieldLabel: '电费年月',
-                        items:[
-                        new Ext.form.DateField({
-                            plugins:'monthPickerPlugin',
-                            name:'FromData',
-                            width:82,
-                            value:new Date().format('Ym')-1,
-                            format: 'Ym'
-                        }),{
-                            xtype: 'displayfield',
-                            value: '至: '
-                        },new Ext.form.DateField({
-                          plugins:'monthPickerPlugin',
-                          name:'ToData',
-                          width:82,
-                          value:new Date().format('Ym'),
-                          format: 'Ym'
-                      })]
+                        items: [
+                            new Ext.form.DateField({
+                                plugins: 'monthPickerPlugin',
+                                name: 'FromData',
+                                width: 82,
+                                value: new Date().format('Ym') - 1,
+                                format: 'Ym'
+                            }), {
+                                xtype: 'displayfield',
+                                value: '至: '
+                            }, new Ext.form.DateField({
+                                plugins: 'monthPickerPlugin',
+                                name: 'ToData',
+                                width: 82,
+                                value: new Date().format('Ym'),
+                                format: 'Ym'
+                            })]
                     }
                 ]
             },
@@ -109,41 +109,41 @@ Ext.onReady(function () {
                 columnWidth: .25,
                 layout: 'form',
                 items: [NumberCombox,
-                {
-                    xtype: 'compositefield',
-                    items: [
-                        {xtype: 'hidden'},
-                        {
-                            width: 100,
-                            xtype: 'button',
-                            text: '查询',
-                            handler: function () {
-                                infoSearch.getForm().submit({
-                                    method: 'GET',
-                                    params: {
-                                        start: 0,
-                                        limit: _pageSize
-                                    },
-                                    success: function (action, msg) {
-                                        var text = Ext.decode(msg.response.responseText);
-                                        if (text.success) {
-                                            listView.store.loadData(text);
-                                            Ext.apply(listView.store.baseParams, infoSearch.getForm().getValues());
+                    {
+                        xtype: 'compositefield',
+                        items: [
+                            {xtype: 'hidden'},
+                            {
+                                width: 100,
+                                xtype: 'button',
+                                text: '查询',
+                                handler: function () {
+                                    infoSearch.getForm().submit({
+                                        method: 'GET',
+                                        params: {
+                                            start: 0,
+                                            limit: _pageSize
+                                        },
+                                        success: function (action, msg) {
+                                            var text = Ext.decode(msg.response.responseText);
+                                            if (text.success) {
+                                                listView.store.loadData(text);
+                                                Ext.apply(listView.store.baseParams, infoSearch.getForm().getValues());
+                                            }
+                                        },
+                                        failure: function (action, msg) {
+                                            var text = Ext.decode(msg.response.responseText);
+                                            if (!text.success) {
+                                                listView.store.removeAll();
+                                                Ext.getCmp('bbar').updateInfo();
+                                                Ext.Msg.alert('提示', text.msg);
+                                            }
                                         }
-                                    },
-                                    failure: function (action, msg) {
-                                        var text = Ext.decode(msg.response.responseText);
-                                        if (!text.success) {
-                                            listView.store.removeAll();
-                                            Ext.getCmp('bbar').updateInfo();
-                                            Ext.Msg.alert('提示', text.msg);
-                                        }
-                                    }
-                                })
+                                    })
+                                }
                             }
-                        }
-                    ]
-                }]
+                        ]
+                    }]
             }
         ]
     });
@@ -186,8 +186,7 @@ Ext.onReady(function () {
             tbar: [
                 {
                     text: '修改数据',
-                    ref: '../del',
-                    iconCls: 'del'
+                    ref: '../del'
                 }
             ],
             columns: [
@@ -198,11 +197,11 @@ Ext.onReady(function () {
                     sortable: true,
                     dataIndex: 'Segment'
                 }, {
-                   header: '抄表员',
-                   align: "center",
-                   sortable: true,
-                   dataIndex: 'SegUser'
-               },{
+                    header: '抄表员',
+                    align: "center",
+                    sortable: true,
+                    dataIndex: 'SegUser'
+                }, {
                     header: '用户编号',
                     dataIndex: 'CustomerNumber',
                     align: "center",
@@ -224,7 +223,7 @@ Ext.onReady(function () {
                     dataIndex: 'YearMonth',
                     sortable: true,
                     align: "center"
-                },{
+                }, {
                     header: '电费金额',
                     sortable: true,
                     align: "center",
@@ -248,12 +247,9 @@ Ext.onReady(function () {
                 return;
             }
             var rd = p.getSelectionModel().getSelections()[0];
-            var Money = rd.get("Money");
-            var SegUser = rd.get("SegUser");
-            Ext.getCmp("editMoney").setValue(Money);
-            Ext.getCmp("editName").setValue(SegUser);
-            Ext.getCmp("arrearID").setValue(rd.get("ID"));
+
             win.show();
+            Ext.getCmp("formpanel").getForm().loadRecord(rd);
         })
     });
 
@@ -261,26 +257,53 @@ Ext.onReady(function () {
     var win = new Ext.Window({
         layout: 'fit',
         width: 360,
-        height: 200,
+        height: 300,
         closeAction: 'hide',
         title: '修改数据',
-        bodyStyle:'padding-top:30px;background:white;',
+        bodyStyle: 'padding-top:30px;background:white;',
         items: new Ext.FormPanel({
             labelAlign: 'right',
+            id: 'formpanel',
             url: '/ams/import/updatemoney',
             items: [
                 {
-                  xtype: 'textfield',
-                  fieldLabel: '抄表员',
-                  id: 'editName',
-                  name: 'Name'
-                },{
+                    xtype: 'textfield',
+                    fieldLabel: '抄表段编号',
+                    name: 'Segment'
+                },
+                {
+                    xtype: 'textfield',
+                    fieldLabel: '抄表员',
+                    name: 'SegUser'
+                },
+//                {
+//                    xtype: 'textfield',
+//                    fieldLabel: '用户编号',
+//                    name: 'CustomerNumber'
+//                },
+                {
+                    xtype: 'textfield',
+                    fieldLabel: '用户名称',
+                    name: 'CustomerName'
+                },
+                {
+                    xtype: 'textfield',
+                    fieldLabel: '用电地址',
+                    name: 'Address',
+                    width: 180
+                },
+                {
+                    xtype: 'numberfield',
+                    fieldLabel: '电费年月',
+                    name: 'YearMonth'
+                },
+                {
                     xtype: 'numberfield',
                     minValue: 0,
-                    fieldLabel: '收费金额',
-                    id: 'editMoney',
+                    fieldLabel: '电费金额',
                     name: 'Money'
-                },{
+                },
+                {
                     xtype: 'hidden',
                     id: 'arrearID',
                     name: 'ID'
@@ -292,7 +315,7 @@ Ext.onReady(function () {
                 text: '提交',
                 handler: function () {
                     var fp = win.items.itemAt(0);
-                    if(fp.getForm().isValid()){
+                    if (fp.getForm().isValid()) {
                         fp.getForm().submit({
                             method: 'GET',
                             success: function (action, msg) {

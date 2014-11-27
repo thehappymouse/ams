@@ -151,7 +151,7 @@ class CountHelper extends HelperBase
 
         $condition = " WHERE a.CutTime BETWEEN :start: AND :end:  AND a.CutUserName IN ($ss)";
 
-        $query = "SELECT a.Arrear,b.Segment, a.Money, a.YearMonth, b.ID, a.CustomerNumber, b.Name, b.Address, a.CutTime, a.CutStyle
+        $query = "SELECT a.Arrear,b.Segment, a.Money, a.YearMonth, b.ID, a.CustomerNumber, b.Name, b.Address, a.CutTime, a.CutStyle, b.IsClean
                          FROM Cutinfo as a LEFT JOIN Customer as b ON a.CustomerNumber = b.Number" . $condition;
 
 
@@ -281,6 +281,7 @@ class CountHelper extends HelperBase
         $results = parent::getModelManager()->executeQuery("SELECT
                                                             ManageTeam,
                                                             Year,
+                                                            count(if(LandlordPhone <>\"\" or RenterPhone <> \"\" ,true,null )) as PhoneCount,
                                                             SUM(Money) AS Money,
                                                             SUM(IsControl) AS ControlCount,
                                                             COUNT(ManageTeam) AS ChargeCount

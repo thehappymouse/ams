@@ -124,7 +124,7 @@ class Arrears extends \Phalcon\Mvc\Model
      */
     public static function findByNumber($customerNumber)
     {
-        return self::Find(array("CustomerNumber=:num:", "bind" => array("num" => $customerNumber)));
+        return self::Find(array("CustomerNumber=:num: ORDER BY YearMonth", "bind" => array("num" => $customerNumber)));
     }
 
     /**

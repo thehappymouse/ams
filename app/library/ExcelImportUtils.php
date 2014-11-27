@@ -54,16 +54,20 @@ class ExcelImportUtils
         $arrears = Arrears::findByNumber($data["Number"]);
         $customer = Customer::findByNumber($data["Number"]);
 
-        if ($customer->Money < $data["Balance"]) {
-            foreach ($arrears as $a) {
-                if ($a->IsClean == 0) {
-                    $a->IsClean = 2;
-                    $a->save();
-                }
+        if(!$customer) return;
+
+        $b = $data["Balance"];
+
+        foreach ($arrears as $a) {
+            if ($a->IsClean == 1) continue;
+
+            if ($a->Money <= $b) {
+                $customer->IsClean = 2;
+                $a->IsClean = 2;
+                $b = $b - $a->Money;
+                $a->save();
             }
         }
-
-        $customer->IsClean = 2;
         $customer->save();
     }
 
@@ -235,11 +239,9 @@ class ExcelImportUtils
             foreach ($headArr as $key2 => $v) { //表头中含有对应数据索引
                 $j = chr($span);
                 //按照B2,C2,D2的顺序逐个写入单元格数据
+                
                 $cell = $objActSheet->getCell($j . $row);
-                $cell->setValueExplicit(PHPExcel_Cell_DataType::TYPE_STRING);
-                $cell->getStyle()->getNumberFormat()->setFormatCode(PHPExcel_Style_NumberFormat::FORMAT_TEXT);
-                $cell->getStyle()->getNumberFormat()->setFormatCode("@");
-                $cell->setValue((string)$rows[$key2] . " ");
+                $cell->setValueExplicit($rows[$key2], PHPExcel_Cell_DataType::TYPE_STRING);
 
                 //移动到当前行右边的单元格
                 $span++;

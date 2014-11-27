@@ -96,7 +96,7 @@ Ext.onReady(function(){
     var SaleRecord = Ext.data.Record.create([
         {name: 'group',   type: 'string'},
         {name: 'year',  type: 'string'},
-        {name: 'head',     type: 'string'},
+        {name: 'head',     type: 'string', convert: function(v){return v.substring(0);}},
         {name: 'state',    type: 'string'},
         {name: 'month',    type: 'int'},
         {name: 'quarter',  type: 'int'},
@@ -199,7 +199,8 @@ var peopleGrid = new Ext.grid.PivotGrid({
         ],
         topAxis: [
             {
-                dataIndex: 'head'
+                dataIndex: 'head',
+                direction: 'desc'
             }
         ],
         bbar:[{

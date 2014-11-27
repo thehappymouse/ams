@@ -242,36 +242,75 @@ Ext.onReady(function(){
 var s2 = new Ext.data.JsonStore(
     {
         fields:['name', 'value', 'views'],
-        data: {{yy}}
-
+        url: '/ams/site/yearmonth',
+        autoLoad: true
 });
+
 
     var bottomPanel = new Ext.Panel(
         {
-            title: '欠费月份户数及金额的分布',
-            region: 'center',
-            height: 180,
+
+            height: 160,
             flex: 1,
-            items: {
-                xtype: 'linechart',
+            items: [{
+                xtype: 'columnchart',
                 store: s2,
                 xField: 'name',
                 yField: 'value'
-            }
-        });
+            }]
 
-    var store = new Ext.data.JsonStore({
+        });
+var bottomPane2 = new Ext.Panel(
+    {
+
+        height: 160,
+        flex: 1,
+        items: [{
+            xtype: 'columnchart',
+            store: s2,
+            xField: 'name',
+            yField: 'views'
+        }]
+
+    });
+
+    var bottomPanel = new Ext.Panel({
+
+        title: '欠费月份户数及金额的分布',
+        height: 420,
+        flex: 1,
+        tbar:[new QuietCombox({
+            displayField:'Text',
+            hiddenName:'Duty',
+            valueField:'Duty',
+            fields:['Text','Duty'],
+            data   : [['2014', '2014'], ['2013', 2013]],
+            width: 151,
+            listeners:{
+                'select': function(f){
+                    s2.load({params:{"year": f.getValue()}});
+                }
+            }
+        })],
+        items:[
+            bottomPanel,bottomPane2
+        ]
+    });
+
+    var bottomPanelCount = new Ext.Panel({
+        title: '欠费月份及户数的分布',
+        height: 180,
+        items: {
+            xtype: 'columnchart',
+            store: s2,
+            xField: 'name',
+            yField: 'views'
+        }
+    });
+
+    var storezrjf = new Ext.data.JsonStore({
             fields:['name', 'visits', 'views'],
-            data: [
-                {name:'Jul 07', visits: 245000},
-                {name:'Aug 07', visits: 240000},
-                {name:'Sep 07', visits: 355000},
-                {name:'Oct 07', visits: 375000},
-                {name:'Nov 07', visits: 490000},
-                {name:'Dec 07', visits: 495000},
-                {name:'Jan 08', visits: 520000},
-                {name:'Feb 08', visits: 620000}
-            ]
+            data: {{zrjf}}
         });
     var centPanel = new Ext.Panel({
           iconCls:'chart',
@@ -281,7 +320,7 @@ var s2 = new Ext.data.JsonStore(
           layout:'fit',
           items: {
               xtype: 'columnchart',
-              store: store,
+              store: storezrjf,
               url:Ext.chart.Chart.CHART_URL,
               xField: 'name',
               yAxis: new Ext.chart.NumericAxis({
@@ -343,7 +382,7 @@ var s2 = new Ext.data.JsonStore(
       });
     var centerPanel = new Ext.Panel(
         {
-            height:600,
+            height:750,
             layout: {
                 type  : 'vbox',
                 align : 'stretch',
@@ -406,7 +445,7 @@ var s2 = new Ext.data.JsonStore(
 var jiaoPanel = new Ext.grid.PropertyGrid({
         width: 300,
         autoHeight: true,
-        title:'昨日缴费情况',
+        title:'昨日交费情况',
         region: "center",
         propertyNames: {
             '中文':'score'

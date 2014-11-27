@@ -65,7 +65,7 @@ var infoSearch = new Ext.FormPanel({
             teamCombox
             ,{
                 xtype: 'compositefield',
-                fieldLabel: '催费时间',
+                fieldLabel: '停电时间',
                 items:[
                     {
                         xtype:'datetimefield',
@@ -189,6 +189,20 @@ var listView = new Ext.grid.EditorGridPanel(
                     sortable: true,
                     align:"center",
                     dataIndex: 'Money'
+                }, {
+                    header: '结清标志',
+                    sortable: true,
+                    align:"center",
+                    dataIndex: 'IsClean',
+                    renderer:function(v) {
+                        if (v == 1) {
+                            return '已结清';
+                        } else if (v == 0){
+                            return "<a style='color:#804000'>未结清</a>";
+                        } else {
+                            return '预收转逾期';
+                        }
+                    }
                 }, {
                     header: '停电时间',
                     sortable: true,

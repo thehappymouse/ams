@@ -451,7 +451,7 @@ Ext.onReady(function(){
                                 }
                                 msgTip.show();
                                 infoSearch.getForm().submit({
-                                    url:'/ams/export/reminder',
+                                    url:'/ams/export/arrears',
                                     success:function(v,action){
                                         var re = Ext.decode(action.response.responseText);
                                         msgTip.hide();

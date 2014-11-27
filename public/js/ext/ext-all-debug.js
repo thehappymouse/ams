@@ -49260,7 +49260,7 @@ Ext.grid.PivotAxis = Ext.extend(Ext.Component, {
             });
         }
         
-        newStore.sort(sorters);
+        //newStore.sort(sorters);
         
         var records = newStore.data.items,
             hashes  = [],

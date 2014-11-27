@@ -1,325 +1,369 @@
 <script type="text/javascript">
-    Ext.onReady(function(){
-        _pageSize = 50;
-        del = function (value) {
-            Ext.Msg.confirm('提示','是否删除此人物',function(btn){
-                if(btn == 'no') {
-                    return;
-                } else {
-                    Ext.Ajax.request({
-                        url:'/ams/manager/userdel',
-                        params:{ID:value},
-                        success:function(){
-                            listView.store.reload();
-                        }
-                    })
-                }
-            })
-        }
+Ext.onReady(function () {
+    _pageSize = 50;
+    del = function (value) {
+        Ext.Msg.confirm('提示', '是否删除此人物', function (btn) {
+            if (btn == 'no') {
+                return;
+            } else {
+                Ext.Ajax.request({
+                    url: '/ams/manager/userdel',
+                    params: {ID: value},
+                    success: function () {
+                        listView.store.reload();
+                    }
+                })
+            }
+        })
+    }
 
-        modify = function (value) {
-            modifyForm.getForm().load({
-                url:'/ams/Poppage/ModifyUser',
-                params:{ID:value}
-            })
-            win.show();
-        }
+    modify = function (value) {
+        modifyForm.getForm().load({
+            url: '/ams/Poppage/ModifyUser',
+            params: {ID: value}
+        })
+        win.show();
+    }
 
-        var store = new Ext.data.JsonStore(
-                {
-                    url: 'UserList',
-                    root: 'data',
-                    autoLoad:true,
-                    baseParams: {
-                        start: 0,
-                        limit: _pageSize
+    var store = new Ext.data.JsonStore(
+            {
+                url: 'UserList',
+                root: 'data',
+                autoLoad: true,
+                baseParams: {
+                    start: 0,
+                    limit: _pageSize
+                },
+                fields: ['ID', 'Name', 'TeamName', 'RoleName']
+            });
+
+    var listView = new Ext.grid.EditorGridPanel(
+            {
+                store: store,
+                multiSelect: true,
+                title: '用户管理',
+                stripeRows: true,
+                region: 'center',
+                autoHeight: true,
+                emptyText: '没有数据',
+                viewConfig: {forceFit: true},
+                reserveScrollOffset: true,
+                columns: [
+                    {
+                        header: '用户名',
+                        align: "center",
+                        sortable: true,
+                        dataIndex: 'Name'
                     },
-                    fields: ['ID','Name','TeamName','RoleName']
-                });
-
-        var listView = new Ext.grid.EditorGridPanel(
-                {
+                    {
+                        header: '班组',
+                        align: "center",
+                        sortable: true,
+                        dataIndex: 'TeamName'
+                    },
+                    {
+                        header: '职责',
+                        dataIndex: 'RoleName',
+                        align: "center",
+                        sortable: true
+                    },
+                    {
+                        header: '操作',
+                        align: "center",
+                        dataIndex: 'ID',
+                        renderer: function (value, cellmeta) {
+                            return "<a href='#' onclick=modify('" + value + "')>修改</a>&nbsp;&nbsp;<a href='#' onclick=del('" + value + "')>删除</a>"
+                        }
+                    }
+                ],
+                bbar: new Ext.PagingToolbar({
+                    pageSize: _pageSize,
                     store: store,
-                    multiSelect: true,
-                    title: '用户管理',
-                    stripeRows: true,
-                    region: 'center',
-                    autoHeight:true,
-                    emptyText: '没有数据',
-                    viewConfig: {forceFit:true},
-                    reserveScrollOffset: true,
-                    columns: [
-                        {
-                            header: '用户名',
-                            align:"center",
-                            sortable: true,
-                            dataIndex: 'Name'
-                        },{
-                            header: '班组',
-                            align:"center",
-                            sortable: true,
-                            dataIndex: 'TeamName'
-                        }, {
-                            header: '职责',
-                            dataIndex: 'RoleName',
-                            align:"center",
-                            sortable: true
-                        },{
-                            header: '操作',
-                            align:"center",
-                            dataIndex: 'ID',
-                            renderer: function (value, cellmeta) {
-                                return "<a href='#' onclick=modify('"+value+"')>修改</a>&nbsp;&nbsp;<a href='#' onclick=del('"+value+"')>删除</a>"
-                            }
-                        }],
-                    bbar: new Ext.PagingToolbar({
-                        pageSize: _pageSize,
-                        store: store,
-                        displayMsg: "显示{0}条到{1}条记录，总共{2}条记录",
-                        emptyMsg: "没有数据记录",
-                        displayInfo: true
-                    })
-                });
-        listView.on("render",  function(p,e){
+                    displayMsg: "显示{0}条到{1}条记录，总共{2}条记录",
+                    emptyMsg: "没有数据记录",
+                    displayInfo: true
+                })
+            });
+    listView.on("render", function (p, e) {
 
-            /* p.canCel.setHandler(function(b, e){
-             if (p.getSelectionModel().getSelections().length == 0) {
-             Ext.Msg.alert('提示','请选择用户！');
-             return;
-             }
-             })*/
-        })
+        /* p.canCel.setHandler(function(b, e){
+         if (p.getSelectionModel().getSelections().length == 0) {
+         Ext.Msg.alert('提示','请选择用户！');
+         return;
+         }
+         })*/
+    })
 
-        var infoPanel = new Ext.TabPanel({
-            labelWidth: 85,
-            activeTab: 0,
-            plain:true,
-            defaults:{autoScroll: true},
-            items:[
-                listView
-            ]
-        });
+    var infoPanel = new Ext.TabPanel({
+        labelWidth: 85,
+        activeTab: 0,
+        plain: true,
+        defaults: {autoScroll: true},
+        items: [
+            listView
+        ]
+    });
 
-        var teamCombox = new SettCombbox({
-            url:'/ams/Info/TeamList',
-            fieldLabel: '班组',
-            width:151,
-            id:'team',
-            hiddenName:'Group',
-            autoLoad:true
-        });
+    var teamCombox = new SettCombbox({
+        url: '/ams/Info/TeamList/',
+        fieldLabel: '班组',
+        width: 151,
+        id: 'team',
+        hiddenName: 'Group',
+        autoLoad: false
+    });
 
-        var teamModify = new SettCombbox({
-            url:'/ams/Info/TeamList',
-            fieldLabel: '班',
-            width:151,
-            id:'teamModify',
-            hiddenName:'TeamID',
-            autoLoad:true
-        });
+    Ext.getCmp("team").store.load({params: {Type: 1}})
 
-        var submitForm = new Ext.FormPanel({
-            labelWidth: 85,
-            defaults:{
-                border: false
-            },
-            url:'/ams/manager/BuildAjax',
-            title: '用户创建',
-            style: 'margin-top:6px;margin-left:20px',
-            labelAlign: 'right',
-            layout: 'form',
-            items: [{
+    var teamModify = new SettCombbox({
+        url: '/ams/Info/TeamList',
+        fieldLabel: '班',
+        width: 151,
+        id: 'teamModify',
+        hiddenName: 'TeamID',
+        autoLoad: false
+    });
+
+    var submitForm = new Ext.FormPanel({
+        labelWidth: 85,
+        defaults: {
+            border: false
+        },
+        url: '/ams/manager/BuildAjax',
+        title: '用户创建',
+        style: 'margin-top:6px;margin-left:20px',
+        labelAlign: 'right',
+        layout: 'form',
+        items: [
+            {
                 fieldLabel: '用户名',
                 xtype: 'textfield',
-                allowBlank:false,
-                name:'UserName',
+                allowBlank: false,
+                name: 'UserName',
                 width: 151
-            },{
-                fieldLabel: '密码',
-                xtype: 'textfield',
-                inputType: 'password',
-                allowBlank:false,
-                id:'one',
-                name:'Password',
-                width: 151
-            },{
-                fieldLabel: '确认密码',
-                xtype: 'textfield',
-                inputType: 'password',
-                allowBlank:false,
-                name:'AgainPassword',
-                id:'two',
-                width: 151,
-                listeners:{
-                    blur:function(v){
-                        var pass = Ext.getCmp('one').getValue();
-                        var twoPass = Ext.getCmp('two').getValue();
-                        if (pass != twoPass) {
-                            Ext.MessageBox.alert('提示','两次密码输入不一样');
-                        }
-                    }
-                }
-            },new QuietCombox({
-                fieldLabel: '职责',
-                displayField:'Text',
-                hiddenName:'Duty',
-                valueField:'Duty',
-                fields:['Text','Duty'],
-                data   : [['抄表', '1'],['抄表员班长', '2'],['收费', '3'],['收费员班长', '4'],['对账', '5'],['管理人员', '6']],
-                width: 151
-            }) ,
-                teamCombox
-            ,{
-                style:'margin-left:90px',
-                width:100,
-                xtype:'button',
-                text:'创建帐户',
-                handler:function(){
-                    var pass = Ext.getCmp('one').getValue();
-                    var twoPass = Ext.getCmp('two').getValue();
-                    if (pass != twoPass) {
-                        Ext.MessageBox.alert('提示','两次密码输入不一样');
-                        return;
-                    }
-                    if (!submitForm.getForm().isValid()){
-                        Ext.MessageBox.alert('提示','请正确填写表单');
-                        return;
-                    }
-                    submitForm.getForm().submit({
-                        success:function(v,action){
-                            var re = Ext.decode(action.response.responseText);
-                            if (re.success) {
-                                Ext.MessageBox.alert('提示','创建成功');
-                                listView.store.reload();
-                            }
-                        },
-                        failure:function(v,action) {
-                            Ext.MessageBox.alert('提示','创建失败');
-                        }
-                    })
-                }
-            }]
-        })
-
-        var modifyForm = new Ext.FormPanel({
-            labelWidth: 85,
-            defaults:{
-                border: false
             },
-            url:'/ams/Manager/Useredit',
-            style: 'margin-top:6px;margin-left:20px',
-            labelAlign: 'right',
-            layout: 'form',
-            items: [{
-              xtype:'hidden',
-                name:'ID'
-            },{
-                fieldLabel: '用户名',
-                xtype: 'textfield',
-                disabled:true,
-                name:'Name',
-                width: 151
-            } ,
-                teamModify,
             {
                 fieldLabel: '密码',
                 xtype: 'textfield',
                 inputType: 'password',
-                name:'Password',
-                id: 'onePass',
+                allowBlank: false,
+                id: 'one',
+                name: 'Password',
                 width: 151
-            },{
+            },
+            {
                 fieldLabel: '确认密码',
                 xtype: 'textfield',
                 inputType: 'password',
-                name:'AgainPassword',
-                id: 'twoPass',
+                allowBlank: false,
+                name: 'AgainPassword',
+                id: 'two',
                 width: 151,
-                listeners:{
-                    blur:function(v){
-                        var pass = Ext.getCmp('onePass').getValue();
-                        var twoPass = Ext.getCmp('twoPass').getValue();
+                listeners: {
+                    blur: function (v) {
+                        var pass = Ext.getCmp('one').getValue();
+                        var twoPass = Ext.getCmp('two').getValue();
                         if (pass != twoPass) {
-                            Ext.MessageBox.alert('提示','两次密码输入不一样');
+                            Ext.MessageBox.alert('提示', '两次密码输入不一样');
                         }
                     }
                 }
-            }]
-        })
+            },
+            new QuietCombox({
+                fieldLabel: '职责',
+                displayField: 'Text',
+                hiddenName: 'Duty',
+                valueField: 'Duty',
+                fields: ['Text', 'Duty'],
+                data: [
+                    ['抄表', '1'],
+                    ['抄表员班长', '2'],
+                    ['收费', '3'],
+                    ['收费员班长', '4'],
+                    ['对账', '5'],
+                    ['管理人员', '6']
+                ],
+                width: 151,
+                listeners: {
+                    'select': function (f) {
+                        var v = f.getValue();
+                        if (5 == v || 6 == v) {
+                            Ext.getCmp("team").hide();
+                        }
+                        else {
+                            Ext.getCmp("team").show();
+                        }
 
-        var win = new Ext.Window({
-            layout:'fit',
-            width:350,
-            height:200,
-            closeAction:'hide',
-           // plain: true,
-            title: '用户修改',
-            items:[modifyForm],
-            buttons: [{
+                        if (1 == v || 2 == v) {
+                            Ext.getCmp("team").store.load({params: {Type: 1}})
+                        }
+                        else if (3 == v || 4 == v) {
+                            Ext.getCmp("team").store.load({params: {Type: 2}})
+                        }
+                    }
+                }
+            }) ,
+            teamCombox
+            ,
+            {
+                style: 'margin-left:90px',
+                width: 100,
+                xtype: 'button',
+                text: '创建帐户',
+                handler: function () {
+                    var pass = Ext.getCmp('one').getValue();
+                    var twoPass = Ext.getCmp('two').getValue();
+                    if (pass != twoPass) {
+                        Ext.MessageBox.alert('提示', '两次密码输入不一样');
+                        return;
+                    }
+                    if (!submitForm.getForm().isValid()) {
+                        Ext.MessageBox.alert('提示', '请正确填写表单');
+                        return;
+                    }
+                    submitForm.getForm().submit({
+                        success: function (v, action) {
+                            var re = Ext.decode(action.response.responseText);
+                            if (re.success) {
+                                Ext.MessageBox.alert('提示', '创建成功');
+                                listView.store.reload();
+                            }
+                        },
+                        failure: function (v, action) {
+                            Ext.MessageBox.alert('提示', '创建失败');
+                        }
+                    })
+                }
+            }
+        ]
+    })
+
+    var modifyForm = new Ext.FormPanel({
+        labelWidth: 85,
+        defaults: {
+            border: false
+        },
+        url: '/ams/Manager/Useredit',
+        style: 'margin-top:6px;margin-left:20px',
+        labelAlign: 'right',
+        layout: 'form',
+        items: [
+            {
+                xtype: 'hidden',
+                name: 'ID'
+            },
+            {
+                fieldLabel: '用户名',
+                xtype: 'textfield',
+                disabled: true,
+                name: 'Name',
+                width: 151
+            } ,
+            teamModify,
+            {
+                fieldLabel: '密码',
+                xtype: 'textfield',
+                inputType: 'password',
+                name: 'Password',
+                id: 'onePass',
+                width: 151
+            },
+            {
+                fieldLabel: '确认密码',
+                xtype: 'textfield',
+                inputType: 'password',
+                name: 'AgainPassword',
+                id: 'twoPass',
+                width: 151,
+                listeners: {
+                    blur: function (v) {
+                        var pass = Ext.getCmp('onePass').getValue();
+                        var twoPass = Ext.getCmp('twoPass').getValue();
+                        if (pass != twoPass) {
+                            Ext.MessageBox.alert('提示', '两次密码输入不一样');
+                        }
+                    }
+                }
+            }
+        ]
+    })
+
+    var win = new Ext.Window({
+        layout: 'fit',
+        width: 350,
+        height: 200,
+        closeAction: 'hide',
+        // plain: true,
+        title: '用户修改',
+        items: [modifyForm],
+        buttons: [
+            {
                 text: '确认',
-                handler: function(){
+                handler: function () {
                     var pass = Ext.getCmp('onePass').getValue();
                     var twoPass = Ext.getCmp('twoPass').getValue();
                     if (pass != twoPass) {
-                        Ext.MessageBox.alert('提示','两次密码输入不一样');
+                        Ext.MessageBox.alert('提示', '两次密码输入不一样');
                         return;
                     }
                     if (!modifyForm.getForm().isValid()) {
-                        Ext.MessageBox.alert('提示','请正确填写表单');
+                        Ext.MessageBox.alert('提示', '请正确填写表单');
                         return;
                     }
                     modifyForm.getForm().submit({
-                        success:function(v, action){
+                        success: function (v, action) {
                             var re = Ext.decode(action.response.responseText);
                             if (re.success) {
-                                Ext.MessageBox.alert('提示','修改成功');
+                                Ext.MessageBox.alert('提示', '修改成功');
                                 listView.store.reload();
                                 win.hide();
                             }
                         },
-                        failure:function(){
-                            Ext.MessageBox.alert('提示','修改失败');
+                        failure: function () {
+                            Ext.MessageBox.alert('提示', '修改失败');
                         }
                     })
 
                 }
-            },{
+            },
+            {
                 text: '取消',
-                handler: function(){
+                handler: function () {
                     modifyForm.getForm().reset();
                     win.hide();
                 }
-            }]
-        });
-        var submmitTab = new Ext.TabPanel({
-            labelWidth: 85,
-            activeTab: 0,
-            height:200,
-            plain:true,
-            style: 'margin-top:15px',
-            defaults:{autoScroll: true},
-            items:[
-                submitForm
-            ]
-        });
-        var formpanels = new Ext.Panel({
-            region: 'center',
-            fileUpload: true,
-            autoScroll: true,
-            bodyStyle: "padding:20px;",
-            items: [
-                infoPanel,
-                submmitTab
-            ]
-        });
+            }
+        ]
+    });
+    var submmitTab = new Ext.TabPanel({
+        labelWidth: 85,
+        activeTab: 0,
+        height: 200,
+        plain: true,
+        style: 'margin-top:15px',
+        defaults: {autoScroll: true},
+        items: [
+            submitForm
+        ]
+    });
+    var formpanels = new Ext.Panel({
+        region: 'center',
+        fileUpload: true,
+        autoScroll: true,
+        bodyStyle: "padding:20px;",
+        items: [
+            infoPanel,
+            submmitTab
+        ]
+    });
 
 
-        new Ext.Viewport(
-                {
-                    layout: 'border',
-                    items: [
-                        formpanels
-                    ]
-                });
-    })
+    new Ext.Viewport(
+            {
+                layout: 'border',
+                items: [
+                    formpanels
+                ]
+            });
+})
 </script>

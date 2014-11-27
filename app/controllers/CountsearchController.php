@@ -38,6 +38,9 @@ class CountsearchController extends ControllerBase
     public function ChargeCountAction()
     {
         $uid = $this->request->get("Name");
+        $start = $this->request->get("FromData");
+        $end = $this->request->get("ToData");
+
 
         if(($tid = User::IsAllUsers($uid))){
             if($tid == -1){
@@ -57,13 +60,14 @@ class CountsearchController extends ControllerBase
             $b = $this->getBuilder("Charge");
             $c = $b->columns(array("UserID", "SUM(Money) AS Money", "count(ID) as Count", "Sum(IsControl) as ControlCount "))
                 ->andWhere("UserID=$user->ID")
-                ->getQuery()->execute()->getFirst();
+                ->andWhere("Time BETWEEN :start: AND :end:")
+                ->getQuery()->execute(array("start" => $start, "end" => $end))->getFirst();
             if($c){
                 $row = array();
                 $row["UserName"] = $user->Name;
-                $row["Money"] = $c->Money;
-                $row["Count"] = $c->Count;
-                $row["ControlCount"] = $c->ControlCount;
+                $row["Money"] = (int)$c->Money;
+                $row["Count"] = (int)$c->Count;
+                $row["ControlCount"] = (int)$c->ControlCount;
                 $data[] = $row;
             }
         }

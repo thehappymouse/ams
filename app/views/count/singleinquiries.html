@@ -313,8 +313,7 @@ Ext.onReady(function () {
 
     var arrStore = new Ext.data.JsonStore(
             {
-                id: 'tvliststore',
-                url: 'singleInquiriesList',
+                url: 'singleInquiriesList?IsClean=1',
                 root: 'data',
                 fields: chargesMoneyFields
             });

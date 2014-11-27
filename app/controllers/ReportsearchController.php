@@ -146,6 +146,38 @@ class  ReportsearchController extends ControllerBase
         $this->echoElectricity($result, $start, $this->request->get("Type"));
     }
 
+    /**
+     * 班组-欠费金额报表
+     */
+    public function TeamAction()
+    {
+        $id = $this->request->get("Team");
+
+        if ($id == -1) {
+            $teams = Team::find("Type=1");
+        } else {
+            $teams = Team::find("ID=$id");
+        }
+
+        $uData = array();
+        foreach ($teams as $user) {
+            $seg = DataUtil::getTeamSegNameArray($user->ID);
+            if (count($seg) == 0) {
+                continue;
+            }
+
+            $build = $this->getBuilder("Arrears", $seg);
+            $build->columns("SUM(Money) AS Money")->andWhere("IsClean=0");
+
+            $r = $build->getQuery()->execute()->getFirst();
+
+            $data["name"] = $user->Name;
+            $data["views"] = (int)$r->Money;
+            $uData[] = $data;
+        }
+        $this->ajax->flushData($uData);
+    }
+
 
     public function UserAction()
     {
@@ -202,7 +234,6 @@ class  ReportsearchController extends ControllerBase
         $p = new RequestParams($this->request->get());
 
         $tid = $p->get("Team");
-
         if (!$tid) {
             echo json_encode(array("total" => 0, "rows" => array()));
             exit;
@@ -222,14 +253,18 @@ class  ReportsearchController extends ControllerBase
         $teamdata = array();
         //班组情况统计
         foreach ($mTeams as $mt) {
-            $seg = DataUtil::getSegNameArray($mt->ID);
+            $seg = DataUtil::getTeamSegNameArray($mt->ID);
 
             list($team, $years) = ReportNewHelper::getFeeStatementsBySeg($seg, $mt->Name, $start, $end);
             $teams[] = $team;
         }
+
         $index = 1;
         foreach ($teams as $team) {
+
+
             $data = array("Name" => $team["Name"], "sort" => $index++);
+
             foreach ($team["Data"] as $d) {
                 $data["Action"] = "未催费金额";
                 $data["Value"] = $d["NoPressMoney"];
@@ -245,6 +280,22 @@ class  ReportsearchController extends ControllerBase
                 $data["Value"] = $d["Rate"];
                 $teamdata[] = $data;
             }
+
+            //添加汇总信息
+            $data["YearMonth"] = "汇总";
+            $data["Action"] = "未催费金额";
+            $data["Value"] = $team["AllData"]["NoPressMoney"];
+            $teamdata[] = $data;
+
+
+            $data["Action"] = "未催费户数";
+            $data["Value"] = $team["AllData"]["NoPressCount"];
+            $teamdata[] = $data;
+
+
+            $data["Action"] = "催费完成率";
+            $data["Value"] = $team["AllData"]["Rate"];
+            $teamdata[] = $data;
         }
 
         echo json_encode(array("total" => count($mTeams), "rows" => $teamdata));

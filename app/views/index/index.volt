@@ -100,7 +100,8 @@
     <TABLE class=infobar style="margin-top:-2px;" cellSpacing=0 cellPadding=0 width="100%" border=0>
         <TBODY>
         <TR>
-            <TD class="infopath">当前位置:&nbsp;<SPAN id="TitlePath">&nbsp;&nbsp;收费模块>>收费</SPAN></TD>
+<!--            收费模块>>收费-->
+            <TD class="infopath">当前位置:&nbsp;<SPAN id="TitlePath">&nbsp;&nbsp;</SPAN></TD>
             <TD align="right" width=330>
                 <TABLE class="buttonInfo" id="buttonInfo" cellSpacing="0" cellPadding="0"
                        border="0">
@@ -165,7 +166,7 @@
         });
         var p = new Ext.Panel({
             region: 'center',
-            html: "<iframe name=PageFrame src='/ams/site/index' frameborder='no'  width='100%' scrolling='no' height='100%' />"
+            html: "<iframe name=PageFrame src='/ams/site/index2' frameborder='no'  width='100%' scrolling='no' height='100%' />"
         });
         new Ext.Viewport(
             {

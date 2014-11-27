@@ -44,6 +44,7 @@ class CountController extends ControllerBase
     public function singleInquiriesListAction()
     {
         $number = $this->request->get("Number");
+        $isClean = $this->request->get("IsClean");
 
         if ($number != null) {
             $c = Customer::findByNumber($number);
@@ -70,6 +71,12 @@ class CountController extends ControllerBase
             $list = array();
 
             foreach ($arr as $a) {
+                if($isClean == 1){
+                    if($a->IsClean != 1) continue;
+                }
+                else {
+                    if($a->IsClean == 1) continue;
+                }
                 $list[] = $a->dump();
             }
 

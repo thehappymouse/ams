@@ -61,6 +61,12 @@ class ControllerBase extends Controller
         return date("Y-m-d H:i:s");
     }
 
+    public function getDateOnly($time = null){
+
+        if (!$time) $time = time();
+        return date("Y-m-d", $time);
+    }
+
     /**
      * 获取日期 2000-01-01
      */

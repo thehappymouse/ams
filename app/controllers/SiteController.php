@@ -16,8 +16,9 @@ class SiteController extends ControllerBase
     //Home 个人排名指标柱形图
     public function getSingleBar()
     {
-        $users = User::find("Role=1");
+        $users = User::find("Role = 1 AND TeamID=" . $this->loginUser["TeamID"]);
 
+        $allMoney = 0;
         $uData = array();
         $data = array();
         foreach ($users as $user) {
@@ -31,25 +32,25 @@ class SiteController extends ControllerBase
             $build->columns("SUM(Money) AS Money");
 
             $r = $build->getQuery()->execute()->getFirst();
-            $uData[$user->Name] = (int)$r->Money;
+            $uData[$user->Name] = (float)$r->Money;
+            $allMoney += (float)$r->Money;
         }
 
-        foreach ($uData as $key => $ud) {
+        $avge = $allMoney / count($users);
 
+        foreach ($uData as $key => $ud) {
             $row = array();
             $row["name"] = $key;
             $row["value"] = $ud;
             $row["views"] = Config::getValue("IndexLine");
-            $row["avge"] = 80;
+            $row["avge"] = $avge;
             $data[] = $row;
         }
         return json_encode($data);
     }
 
-    public function getArrarsCount()
+    public function getArrarsCount($seg)
     {
-        $seg = DataUtil::getSegNameArray($this->loginUser["ID"]);
-
         $data = array();
         for ($i = 0; $i < 4; $i++) {
             $row = array();
@@ -78,71 +79,64 @@ class SiteController extends ControllerBase
         return json_encode($data);
     }
 
-    public function getCut()
+    public function getCut($seg)
     {
-        $seg = DataUtil::getSegNameArray($this->loginUser["ID"]);
 
         $data = array(
             array("season" => "已停电", "total" => 0),
             array("season" => "可停电", "total" => 0),
-            array("season" => "已复电", "total" => 0),
+            array("season" => "特殊客户", "total" => 0),
             array("season" => "无", "total" => 0));
 
         if ($seg) {
 
-            $r = $this->getBuilder("Cutinfo", $seg)->columns("COUNT(*) as Count")->andWhere("ResetTime is null")->getQuery()->execute()->getFirst();
+            $r = $this->getBuilder("Customer", $seg)->columns("COUNT(*) as Count")->andWhere("IsCut = 1")->getQuery()->execute()->getFirst();
             $data[0]["total"] = $r->Count;
 
             $r = $this->getBuilder("Customer", $seg)->columns("COUNT(*) as Count")->andWhere("PressCount >= 2 and IsCut != 1")->getQuery()->execute()->getFirst();
             $data[1]["total"] = $r->Count;
 
-            $r = $this->getBuilder("Cutinfo", $seg)->columns("COUNT(*) as Count")->andWhere("ResetTime is not null")->getQuery()->execute()->getFirst();
+            $r = $this->getBuilder("Customer", $seg)->columns("COUNT(*) as Count")->andWhere("IsSpecial = 1")->getQuery()->execute()->getFirst();
             $data[2]["total"] = $r->Count;
+
+
+            $r = $this->getBuilder("Customer", $seg)->columns("COUNT(*) as Count")->getQuery()->execute()->getFirst();
+            $data[3]["total"] = $r->Count - $data[0]["total"] - $data[1]["total"] - $data[2]["total"];
         }
 
         return json_encode($data);
     }
 
     /**
-     * 当年 各月欠费户数. 如果是1月，怎么办？
+     * 欠费金额月份分布图
      */
-    public function getArrarsMonth()
+    public function getArrarsMonth($seg)
     {
+        $year = $this->request->get("year");
+        if(!$year) $year = date("Y");
 
-        $seg = DataUtil::getSegNameArray($this->loginUser["ID"]);
-        $rs = array();
-        if ($seg) {
-            $builder = $this->getBuilder("Arrears", $seg);
-
-            $builder->from("Arrears")->columns("YearMonth, count(DISTINCT CustomerNumber) AS Count");
-            $builder->groupBy("YearMonth");
-            $rs = $builder->getQuery()->execute();
-        } else {
-
-        }
-        $dataX = array();
         $data = array();
 
-        for ($i = 1; $i <= (int)date('m'); $i++) {
-            $ym = date('Y') . str_pad($i, 2, "0", STR_PAD_LEFT);
-            $dataX[] = $ym;
-            $count = 0;
-            if ($rs) {
-                foreach ($rs as $r) {
+        if ($seg) {
+            for ($i = 1; $i <= 12; $i++) {
+                $m = str_pad($i, 2, "0", STR_PAD_LEFT);
+                $ym = $year . $m;
 
-                    if ($r->YearMonth == $ym && in_array($r->YearMonth, $dataX)) {
-                        $count += $r->Count;
-                    }
-                }
+                $builder = $this->getBuilder("Arrears", $seg);
+
+                $builder->from("Arrears")->columns("SUM(Money) as Money, count(DISTINCT CustomerNumber) as Count");
+                $builder->andWhere("YearMonth=:ym:", array("ym" => $ym));
+                $rs = $builder->getQuery()->execute()->getFirst();
+
+                $row = array();
+                $row["name"] = $ym;
+                $row["value"] = $rs->Money;
+                $row["views"] = $rs->Count;
+                $data[] = $row;
             }
-            $row = array();
-            $row["name"] = $ym;
-            $row["value"] = $count;
-            $data[] = $row;
+
         }
-
-
-        return json_encode($data);
+        return $data;
     }
 
     private function teamindex($teamid)
@@ -163,7 +157,6 @@ class SiteController extends ControllerBase
             }
             $sort++;
         }
-
         return $sort;
     }
 
@@ -193,18 +186,22 @@ class SiteController extends ControllerBase
         return $sort;
     }
 
+    /**
+     * 欠费情况。 回收率从charge表计算。 欠费数据从欠费表中查询
+     * @param $seg
+     * @return array
+     */
     private function qianfeiqingkuangBySeg($seg)
     {
         $data = array("Rate" => 0, "CountRate" => 0, "UserIndex" => 0, "CustomerCount" => 0, "ArrearCount" => 0, "Money" => 0);
 
         if (count($seg) > 0) {
-
-
             //按电费回收率进行排名
 //            $data["UserIndex"] = $r->Money;
 
             $builder = $this->getBuilder("Arrears", $seg);
             $builder->columns(array("COUNT(DISTINCT CustomerNumber) AS CustomerCount", "COUNT(ID) AS ArrearCount", "SUM(Money) AS Money"));
+            $builder->andWhere("IsClean=1");
             $result = $builder->getQuery()->execute()->getFirst();
             $data = array_merge($data, (array)$result);
 
@@ -214,10 +211,20 @@ class SiteController extends ControllerBase
 
             $udata = (array)$builder->getQuery()->execute()->getFirst();
 
+
             if ($udata["Money"]) {
                 $data["Rate"] = number_format((100 * $data["Money"] / $udata["Money"]), 2, ".", "") . "%";
                 $data["CountRate"] = number_format((100 * $data["CustomerCount"] / $udata["Count"]), 2, ".", "") . "%";
             }
+
+            $builder = $this->getBuilder("Arrears", $seg);
+            $builder->columns(array("COUNT(DISTINCT CustomerNumber) AS CustomerCount", "COUNT(ID) AS ArrearCount", "SUM(Money) AS Money"));
+            $builder->andWhere("IsClean=0");
+            $result = $builder->getQuery()->execute()->getFirst();
+            $data["Money"] = $result->Money;
+            $data["CustomerCount"] = $result->CustomerCount;
+            $data["ArrearCount"] = $result->ArrearCount;
+
 
         }
         return $data;
@@ -226,55 +233,64 @@ class SiteController extends ControllerBase
     /**
      * 欠费情况 抄表员登录，统计个人情况。班长登录，统计班组情况
      */
-    private function qianfeiqingkuang()
+    private function qianfeiqingkuang($seg)
     {
-
-        if (ROLE_MATER == $this->loginUser["Role"]) {
-            $seg = DataUtil::getSegNameArray($this->loginUser["ID"]);
-        } else if (ROLE_MATER_LEAD == $this->loginUser["Role"]) {
-
-            $seg = DataUtil::getTeamSegNameArray($this->loginUser["TeamID"]);
-        }
-
         $data = $this->qianfeiqingkuangBySeg($seg);
 
+
         if (ROLE_MATER == $this->loginUser["Role"]) {
-            $seg = DataUtil::getSegNameArray($this->loginUser["ID"]);
-
-
             $data["UserIndex"] = $this->userindex($this->loginUser["ID"]);
 
         } else if (ROLE_MATER_LEAD == $this->loginUser["Role"]) {
-
-            $seg = DataUtil::getTeamSegNameArray($this->loginUser["TeamID"]);
             $data["UserIndex"] = $this->teamindex($this->loginUser["TeamID"]);
         }
-
 
         return $data;
     }
 
     /**
-     * 昨日檄费
+     * 昨日檄费 表格
      */
-    private function yestoryday_jifei()
+    private function yestoryday_jifei($seg)
     {
         $yestarday = array("Count" => 0, "Money" => 0);
 
-        if (ROLE_MATER == $this->loginUser["Role"]) {
-            $seg = DataUtil::getSegNameArray($this->loginUser["ID"]);
-        } else if (ROLE_MATER_LEAD == $this->loginUser["Role"]) {
-            $seg = DataUtil::getTeamSegNameArray($this->loginUser["TeamID"]);
-        }
 
         $builder = $this->getBuilder("Charge", $seg);
         $builder->columns("COUNT( DISTINCT CustomerNumber) as Count, SUM(Money) as Money");
         $builder->andWhere("Time BETWEEN :yd: AND :today:");
 
-        $r = $builder->getQuery()->execute(array("yd" => $this->getDate(time() - 24 * 3600), "today" => $this->getDate()))->getFirst();
+        $r = $builder->getQuery()->execute(array("yd" => $this->getDateOnly(time() - 24 * 3600), "today" => $this->getDateOnly()))->getFirst();
 
         $yestarday = (array)$r;
         return $yestarday;
+    }
+
+    /**
+     * 昨日檄费 桩装图
+     * @param $seg
+     */
+    private function getYestaryQfqk($seg)
+    {
+        $seg = DataUtil::getTeamSegNameArray($this->loginUser["TeamID"]);
+        $data = array();
+        $builder = $this->getBuilder("Charge", $seg);
+        $builder->columns(array("SUM(Money) as Money", "SegUser"));
+        $builder->andWhere("Time BETWEEN :yd: AND :today:");
+        $builder->groupBy("SegUser");
+        $rs = $builder->getQuery()->execute(array("yd" => $this->getDateOnly(time() - 24 * 3600), "today" => $this->getDateOnly()));
+
+//        var_dump($builder->getQuery());exit;
+
+        foreach ($rs as $r) {
+            $row = array();
+
+            $row["name"] = $r->SegUser;
+            $row["visits"] = $r->Money;
+            $data[] = $row;
+        }
+
+        return json_encode($data);
     }
 
     /**
@@ -283,25 +299,25 @@ class SiteController extends ControllerBase
      */
     public function indexAction()
     {
-        $this->qianfeiqingkuang();
 
-        $seg = DataUtil::getSegNameArray($this->loginUser["ID"]);
-        $data = array("Rate" => 0, "CountRate" => 0, "UserIndex" => 0, "CustomerCount" => 0, "ArrearCount" => 0, "Money" => 0);
+
+        if (ROLE_MATER == $this->loginUser["Role"]) {
+            $seg = DataUtil::getSegNameArray($this->loginUser["ID"]);
+        } else if (ROLE_MATER_LEAD == $this->loginUser["Role"]) {
+            $seg = DataUtil::getTeamSegNameArray($this->loginUser["TeamID"]);
+        }
+
+        $data = $this->qianfeiqingkuang($seg);
 
         $press = array("Rate" => 0, "NoPressCustomer" => 0, "NoPressMoney" => 0);
 
         if (count($seg) > 0) {
             $builder = $this->getBuilder("Arrears", $seg);
             $builder->columns(array("COUNT(DISTINCT CustomerNumber) AS CustomerCount", "COUNT(ID) AS ArrearCount", "SUM(Money) AS Money"));
-            $result = $builder->getQuery()->execute()->getFirst();
-            $data = array_merge($data, (array)$result);
 
             $builder = $this->getBuilder("Arrears", $seg);
             $builder->columns("COUNT( DISTINCT CustomerNumber) as Count, SUM(Money) as Money");
             $builder->andWhere("IsClean = 1");
-            $r = $builder->getQuery()->execute()->getFirst();
-            $data["Rate"] = number_format((100 * $r->Money / $data["Money"]), 2, ".", "") . "%";
-            $data["CountRate"] = number_format((100 * $r->Count / $data["CustomerCount"]), 2, ".", "") . "%";
 
 
             $builder = $this->getBuilder("Charge", $seg);
@@ -317,17 +333,27 @@ class SiteController extends ControllerBase
             $press["NoPressMoney"] = $r->NoPressMoney;
         }
 
-        $data = $this->qianfeiqingkuang();
         $this->view->arrear = $data;
         $this->view->press = $press;
-        $this->view->cutinfo = $this->getCut();
-        $this->view->arrcount = $this->getArrarsCount();
+        $this->view->cutinfo = $this->getCut($seg);
+        $this->view->arrcount = $this->getArrarsCount($seg);
         $this->view->sig = $this->getSingleBar();
-        $this->view->yy = $this->getArrarsMonth();
         $this->view->lineshow = $this->loginUser["Role"] == ROLE_ADMIN;
-        $this->view->yesterday = $this->yestoryday_jifei();
+        $this->view->yesterday = $this->yestoryday_jifei($seg);
+        $this->view->zrjf = $this->getYestaryQfqk($seg);
     }
 
+    public function yearmonthAction()
+    {
+        if (ROLE_MATER == $this->loginUser["Role"]) {
+            $seg = DataUtil::getSegNameArray($this->loginUser["ID"]);
+        } else if (ROLE_MATER_LEAD == $this->loginUser["Role"]) {
+            $seg = DataUtil::getTeamSegNameArray($this->loginUser["TeamID"]);
+        }
+        $data = $this->getArrarsMonth($seg);
+        echo json_encode($data);
+        exit;
+    }
 
     /**
      * 个人促费情况

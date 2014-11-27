@@ -32,13 +32,19 @@ class  ImportController extends ControllerBase
         $id = $this->request->get("ID");
         $money = $this->request->get("Money");
 
-        $arrear = new Arrears();
-
         $arrear = Arrears::findFirst($id);
         if (!$arrear) {
             $this->ajax->flushError("没有相关的欠费信息");
         }
         $arrear->Money = $money;
+        $arrear->YearMonth = $this->request->get("YearMonth");
+        $arrear->CustomerName = $this->request->get("CustomerName");
+//        $arrear->CustomerNumber = $this->request->get("CustomerNumber");
+        $arrear->Segment = $this->request->get("Segment");
+        $arrear->SegUser = $this->request->get("SegUser");
+
+
+
         $r = $arrear->save();
         if($r){
             CustomerHelper::SyncCustomerByNumber($arrear->CustomerNumber);
