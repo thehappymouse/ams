@@ -16,12 +16,15 @@ class ReportNewHelper extends HelperBase
             "Name" => $name,
             "MonthDatas" => array(),
             //用户汇总数据   应收金额，欠费金额，应收户数，欠费户数
-            "AllData" => array("AllMoney" => 0, "ArrearMoney" => 0, "AllCount" => 0, "ArrearCount" => 0)
+            "AllData" => array("AllMoney" => 0, "ArrearMoney" => 0, "AllCount" => 0, "ArrearCount" => 0, "ClearMoney" => 0, "ClearCount" => 0)
         );
 
 
-        foreach ($month_arr as $key => $month) {
+        foreach ($month_arr as  $month) {
+            $key = $month;
             $clear = self::getSegUserMonthCharge($seguser, $month);
+            $qianfei = self::getSegUserQianfei($seguser, $month);
+
 
             $b = parent::getModelManager()->createBuilder()->columns(array("SUM(Money) as Money", "SUM(House) as House"))
                 ->from("Usermoney")
@@ -39,22 +42,21 @@ class ReportNewHelper extends HelperBase
             }
 
             $row = array(
-                "ArrearMoney" => $umoney, //欠费余额
+                "ArrearMoney" => $qianfei->Money, //欠费余额
+                "ArrearHouse" => $qianfei->Count, //欠费户数
                 "uMoney" => $umoney, //应收电费
                 "uHouse" => $umoney, //应收户数
-                "ArrearHouse" => $uhouse, //欠费户数
                 "MoneyRate" => 0,
                 "HouseRate" => 0
             );
 
-            if ($clear) {
-
-                $row["ArrearMoney"] = $umoney - $clear->Money; //欠费余额
-                $row["ArrearHouse"] = $uhouse - $clear->Count; //欠费户数
-                $row["MoneyRate"] = number_format(null == $umoney ? 100 : 100 * $clear->Money / $umoney, 2);
-                $row["HouseRate"] = number_format(null == $umoney ? 100 : 100 * $clear->Count / $uhouse, 2);
+            if ($clear && $umoney) {
+                $row["MoneyRate"] = number_format(null == $umoney ? 100 : 100 * ( $clear->Money) / $umoney, 2);
+                $row["HouseRate"] = number_format(null == $umoney ? 100 : 100 * ( $clear->Count) / $uhouse, 2);
             }
 
+            $data["AllData"]["ClearMoney"] += $clear ? $clear->Money: 0;
+            $data["AllData"]["ClearCount"] += $clear ? $clear->Count: 0;
             $data["AllData"]["ArrearMoney"] += $row["ArrearMoney"];
             $data["AllData"]["AllMoney"] += $umoney;
             $data["AllData"]["ArrearCount"] += $row["ArrearHouse"];
@@ -64,14 +66,14 @@ class ReportNewHelper extends HelperBase
         }
 
         if ($data["AllData"]["AllMoney"] > 0) {
-            $data["AllData"]["MoneyRate"] = 100 - $data["AllData"]["ArrearMoney"] * 100 / $data["AllData"]["AllMoney"];
+            $data["AllData"]["MoneyRate"] = $data["AllData"]["ClearMoney"] * 100 / $data["AllData"]["AllMoney"];
             $data["AllData"]["MoneyRate"] = number_format($data["AllData"]["MoneyRate"], 2);
         } else {
             $data["AllData"]["MoneyRate"] = 0;
         }
 
         if ($data["AllData"]["AllCount"] > 0) {
-            $data["AllData"]["CountRate"] = 100 - $data["AllData"]["ArrearCount"] * 100 / $data["AllData"]["AllCount"];
+            $data["AllData"]["CountRate"] = $data["AllData"]["ClearCount"] * 100 / $data["AllData"]["AllCount"];
             $data["AllData"]["CountRate"] = number_format($data["AllData"]["CountRate"], 2);
         } else {
             $data["AllData"]["CountRate"] = 0;
@@ -129,22 +131,40 @@ class ReportNewHelper extends HelperBase
         $arr = array();
         for ($i = 0; $i <= $month; $i++) {
             $key = date("Ym", mktime(0, 0, 0, $m1 + $i, 1, $year1));
-            $arr[$key][] = date("Y-m-d H:i:s", mktime(0, 0, 0, $m1 + $i, 1, $year1));
-            $arr[$key][] = date("Y-m-d H:i:s", mktime(23, 59, 59, $m1 + $i + 1, null, $year1));
+            $arr[] = $key;
+//            $arr[$key][] = date("Y-m-d H:i:s", mktime(0, 0, 0, $m1 + $i, 1, $year1));
+//            $arr[$key][] = date("Y-m-d H:i:s", mktime(23, 59, 59, $m1 + $i + 1, null, $year1));
         }
 
         return $arr;
     }
 
+    //抄表员名称的 欠费金额
+    private static function getSegUserQianfei($seg, $month)
+    {
+
+        $builder = parent::getModelManager()->createBuilder();
+        $results = $builder->columns(array("SUM(Money) as Money", "Count( DISTINCT CustomerNumber) AS Count", "SegUser"))
+            ->from("Arrears")
+            ->andWhere("IsClean!=1")
+            ->andWhere("YearMonth=:ym:")
+            ->inWhere("SegUser", $seg)
+            ->getQuery()->execute(array("ym" => $month));
+
+        return $results->getFirst();
+    }
+
     private static function getSegUserMonthCharge($seg, $month)
     {
+
         $builder = parent::getModelManager()->createBuilder();
         $results = $builder->columns(array("SUM(Money) as Money", "Count( DISTINCT CustomerNumber) AS Count", "SegUser"))
             ->from("Charge")
-            ->andWhere("Time BETWEEN :start: and :end:")
+            ->andWhere("YearMonth=:start:")
+//            ->andWhere("Time BETWEEN :start: and :end:")
             ->inWhere("SegUser", $seg)
             ->groupBy("SegUser")
-            ->getQuery()->execute(array("start" => $month[0], "end" => $month[1]));
+            ->getQuery()->execute(array("start" => $month));
         return $results->getFirst();
     }
 

@@ -35,13 +35,11 @@ class ManagerController extends ControllerBase
         foreach ($users as $u) {
 
 
-
             $row = $u->dump();
             if ($u->Team) {
 
                 $row["TeamName"] = $u->Team->Name;
-            }
-            else {
+            } else {
                 $row["TeamName"] = "";
             }
             $data[] = $row;
@@ -79,12 +77,13 @@ class ManagerController extends ControllerBase
         if ($id && (($u = Team::findFirst($id)) != null)) {
 
             $user = User::findFirst("TeamID=$id");
-            if($user){
+            if ($user) {
                 $this->ajax->flushError("班组下存在用户，无法删除");
             }
 
-            $this->ajax->logData->Data =  $u->Name;
+            $this->ajax->logData->Data = $u->Name;
             $u->delete();
+
             $this->ajax->flushOk("班组信息已删除");
         } else {
             $this->ajax->flushError("没有这个班组");
@@ -100,7 +99,7 @@ class ManagerController extends ControllerBase
         $this->ajax->logData->Action = "删除用户";
         $id = $this->request->get("ID");
         if ($id && (($u = User::findFirst($id)) != null)) {
-            $this->ajax->logData->Data =  $u->Name;
+            $this->ajax->logData->Data = $u->Name;
             $u->delete();
             $this->ajax->flushOk("用户已删除");
         } else {
@@ -119,7 +118,7 @@ class ManagerController extends ControllerBase
      */
     public function BuildAjaxAction()
     {
-        $this->ajax->logData->Action="创建用户";
+        $this->ajax->logData->Action = "创建用户";
         $name = $this->request->get("UserName");
         $this->ajax->logData->Data = $name;
         if (User::findFirst(array("Name=:name:", "bind" => array("name" => $name)))) {
@@ -167,12 +166,19 @@ class ManagerController extends ControllerBase
 
     public function ChangeIndexlineAction()
     {
-
         $key = "IndexLine";
         $value = $this->request->get($key);
-        Config::setValue($key, $value);
+//        Config::setValue($key, $value);
 
-        $this->ajax->flushOk("操作已成功");
+        $t = Team::findFirst("ID=" . $this->loginUser["TeamID"]);
+        if ($t) {
+            $t->LineNumber = $value;
+            $t->save();
+            $this->ajax->flushOk("操作已成功");
+        } else {
+            $this->ajax->flushOk("班组不存在");
+        }
+
     }
 
     /**
@@ -186,18 +192,16 @@ class ManagerController extends ControllerBase
         $newpass = $this->request->get("newPassWord");
         $oldpass = $this->request->get("oldPassWord");
 
-        if($user->Pass == sha1($oldpass)){
+        if ($user->Pass == sha1($oldpass)) {
 
             $user->Pass = sha1($newpass);
-            if($user->save()){
+            if ($user->save()) {
                 $this->ajax->flushOk("操作已成功");
-            }
-            else {
+            } else {
                 var_dump($user->getMessages());
             }
 
-        }
-        else {
+        } else {
             $this->ajax->flushError("原始密码不正确");
         }
 
@@ -218,7 +222,7 @@ class ManagerController extends ControllerBase
             $u->Pass = sha1($pass);
         }
 
-        if(($g = $this->request->get("TeamID")) != null){
+        if (($g = $this->request->get("TeamID")) != null) {
             $u->TeamID = $this->request->get("TeamID");
         }
 
@@ -254,7 +258,7 @@ class ManagerController extends ControllerBase
      */
     public function GroupBuildAjaxAction()
     {
-        $this->ajax->logData->Action="创建班组";
+        $this->ajax->logData->Action = "创建班组";
         $team = new Team();
         $team->Name = $this->request->get("Team");
         $team->Type = $this->request->get("Duty");

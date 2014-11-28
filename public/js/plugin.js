@@ -86,7 +86,7 @@ spliceArr = function  (v)
         arr.push(item.data.sort);
     })
     if (arr.length == 0) {
-        return;
+        return [];
     }
     var tempArray = arr.slice(0);
     for (var i = 0; i< tempArray.length; i++) {
@@ -98,6 +98,7 @@ spliceArr = function  (v)
             }
         }
     }
+
     return tempArray;
 }
 arrearsMoney = 0;

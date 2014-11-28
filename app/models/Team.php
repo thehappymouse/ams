@@ -18,6 +18,12 @@ class Team extends \Phalcon\Mvc\Model
 
     /**
      *
+     * @var integer
+     */
+    public $LineNumber;
+
+    /**
+     *
      * @var string
      */
     public $Name;
@@ -51,6 +57,7 @@ class Team extends \Phalcon\Mvc\Model
             'ID' => 'ID', 
             'Name' => 'Name', 
             'Type' => 'Type', 
+            'LineNumber' => 'LineNumber',
             'TypeName' => 'TypeName'
         );
     }

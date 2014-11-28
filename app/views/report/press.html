@@ -107,58 +107,78 @@ Ext.onReady(function(){
 
     var myStore = new Ext.data.Store({
         url: '/ams/reportsearch/press',
-        reader: new Ext.data.JsonReader({
+        reader: new Ext.data.JsonReader(
+        {
             root: 'rows',
             idProperty: 'id'
         }, PersonRecord)
     });
 
-    var chaobiaoPanel = new Ext.grid.PivotGrid({
+    var chaobiaoPanel = new Ext.grid.PivotGrid(
+    {
         store     : myStore,
         aggregator: 'sum',
         title     : '抄表员',
-        autoHeight:true,
+        autoHeight: true,
         measure   : 'Value',
-        viewConfig: {
-            autoFill:true,
+        viewConfig: 
+        {
+            autoFill: true,
             title: '抄表员<br/>欠费年月'
         },
-        tbar:[{
-            text:'上一页',
-            disabled:true,
+        tbar:[
+        {
+            text: '上一页',
+            disabled: true,
             id: 'lastOne',
-            handler:function(){
+            handler: function(){
                 var data = infoSearch.getForm().getValues();
                 data.start = chaobiaoSortLast;
-                var arr =[];
-                chaobiaoPanel.getStore().load({
+                var arr = [];
+                chaobiaoPanel.getStore().load(
+                {
                     params: data,
-                    callback:function(v) {
+                    callback: function(v) 
+                    {
                         arr = spliceArr(v);
-                        chaobiaoSortLast = arr[0] - 6;
-                        chaobiaoSortnext =  arr[arr.length - 1];
+                        if (0 != arr.length)
+                        {
+                            chaobiaoSortLast = arr[0] - 6;
+                            chaobiaoSortnext =  arr[arr.length - 1];
+                        }
                     }
                 });
             }
-        },'->',{
-            text:'下一页',
-            disabled:true,
+        }, '->', {
+            text: '下一页',
+            disabled: true,
             id: 'nextOne',
-            handler:function(){
+            handler: function()
+            {
                 var data = infoSearch.getForm().getValues();
                 data.start = chaobiaoSortnext;
-                var arr =[];
-                chaobiaoPanel.getStore().load({
+for (i in data)
+{
+    console.log(data[i]);
+}
+                var arr = [];
+                chaobiaoPanel.getStore().load(
+                {
                     params: data,
-                    callback:function(v, action) {
+                    callback: function(v, action) 
+                    {
                         arr = spliceArr(v);
-                        chaobiaoSortLast = arr[0] - 6;
-                        chaobiaoSortnext =  arr[arr.length - 1];
+                        if (0 != arr.length)
+                        {
+                            chaobiaoSortLast = arr[0] - 6;
+                            chaobiaoSortnext =  arr[arr.length - 1];
+                        }
                     }
                 });
             }
         }],
-        leftAxis: [{
+        leftAxis: [
+        {
             dataIndex: 'YearMonth'
         }],
         topAxis: [/*{
@@ -216,7 +236,9 @@ Ext.onReady(function(){
             root: 'rows'
         }, PersonRecord)
     });
-    var groupPanel = new Ext.grid.PivotGrid({
+
+    var groupPanel = new Ext.grid.PivotGrid(
+    {
         store     : hr_Store,
         aggregator: 'sum',
         title     : '班组情况',
@@ -226,82 +248,103 @@ Ext.onReady(function(){
             autoFill:true,
             title: '抄表员<br/>欠费年月'
         },
-        tbar:[{
-            text:'上一页',
+        tbar:[
+        {
+            text: '上一页',
             disabled:true,
             id: 'last',
-            handler:function(){
+            handler: function()
+            {
                 var data = infoSearch.getForm().getValues();
                 data.start = groupSortnext;
                 var arr =[];
-                groupPanel.getStore().load({
+                groupPanel.getStore().load(
+                {
                     params: data,
-                    callback:function(v, action) {
+                    callback: function(v, action) 
+                    {
                         arr = spliceArr(v);
-                        groupSortLast = arr[0] - 6;
-                        groupSortnext =  arr[arr.length - 1];
+                        if (0 != arr.length)
+                        {
+                            chaobiaoSortLast = arr[0] - 6;
+                            chaobiaoSortnext =  arr[arr.length - 1];
+                        }
 
                     }
                 });
             }
         },'->',{
-            text:'下一页',
-            disabled:true,
+            text: '下一页',
+            disabled: true,
             id: 'next',
-            handler:function(){
+            handler: function()
+            {
                 var data = infoSearch.getForm().getValues();
                 data.start = groupSortnext;
                 var arr =[];
-                groupPanel.getStore().load({
+                groupPanel.getStore().load(
+                {
                     params: data,
-                    callback:function(v, action) {
+                    callback: function(v, action) 
+                    {
                         arr = spliceArr(v);
-                        groupSortLast = arr[0] - 6;
-                        groupSortnext =  arr[arr.length - 1];
+                        if (0 != arr.length)
+                        {
+                            chaobiaoSortLast = arr[0] - 6;
+                            chaobiaoSortnext =  arr[arr.length - 1];
+                        }
 
                     }
                 });
             }
         }],
-        leftAxis: [{
+        leftAxis: [
+        {
             dataIndex: 'YearMonth'
         }],
-        topAxis: [{
+        topAxis: [
+        {
             dataIndex: 'sort'
-        },{
+        }, {
 
             dataIndex: 'Name'
-        },{
+        }, {
             dataIndex: 'Action'
         }],
-        bbar:[{
+        bbar:[
+        {
             text: 'excel',
             iconCls: 'excel',
-            handler: function(btn, pressed){
+            handler: function(btn, pressed)
+            {
                 if (groupPanel.getStore().data.length == 0) {
                     Ext.MessageBox.alert('提示','请先查询数据');
                     return;
                 }
                 var data = infoSearch.getForm().getValues();
                 msgTip.show();
-                infoSearch.getForm().submit({
+                infoSearch.getForm().submit(
+                {
                     params: data,
                     url:'/ams/export/ReportPress',
-                    success:function(v,action){
+                    success: function(v, action)
+                    {
                         var re = Ext.decode(action.response.responseText);
                         msgTip.hide();
-                        Ext.MessageBox.alert('提示',"<a target='_blank' href='"+re.msg+"'>下载</a>");
+                        Ext.MessageBox.alert('提示',"<a target='_blank' href='" + re.msg + "'>下载</a>");
                     },
-                    failure:function(v,action) {
+                    failure: function(v, action) 
+                    {
                         msgTip.hide();
-                        Ext.MessageBox.alert('提示','创建失败');
+                        Ext.MessageBox.alert('提示', '创建失败');
                     }
                 })
             }
         }]
     });
 
-    groupPanel.getStore().on('load',function(v){
+    groupPanel.getStore().on('load',function(v)
+    {
         var total = v.totalLength;
         if (total != 0) {
             var array = spliceArr(v.data.items);
@@ -315,7 +358,8 @@ Ext.onReady(function(){
         }
     })
 
-    var chaobiaoTab = new Ext.TabPanel({
+    var chaobiaoTab = new Ext.TabPanel(
+    {
         activeTab: 0,
         plain:true,
         autoWidth:true,

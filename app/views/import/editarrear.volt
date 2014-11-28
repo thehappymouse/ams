@@ -170,11 +170,10 @@ Ext.onReady(function () {
             fields: ArrarsinfoFields
         });
 
-    var sm = new Ext.grid.CheckboxSelectionModel({singleSelect: true});
-    var listView = new Ext.grid.EditorGridPanel(
+    var sm = new Ext.grid.CheckboxSelectionModel({singleSelect: false});
+    var listView = new Ext.grid.GridPanel(
         {
             store: store,
-            multiSelect: true,
             title: '欠费信息',
             stripeRows: true,
             region: 'center',
@@ -246,13 +245,99 @@ Ext.onReady(function () {
                 Ext.Msg.alert('提示', '请选择记录！');
                 return;
             }
-            var rd = p.getSelectionModel().getSelections()[0];
+            var rds = p.getSelectionModel().getSelections();
+            if (rds.length == 1) {
+                var rd = p.getSelectionModel().getSelections()[0];
 
-            win.show();
-            Ext.getCmp("formpanel").getForm().loadRecord(rd);
+                win.show();
+                Ext.getCmp("formpanel").getForm().loadRecord(rd);
+            }
+            else {
+                var ids = [];
+                Ext.each(rds, function(r){
+                    ids.push(r.get("ID"));
+                })
+                var rd = {data:{"IDS":ids.join(",")}};
+                winMini.show();
+                winMini.items.itemAt(0).getForm().loadRecord(rd);
+            }
         })
     });
 
+    var winMini = new Ext.Window({
+        layout: 'fit',
+        width: 360,
+        height: 200,
+        closeAction: 'hide',
+        title: '修改数据',
+        bodyStyle: 'padding-top:30px;background:white;',
+        items: new Ext.FormPanel({
+            labelAlign: 'right',
+            url: '/ams/import/updatemoney',
+            items: [
+                {
+                    xtype: 'textfield',
+                    fieldLabel: '抄表员',
+                    name: 'SegUser'
+                },
+                new Ext.form.DateField({
+                    plugins: 'monthPickerPlugin',
+                    name: 'YearMonth',
+                    fieldLabel: '电费年月',
+                    width: 82,
+                    format: 'Ym'
+                }),
+                {
+                    xtype: 'numberfield',
+                    minValue: 0,
+                    fieldLabel: '电费金额',
+                    name: 'Money'
+                },
+                {
+                    xtype: 'hidden',
+                    name: "IDS",
+                    id: 'arrearIDS'
+                }
+            ]
+        }),
+        buttons: [
+            {
+                text: '提交',
+                handler: function (b, e) {
+
+                    var fp = b.findParentByType("window").items.itemAt(0);
+                    if (fp.getForm().isValid()) {
+                        fp.getForm().submit({
+                            method: 'GET',
+                            success: function (action, msg) {
+                                var text = Ext.decode(msg.response.responseText);
+                                if (text.success) {
+
+                                    Ext.Msg.alert('提示', text.msg);
+                                    b.findParentByType("window").hide();
+                                    listView.store.removeAll();
+                                    listView.store.reload();
+                                }
+                            },
+                            failure: function (action, msg) {
+                                var text = Ext.decode(msg.response.responseText);
+                                if (!text.success) {
+                                    listView.store.removeAll();
+                                    Ext.Msg.alert('提示', text.msg);
+                                }
+                            }
+                        })
+                    }
+                }
+            },
+            {
+                text: '关闭',
+                handler: function (b,e) {
+                    b.findParentByType("window").hide();
+                }
+            }
+        ]
+    });
 
     var win = new Ext.Window({
         layout: 'fit',
@@ -276,11 +361,6 @@ Ext.onReady(function () {
                     fieldLabel: '抄表员',
                     name: 'SegUser'
                 },
-//                {
-//                    xtype: 'textfield',
-//                    fieldLabel: '用户编号',
-//                    name: 'CustomerNumber'
-//                },
                 {
                     xtype: 'textfield',
                     fieldLabel: '用户名称',
@@ -292,11 +372,13 @@ Ext.onReady(function () {
                     name: 'Address',
                     width: 180
                 },
-                {
-                    xtype: 'numberfield',
+                new Ext.form.DateField({
+                    plugins: 'monthPickerPlugin',
+                    name: 'YearMonth',
                     fieldLabel: '电费年月',
-                    name: 'YearMonth'
-                },
+                    width: 82,
+                    format: 'Ym'
+                }),
                 {
                     xtype: 'numberfield',
                     minValue: 0,
@@ -305,7 +387,6 @@ Ext.onReady(function () {
                 },
                 {
                     xtype: 'hidden',
-                    id: 'arrearID',
                     name: 'ID'
                 }
             ]

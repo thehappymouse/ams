@@ -76,7 +76,7 @@ class ExcelImportUtils
      * 2014-11-02 如果抄表段已存在，但抄表员名称不同：新建记录，记录抄表员和抄表段的关系。旧关系不动
      * @param array $row
      */
-    private static function saveSegment(array $row)
+    public  static function saveSegment(array $row)
     {
         $s = Segment::findFirst("Number = '$row[Segment]'");
 

@@ -190,7 +190,7 @@ Ext.onReady(function(){
                         }),{
                             name: 'ReminderFeeValue',
                             xtype: 'textfield',
-                            value: 1,
+                            value: 2,
                             width:132
                         }],
                     anchor:'95%'
@@ -232,9 +232,9 @@ Ext.onReady(function(){
             },new QuietCombox({
                 fieldLabel: '特殊客户',
                 displayField:'Text',
-                valueField:'PowerOutages',
-                hiddenName:'PowerOutages',
-                fields:['Text','PowerOutages'],
+                valueField:'IsSpecial',
+                hiddenName:'IsSpecial',
+                fields:['Text','IsSpecial'],
                 data   : [['否', '0'],['是', '1'],['全部', '2']],
                 anchor:'95%'
             }),{

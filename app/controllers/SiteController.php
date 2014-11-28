@@ -17,6 +17,7 @@ class SiteController extends ControllerBase
     public function getSingleBar()
     {
         $users = User::find("Role = 1 AND TeamID=" . $this->loginUser["TeamID"]);
+        $team = Team::findFirst("ID=" . $this->loginUser["TeamID"]);
 
         $allMoney = 0;
         $uData = array();
@@ -42,7 +43,7 @@ class SiteController extends ControllerBase
             $row = array();
             $row["name"] = $key;
             $row["value"] = $ud;
-            $row["views"] = Config::getValue("IndexLine");
+            $row["views"] = $team->LineNumber; //Config::getValue("IndexLine");
             $row["avge"] = $avge;
             $data[] = $row;
         }
@@ -93,7 +94,7 @@ class SiteController extends ControllerBase
             $r = $this->getBuilder("Customer", $seg)->columns("COUNT(*) as Count")->andWhere("IsCut = 1")->getQuery()->execute()->getFirst();
             $data[0]["total"] = $r->Count;
 
-            $r = $this->getBuilder("Customer", $seg)->columns("COUNT(*) as Count")->andWhere("PressCount >= 2 and IsCut != 1")->getQuery()->execute()->getFirst();
+            $r = $this->getBuilder("Customer", $seg)->columns("COUNT(*) as Count")->andWhere("PressCount >= 2 and IsCut != 1 and IsSpecial != 1")->getQuery()->execute()->getFirst();
             $data[1]["total"] = $r->Count;
 
             $r = $this->getBuilder("Customer", $seg)->columns("COUNT(*) as Count")->andWhere("IsSpecial = 1")->getQuery()->execute()->getFirst();
@@ -167,21 +168,23 @@ class SiteController extends ControllerBase
      */
     private function userindex($uname)
     {
+
         $data = array();
-        $users = User::find("TeamID=1");
+        $users = User::find("TeamID=" . $this->loginUser["TeamID"]);
         foreach ($users as $u) {
             $seg = array($u->Name);
             $d = $this->qianfeiqingkuangBySeg($seg);
             $d["key"] = $u->ID;
+
             $data[] = $d;
         }
-        $sort = 0;
+        $sort = 1;
 
         foreach ($data as $d) {
             if ($uname == $d["key"]) {
                 break;
             }
-            ++$sort;
+            $sort++;
         }
         return $sort;
     }
@@ -219,7 +222,7 @@ class SiteController extends ControllerBase
 
             $builder = $this->getBuilder("Arrears", $seg);
             $builder->columns(array("COUNT(DISTINCT CustomerNumber) AS CustomerCount", "COUNT(ID) AS ArrearCount", "SUM(Money) AS Money"));
-            $builder->andWhere("IsClean=0");
+            $builder->andWhere("IsClean!=1");
             $result = $builder->getQuery()->execute()->getFirst();
             $data["Money"] = $result->Money;
             $data["CustomerCount"] = $result->CustomerCount;
@@ -338,7 +341,7 @@ class SiteController extends ControllerBase
         $this->view->cutinfo = $this->getCut($seg);
         $this->view->arrcount = $this->getArrarsCount($seg);
         $this->view->sig = $this->getSingleBar();
-        $this->view->lineshow = $this->loginUser["Role"] == ROLE_ADMIN;
+        $this->view->lineshow = $this->loginUser["Role"] == ROLE_MATER_LEAD;
         $this->view->yesterday = $this->yestoryday_jifei($seg);
         $this->view->zrjf = $this->getYestaryQfqk($seg);
     }

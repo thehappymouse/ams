@@ -30,30 +30,59 @@ class  ImportController extends ControllerBase
     public function updatemoneyAction()
     {
         $id = $this->request->get("ID");
-        $money = $this->request->get("Money");
+        $ids = $this->request->get("IDS");
 
-        $arrear = Arrears::findFirst($id);
-        if (!$arrear) {
-            $this->ajax->flushError("没有相关的欠费信息");
-        }
-        $arrear->Money = $money;
-        $arrear->YearMonth = $this->request->get("YearMonth");
-        $arrear->CustomerName = $this->request->get("CustomerName");
-//        $arrear->CustomerNumber = $this->request->get("CustomerNumber");
-        $arrear->Segment = $this->request->get("Segment");
-        $arrear->SegUser = $this->request->get("SegUser");
-
-
-
-        $r = $arrear->save();
-        if($r){
-            CustomerHelper::SyncCustomerByNumber($arrear->CustomerNumber);
-            $this->ajax->flushOk("操作已成功");
-        }
-        else {
-            var_dump($arrear->getMessages());exit;
+        if ($ids) {
+            $arrears = Arrears::find("ID IN ($ids)");
+        } else if ($id) {
+            $arrears = Arrears::find($id);
         }
 
+        foreach ($arrears as $arrear) {
+            if (!$arrear) {
+                $this->ajax->flushError("没有相关的欠费信息");
+                continue;
+            }
+
+            $money = $this->request->get("Money");
+            if (!empty($money)) {
+                $arrear->Money = $money;
+            }
+
+            $ym = $this->request->get("YearMonth");
+            if (!empty($ym)) {
+                $arrear->YearMonth = $ym;
+            }
+
+            $cname = $this->request->get("CustomerName");
+            if (!empty($cname)) {
+                $arrear->CustomerName = $cname;
+            }
+
+            $segment = $this->request->get("Segment");
+            if (!empty($segment)) {
+                $arrear->Segment = $segment;
+            }
+
+            $seguser = $this->request->get("SegUser");
+            if (!empty($seguser)) {
+                $arrear->SegUser = $seguser;
+            }
+
+            if($segment && $seguser){
+                ExcelImportUtils::saveSegment(array("SegUser" => $seguser, "Segment" => $segment, "SegmentName" => $seguser));
+            }
+
+            $r = $arrear->save();
+            if ($r) {
+                CustomerHelper::SyncCustomerByNumber($arrear->CustomerNumber);
+            } else {
+                var_dump($arrear->getMessages());
+                exit;
+            }
+        }
+
+        $this->ajax->flushOk("操作已成功");
     }
 
     /**

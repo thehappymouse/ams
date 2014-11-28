@@ -10,6 +10,7 @@ Ext.onReady(function () {
                     url: '/ams/manager/userdel',
                     params: {ID: value},
                     success: function () {
+                        listView.store.removeAll();
                         listView.store.reload();
                     }
                 })
@@ -121,7 +122,7 @@ Ext.onReady(function () {
         width: 151,
         id: 'teamModify',
         hiddenName: 'TeamID',
-        autoLoad: false
+        autoLoad: true
     });
 
     var submitForm = new Ext.FormPanel({

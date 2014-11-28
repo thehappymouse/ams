@@ -10,6 +10,7 @@ Ext.onReady(function(){
                       url:'/ams/manager/GroupDel',
                       params:{ID:value},
                       success:function(){
+                          listView.store.removeAll();
                           listView.store.reload();
                       }
                   })

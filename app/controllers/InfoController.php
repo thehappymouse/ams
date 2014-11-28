@@ -19,6 +19,7 @@ class InfoController extends ControllerBase
      */
     public function  TeamListAction()
     {
+        $arr = array();
         if ($this->role == ROLE_MATER || $this->role == ROLE_MATER_LEAD || $this->role == ROLE_TOLL || $this->role == ROLE_TOLL_LEAD) { //抄表员
             $teams = Team::find("ID=" . $this->loginUser["TeamID"]);
         } else {

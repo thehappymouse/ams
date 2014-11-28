@@ -268,6 +268,12 @@ class CustomerHelper extends HelperBase
                 $param["cutstyle"] = $p->CutType;
             }
 
+            //是否特殊客户
+            if ($p->IsSpecial != NULL && $p->IsSpecial != 2) {
+                $conditions .= " AND IsSpecial = :IsSpecial:";
+                $param["IsSpecial"] = $p->IsSpecial;
+            }
+
             //是否结清
             if ($p->IsClean != NULL && $p->IsClean != 2) {
                 $conditions .= " AND IsClean = :IsClean:";

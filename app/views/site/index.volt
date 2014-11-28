@@ -279,19 +279,24 @@ var bottomPane2 = new Ext.Panel(
         title: '欠费月份户数及金额的分布',
         height: 420,
         flex: 1,
-        tbar:[new QuietCombox({
-            displayField:'Text',
-            hiddenName:'Duty',
-            valueField:'Duty',
-            fields:['Text','Duty'],
-            data   : [['2014', '2014'], ['2013', 2013]],
-            width: 151,
-            listeners:{
-                'select': function(f){
-                    s2.load({params:{"year": f.getValue()}});
+        tbar:[
+            {
+                text: '月份选择  '
+            },
+            new QuietCombox({
+                displayField:'Text',
+                hiddenName:'Duty',
+                valueField:'Duty',
+                fields:['Text','Duty'],
+                data   : [['2014', '2014'], ['2013', 2013]],
+                width: 80,
+                listeners:{
+                    'select': function(f){
+                        s2.load({params:{"year": f.getValue()}});
+                    }
                 }
-            }
-        })],
+            })
+        ],
         items:[
             bottomPanel,bottomPane2
         ]
@@ -424,8 +429,52 @@ var bottomPane2 = new Ext.Panel(
             tested: 'QA',
             borderWidth: 'Border Width'
         },
-        source: {
+        initComponent : function(){
+            this.customRenderers = this.customRenderers || {};
+            this.customEditors = this.customEditors || {};
+            this.lastEditRow = null;
+            var store = new Ext.grid.PropertyStore(this);
+            this.propStore = store;
+            var cm = new Ext.grid.PropertyColumnModel(this, store);
+//            store.store.sort('name', 'ASC');
+            this.addEvents(
 
+                /**
+                 * @event beforepropertychange
+                 * Fires before a property value changes.  Handlers can return false to cancel the property change
+                 * (this will internally call {@link Ext.data.Record#reject} on the property's record).
+                 * @param {Object} source The source data object for the grid (corresponds to the same object passed in
+                 * as the {@link #source} config property).
+                 * @param {String} recordId The record's id in the data store
+                 * @param {Mixed} value The current edited property value
+                 * @param {Mixed} oldValue The original property value prior to editing
+                 */
+                'beforepropertychange',
+
+                /**
+                 * @event propertychange
+                 * Fires after a property value has changed.
+                 * @param {Object} source The source data object for the grid (corresponds to the same object passed in
+                 * as the {@link #source} config property).
+                 * @param {String} recordId The record's id in the data store
+                 * @param {Mixed} value The current edited property value
+                 * @param {Mixed} oldValue The original property value prior to editing
+                 */
+                'propertychange'
+            );
+            this.cm = cm;
+            this.ds = store.store;
+            Ext.grid.PropertyGrid.superclass.initComponent.call(this);
+
+            this.mon(this.selModel, 'beforecellselect', function(sm, rowIndex, colIndex){
+                if(colIndex === 0){
+                    this.startEditing.defer(200, this, [rowIndex, 1]);
+                    return false;
+                }
+            }, this);
+        },
+
+        source: {
             '排名': '{{arrear["UserIndex"]}}',
             '欠费户数': '{{arrear["CustomerCount"]}}',
             '欠费笔数': '{{arrear["ArrearCount"]}}',
