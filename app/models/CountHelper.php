@@ -87,6 +87,7 @@ class CountHelper extends HelperBase
 
         $ss = DataUtil::getSegName($uid);
 
+
         $query = "SELECT a.CutUserName, a.Arrear,b.Segment, a.CustomerNumber, b.ID, b.Name, b.Address, a.ResetTime, a.ResetStyle, a.ResetPhone
                          FROM Cutinfo as a LEFT JOIN Customer as b ON a.CustomerNumber = b.Number
                          WHERE a.ResetTime != '' AND a.CutUserName IN ($ss)";
@@ -118,7 +119,7 @@ class CountHelper extends HelperBase
             }
 
             $d2[$year]["Count"] = (int)$d2[$year]["Count"] + 1;
-            $d2[$year]["Money"] = (float)$d2[$year]["Money"] + $rs->Money;
+            $d2[$year]["Money"] = (float)$d2[$year]["Money"] + ($a ? $rs->Money : 0);
         }
 
 

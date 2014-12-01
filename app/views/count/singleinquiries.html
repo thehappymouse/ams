@@ -400,12 +400,12 @@ Ext.onReady(function () {
             });
     ArrarsView.getStore().on("load",function(p){
         var total = 0;
+        var moneys=0;
         Ext.each(p.data.items, function(it){
-            if (it.data.IsClean == 0) {
-                total++;
-            }
+            total++;
+            moneys += parseInt(it.data.Money);
         })
-        var tpl  = '共计：欠费'+total+'笔，'+arrearsMoney+'元';
+        var tpl  = '共计：欠费'+total+'笔，'+moneys+'元';
         Ext.getCmp('htmlID').setText(tpl);
     })
     ArrarsView.on('cellclick', function (grid, rowIndex, columnIndex, e) {

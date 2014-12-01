@@ -5,6 +5,31 @@ class ChargesController extends ControllerBase
 
     public function ChargesAction()
     {
+
+//        $db = $this->getDI()->get("db");
+//
+//        try
+//        {
+//            // Start transaction
+//            $db->begin();
+//
+//            $u = User::findFirst(110);
+//            $u->Name = "21111";
+//            $u->save();
+//            $db->commit();
+//
+//            throw new \Phalcon\Http\Client\Exception("D");
+//
+//        }
+//        catch (\Exception $e)
+//        {
+//            echo "Dx";
+//            $db->rollback();
+//
+//        }
+//
+//
+//        echo "D";exit;
         //收费界面
     }
 
@@ -233,6 +258,7 @@ class ChargesController extends ControllerBase
             $msg->Sender = $this->loginUser["Name"];
             $msg->Content = $customerModel->Name . "  已交费";
             $msg->RefCustomer = $customer;
+            $msg->IsRead = 0;
             $msg->IsImportant = $customerModel->IsCut;
             $msg->save();
 

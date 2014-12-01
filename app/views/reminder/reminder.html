@@ -296,8 +296,9 @@ Ext.onReady(function(){
                 url: '/ams/reminder/SearchFee',
                 baseParams: {
                     start: 0,
-                    limit: 5
+                    limit: _pageSize
                 },
+                storeId:"cuifeijilvStore",
                 fields: reminderFields,
                 root: 'data',
                 totalProperty: 'total'

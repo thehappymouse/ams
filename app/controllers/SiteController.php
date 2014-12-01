@@ -29,8 +29,9 @@ class SiteController extends ControllerBase
                 continue;
             }
 
-            $build = $this->getBuilder("Charge", $seg);
+            $build = $this->getBuilder("Arrears", $seg);
             $build->columns("SUM(Money) AS Money");
+            $build->andWhere("IsClean != 1");
 
             $r = $build->getQuery()->execute()->getFirst();
             $uData[$user->Name] = (float)$r->Money;
@@ -127,6 +128,8 @@ class SiteController extends ControllerBase
 
                 $builder->from("Arrears")->columns("SUM(Money) as Money, count(DISTINCT CustomerNumber) as Count");
                 $builder->andWhere("YearMonth=:ym:", array("ym" => $ym));
+                $builder->andWhere("IsClean != 1");
+
                 $rs = $builder->getQuery()->execute()->getFirst();
 
                 $row = array();

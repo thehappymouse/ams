@@ -52,7 +52,7 @@ freeView = new Ext.grid.GridPanel(
             {
                 text: '录入催费信息',
                 ref: '../add',
-                hidden: show_cuifei_btn == 1 ? false: true,
+                hidden: show_cuifei_btn == 1 ? false : true,
                 iconCls: 'add'
             }
         ],
@@ -118,7 +118,7 @@ freeView.on("render", function (p, e) {
         });
         var idString = ids.join(",");
         if (idString.length == 0) {
-            Ext.Msg.alert('提示', '请选择抄表段编号！');
+            Ext.Msg.alert('提示', '请选择电费年月！');
             return;
         }
         submitTabPanel.setActiveTab(0);
@@ -677,6 +677,11 @@ submit2Form = new Ext.FormPanel({
                                 cuifeiView.store.reload();
                                 tingdianView.store.reload();
                                 formWin.hide();
+
+                                var store = Ext.StoreMgr.get("cuifeijilvStore");
+                                if (store) {
+                                    Ext.StoreMgr.get("cuifeijilvStore").reload();
+                                }
                             },
                             failure: function (v, action) {
                                 try {

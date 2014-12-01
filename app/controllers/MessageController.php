@@ -42,8 +42,7 @@ class MessageController extends ControllerBase
      */
     public function countAction()
     {
-
-        $count = Message::count("IsRead IS NULL AND ToUserID=" . $this->loginUser["ID"]);
+        $count = Message::count("(IsRead <> 1 OR IsRead IS NULL) AND ToUserID=" . $this->loginUser["ID"]);
         $this->ajax->flushData($count);
 
     }

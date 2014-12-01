@@ -131,7 +131,7 @@ Ext.onReady(function(){
                     anchor:'95%',
                     items:[
                         new QuietCombox({
-                            width:50,
+                            width:40,
                             displayField:'Text',
                             valueField:'Arrears',
                             hiddenName:'Arrears',
@@ -140,14 +140,14 @@ Ext.onReady(function(){
                         }),{
                             name: 'ArrearsValue',
                             xtype: 'textfield',
-                            width:132
+                            width:95
                         }]
                 },{
                     xtype: 'compositefield',
                     fieldLabel: '欠费笔数',
                     items:[
                         new QuietCombox({
-                            width:50,
+                            width:40,
                             displayField:'Text',
                             valueField:'ArrearsItems',
                             hiddenName:'ArrearsItems',
@@ -156,7 +156,7 @@ Ext.onReady(function(){
                         }),{
                             name: 'ArrearsItemsValue',
                             xtype: 'textfield',
-                            width:132
+                            width:95
                         }],
                     anchor:'95%'
                 },
@@ -182,7 +182,7 @@ Ext.onReady(function(){
                     fieldLabel: '催费次数',
                     items:[
                         new QuietCombox({
-                            width:50,
+                            width:40,
                             displayField:'Text',
                             valueField:'ReminderFee',
                             hiddenName:'ReminderFee',
@@ -191,7 +191,7 @@ Ext.onReady(function(){
                         }),{
                             name: 'ReminderFeeValue',
                             xtype: 'textfield',
-                            width:132
+                            width:95
                         }],
                     anchor:'95%'
                 },
@@ -208,7 +208,7 @@ Ext.onReady(function(){
                     fieldLabel: '停电次数',
                     items:[
                     new QuietCombox({
-                        width:50,
+                        width:40,
                         displayField:'Text',
                         valueField:'PowerOutages',
                         hiddenName:'PowerOutages',
@@ -217,7 +217,7 @@ Ext.onReady(function(){
                     }),{
                         name: 'PowerOutagesValue',
                         xtype: 'textfield',
-                        width:132
+                        width:95
                     }],
                     anchor:'95%'
                 }]
@@ -424,7 +424,7 @@ Ext.onReady(function(){
         p.canCel.setHandler(function(b, e){
             //var SegmentNumber =listView.getSelectedIds();listView.getSelectionModel().getSelections()
             if (p.getSelectionModel().getSelections().length == 0) {
-                Ext.Msg.alert('提示','请选择用户！');
+                Ext.Msg.alert('提示','请选择要撤销的条目！');
                 return;
             }
             var SegmentNumber = p.getSelectionModel().getSelections()[0].data.CustomerNumber;
@@ -503,7 +503,7 @@ Ext.onReady(function(){
             });
             var  idString = ids.join(",");
              if (ids.length == 0) {
-                 Ext.Msg.alert('提示','请选择抄表段编号！');
+                 Ext.Msg.alert('提示','请选择要撤销的条目！');
                  return;
              }
             Ext.Ajax.request({

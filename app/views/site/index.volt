@@ -166,7 +166,7 @@ Ext.onReady(function(){
             }),
             tipRenderer : function(chart, record, index, series){
                 if(series.yField == 'value'){
-                    return  "综合指标为" +Ext.util.Format.number(record.data.value, '0,0');
+                    return  "欠费金额 " +Ext.util.Format.number(record.data.value, '0,0');
                 }else if(series.yField == 'views'){
                     return  "应完成的指标为" +Ext.util.Format.number(record.data.views, '0,0');
                 } else {

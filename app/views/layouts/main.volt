@@ -48,6 +48,7 @@ echo "var show_cuifei_btn=$r;";
 <script>
     Ext.onReady(function () {
         messageaAlert = function () {
+            store.reload({});
             messageWin.show();
         }
         passWinAlert = function () {
@@ -63,7 +64,6 @@ echo "var show_cuifei_btn=$r;";
                     start: 0,
                     limit: 50
                 },
-                autoLoad: true,
                 fields: ['Content', 'Sender', 'SendTime']
             });
 

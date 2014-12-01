@@ -20,18 +20,16 @@ class ReportNewHelper extends HelperBase
         );
 
 
-        foreach ($month_arr as  $month) {
+        foreach ($month_arr as $month) {
             $key = $month;
-            $clear = self::getSegUserMonthCharge($seguser, $month);
             $qianfei = self::getSegUserQianfei($seguser, $month);
-
 
             $b = parent::getModelManager()->createBuilder()->columns(array("SUM(Money) as Money", "SUM(House) as House"))
                 ->from("Usermoney")
                 ->andWhere("Month=:key:", array("key" => $key))
                 ->inWhere("UserName", $seguser)
                 ->getQuery();
-            $results =  $b->execute();
+            $results = $b->execute();
             $udata = $results[0];
 
             $umoney = 0;
@@ -45,35 +43,34 @@ class ReportNewHelper extends HelperBase
                 "ArrearMoney" => $qianfei->Money, //欠费余额
                 "ArrearHouse" => $qianfei->Count, //欠费户数
                 "uMoney" => $umoney, //应收电费
-                "uHouse" => $umoney, //应收户数
+                "uHouse" => $uhouse, //应收户数
                 "MoneyRate" => 0,
                 "HouseRate" => 0
             );
 
-            if ($clear && $umoney) {
-                $row["MoneyRate"] = number_format(null == $umoney ? 100 : 100 * ( $clear->Money) / $umoney, 2);
-                $row["HouseRate"] = number_format(null == $umoney ? 100 : 100 * ( $clear->Count) / $uhouse, 2);
+            //欠费回收率公式：  （应收-欠费金额）/ 应收
+            if ($umoney) {
+                $row["MoneyRate"] = number_format(null == $umoney ? 100 : 100 * ($umoney - $qianfei->Money) / $umoney, 2);
+                $row["HouseRate"] = number_format(null == $umoney ? 100 : 100 * ($uhouse - $qianfei->Count) / $uhouse, 2);
             }
 
-            $data["AllData"]["ClearMoney"] += $clear ? $clear->Money: 0;
-            $data["AllData"]["ClearCount"] += $clear ? $clear->Count: 0;
-            $data["AllData"]["ArrearMoney"] += $row["ArrearMoney"];
+            $data["AllData"]["ArrearMoney"] += $qianfei->Money;
             $data["AllData"]["AllMoney"] += $umoney;
-            $data["AllData"]["ArrearCount"] += $row["ArrearHouse"];
+            $data["AllData"]["ArrearCount"] +=$qianfei->Count;
             $data["AllData"]["AllCount"] += $uhouse;
 
             $data["MonthDatas"][$key] = $row;
         }
 
         if ($data["AllData"]["AllMoney"] > 0) {
-            $data["AllData"]["MoneyRate"] = $data["AllData"]["ClearMoney"] * 100 / $data["AllData"]["AllMoney"];
+            $data["AllData"]["MoneyRate"] = ($data["AllData"]["AllMoney"] - $data["AllData"]["ArrearMoney"]) * 100 / $data["AllData"]["AllMoney"];
             $data["AllData"]["MoneyRate"] = number_format($data["AllData"]["MoneyRate"], 2);
         } else {
             $data["AllData"]["MoneyRate"] = 0;
         }
 
         if ($data["AllData"]["AllCount"] > 0) {
-            $data["AllData"]["CountRate"] = $data["AllData"]["ClearCount"] * 100 / $data["AllData"]["AllCount"];
+            $data["AllData"]["CountRate"] = ($data["AllData"]["AllCount"]  -  $data["AllData"]["ArrearCount"]) * 100 / $data["AllData"]["AllCount"];
             $data["AllData"]["CountRate"] = number_format($data["AllData"]["CountRate"], 2);
         } else {
             $data["AllData"]["CountRate"] = 0;
@@ -92,12 +89,12 @@ class ReportNewHelper extends HelperBase
         $start = $p->get("FromData");
         $end = $p->get("ToData");
 
-        if ($id == "-1") {
-            $teams = Team::find("Type=1");
+//        if ($id == "-1") {
+        $teams = Team::find("Type=1");
 
-        } else {
-            $teams = Team::find($id);
-        }
+//        } else {
+//            $teams = Team::find($id);
+//        }
 
         $month_arr = self::getMonths($start, $end); //显示的月份
 

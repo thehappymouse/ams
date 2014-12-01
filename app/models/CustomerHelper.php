@@ -28,8 +28,10 @@ class CustomerHelper extends HelperBase
         $last = "";
         //$moneyQuery = "SELECT SUM(Money) AS Money, COUNT(ID) AS ArrearCount, SUM(PressCount) FROM Arrears WHERE CustomerNumber = '0268004260' AND IsClean = 0";
         $arrears = $customer->Arrears;
+        $is_yushou = false;
         foreach ($arrears as $e) {
             if ($e->IsClean != 1) {
+                if($e->IsClean == 2) $is_yushou = true;
                 $money += (int)$e->Money;
                 $count++;
                 $presscount += $e->PressCount; //已结清，不计算期催费次数，欠费笔数
@@ -53,6 +55,11 @@ class CustomerHelper extends HelperBase
         if ($count == 0) {
             $customer->IsClean = 1;
         }
+
+        if($is_yushou){
+            $customer->IsClean = 2;
+        }
+
         $customer->Money = $money;
         $customer->ArrearsCount = $count;
         $customer->PressCount = $presscount;

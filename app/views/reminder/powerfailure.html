@@ -453,7 +453,7 @@ Ext.onReady(function(){
             text:'停电',
             handler:function(){
                 if (listView.getSelectionModel().getSelections().length == 0) {
-                    Ext.Msg.alert('提示','请选择收费年月!');
+                    Ext.Msg.alert('提示','请选择欠费用户!');
                     return;
                 }
                 var ids = [];

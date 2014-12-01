@@ -78,6 +78,7 @@ class  ReportsearchController extends ControllerBase
 
             $data = array("Name" => $user["Name"], "sort" => $index  + 1);
             foreach ($user["MonthDatas"] as $key => $ym) {
+
                 $data["YearMonth"] = $key;
                 $data["Action"] = "欠费户数";
                 $data["Value"] = $ym["ArrearHouse"];
@@ -94,13 +95,13 @@ class  ReportsearchController extends ControllerBase
 
             $data["Action"] = "欠费户数";
             $data["YearMonth"] = "汇总";
-            $data["Value"] = $user["AllData"]["ArrearMoney"];
+            $data["Value"] = $user["AllData"]["ArrearCount"];
             $hrows[] = $data;
 
 
             $data["Action"] = "应收户数";
             $data["YearMonth"] = "汇总";
-            $data["Value"] = $user["AllData"]["ArrearCount"];
+            $data["Value"] = $user["AllData"]["AllCount"];
             $hrows[] = $data;
 
             $data["Action"] = "回收率(%)";
