@@ -249,7 +249,10 @@ class ExportController extends ControllerBase
      */
     public function AdvanceAction()
     {
+
+
         $data = CustomerHelper::Advances($this->request->get());
+
         $head = array(
             "CustomerNumber" => "用户编号",
             "CustomerName" => "用户名称",
@@ -261,15 +264,17 @@ class ExportController extends ControllerBase
 
         $count = 0;
         $money = 0;
-        foreach ($data as $d) {
+
+        foreach ($data[1] as $d) {
             $count++;
             $money += (int)$d["Money"];
         }
         $floor = sprintf($floor, $count, $money);
 
-        try {
-            $filename = ExcelImportUtils::arrayToExcel("预收转逾期", $head, $data, $floor, true);
 
+
+        try {
+            $filename = ExcelImportUtils::arrayToExcel("预收转逾期", $head, $data[1], $floor, true);
             $this->ajax->flushOk("/ams/public/" . $filename);
         } catch (Exception $e) {
             $this->ajax->flushError($e->getMessage());
@@ -649,9 +654,11 @@ class ExportController extends ControllerBase
 
         $customers = array();
         $address = array();
+        $asss = array();
         foreach ($data as $d) {
             $customers[] = $d["Number"];
             $address[$d["Number"]] = $d["Address"];
+            $asss[$d["Number"]] = $d["AssetNumber"];
         }
         $customers = "'" . implode("','", $customers) . "'";
         $cu = Arrears::find("CustomerNumber IN ($customers)");
@@ -660,10 +667,13 @@ class ExportController extends ControllerBase
             $row = $c->dump();
             $row["Name"] = $c->CustomerName;
             $row["Address"] = $address[$c->CustomerNumber];
+            $row["AssetNumber"] = $asss[$c->CustomerNumber];
             $data[] = $row;
         }
 
         $headArr = $this->headCount;
+
+        $headArr["AssetNumber"] = "电能表号";
         $headArr["IsClean"] = "结清标志";
 
         $floor = "共：%s条记录，欠费用户：%s 位，停电用户：%s位，特殊用户：%s位";
@@ -671,6 +681,23 @@ class ExportController extends ControllerBase
 
         $filename = ExcelImportUtils::arrayToExcel("欠费详情", $headArr, $data, $floor, true);
         $this->ajax->flushOk("/ams/public/" . $filename);
+    }
+
+    /**
+     * 催费模板，停电
+     */
+    public function powerfailureAction()
+    {
+        $params = $this->request->get();
+        $params["limit"] = 100000;
+        $params["start"] = 0;
+        list($total, $data, $conditions, $param) = CustomerHelper::ArrearsInfo($params);
+
+        $headArr = $this->headArrear;
+
+        $filename = ExcelImportUtils::arrayToExcel("停电", $headArr, $data, false, true);
+        $this->ajax->flushOk("/ams/public/" . $filename);
+
     }
 
     /**

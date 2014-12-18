@@ -173,7 +173,7 @@ class CustomerHelper extends HelperBase
         $p = new RequestParams($param);
 
         $team = $p->get("Team");
-
+        
         $seg = DataUtil::getTeamSegNameArray($team);
 
         $data = array();
@@ -270,7 +270,8 @@ class CustomerHelper extends HelperBase
                 $param["IsCut"] = $p->PowerCutLogo;
             }
 
-            if ($p->CutType){
+            if ($p->CutType != null && $p->CutType !=2) {
+
                 $conditions .= " AND CutStyle = :cutstyle:";
                 $param["cutstyle"] = $p->CutType;
             }
@@ -283,8 +284,13 @@ class CustomerHelper extends HelperBase
 
             //是否结清
             if ($p->IsClean != NULL && $p->IsClean != 2) {
-                $conditions .= " AND IsClean = :IsClean:";
-                $param["IsClean"] = $p->IsClean;
+                if(3 == $p->IsClane) {
+                    $conditions .= " AND (IsClean = 1 OR IsClean = 2)";
+                }
+                else {
+                    $conditions .= " AND IsClean = :IsClean:";
+                    $param["IsClean"] = $p->IsClean;
+                }
             }
 
 

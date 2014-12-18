@@ -79,7 +79,7 @@ Ext.onReady(function(){
                     hiddenName:'CutType',
                     fields:['Text','CutType'],
                     data   : [
-                        ['远程停电', '远程停电'],['表后开关上锁', '表后开关'],
+                        ['全部','2'],['远程停电', '远程停电'],['表后开关', '表后开关'],
                         ['表前开关', '表前开关'] ,['表前开关上锁', '表前开关上锁'],['拆表', '拆表']
                     ],
                     anchor:'95%'
@@ -99,8 +99,7 @@ Ext.onReady(function(){
                     valueField:'IsClean',
                     hiddenName:'IsClean',
                     fields:['Text','IsClean'],
-
-                    data   : [['是', '1'],['否', '0'],['全部', '2']],
+                    data   : [['已结清和预收', "3"],['是', '1'],['否', '0'],['全部', '2']],
                     anchor:'95%'
                 })
             ]

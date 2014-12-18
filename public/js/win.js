@@ -152,7 +152,8 @@ arrarsPanel = new Ext.FormPanel({
                         {
                             fieldLabel: '管理班组',
                             name: 'Team',
-                            disabled: true,
+                            readOnly: true,
+//                            disabled: true,
                             anchor: '95%'
                         },
                         {
@@ -196,7 +197,7 @@ arrarsPanel = new Ext.FormPanel({
                         {
                             fieldLabel: '抄表员',
                             name: 'SegUser',
-                            disabled: true,
+                            readOnly: true,
                             anchor: '95%'
                         },
                         new QuietCombox({
@@ -214,7 +215,7 @@ arrarsPanel = new Ext.FormPanel({
                         {
                             fieldLabel: '抄表段编号',
                             name: 'Segment',
-                            disabled: true,
+                            readOnly: true,
                             anchor: '95%'
                         },
                         {
@@ -270,6 +271,7 @@ arrarsPanel = new Ext.FormPanel({
                     items: [
                         {
                             fieldLabel: '用户名称',
+                            readOnly: true,
                             name: 'Name',
                             anchor: '95%'
                         },
@@ -399,12 +401,12 @@ cuifeiView.on('cellclick', function (grid, rowIndex, columnIndex, e) {
     }
 })
 lookImg = function (v) {
-    var tpl = "<img width='400'  src='/ams" + v + "' />";
+    var tpl = "<div></div><img width='600'  src='/ams" + v + "' /></div>";
 
     var imgWin = new Ext.Window({
         title: '催费照片',
         autoHeight: true,
-        width: 400,
+        width: 600,
         closeAction: 'hide',
         // plain: true,
         autoScroll: true,

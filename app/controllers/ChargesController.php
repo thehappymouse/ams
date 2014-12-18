@@ -264,9 +264,10 @@ class ChargesController extends ControllerBase
 
             $msg->ID = null;
             $teamamanager = User::findFirst("Role=2 AND TeamID = " . $manager->TeamID);
-            $msg->ToUserID = $teamamanager->ID;
-
-            $msg->save();
+            if($teamamanager) {
+                $msg->ToUserID = $teamamanager->ID;
+                $msg->save();
+            }
         } catch (Exception $e) {
             $log = new SystemLog();
             $log->Action = "收费后向管理员发信";

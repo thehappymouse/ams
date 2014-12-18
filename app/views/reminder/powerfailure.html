@@ -2,6 +2,10 @@
 var startdate = <?php echo $startdate; ?>;
 Ext.onReady(function(){
     _pageSize = 50;
+    var msgTip = new Ext.LoadMask(Ext.getBody(),{
+        msg:'Excel正在生成中',
+        removeMask : true
+    });
     /*三个动态框*/
     var teamCombox = new SettCombbox({
         url:'/ams/Info/TeamList?ID=1&Type=1&All=1',
@@ -190,7 +194,7 @@ Ext.onReady(function(){
                         }),{
                             name: 'ReminderFeeValue',
                             xtype: 'textfield',
-                            value: 2,
+                            value: 1,
                             width:132
                         }],
                     anchor:'95%'
@@ -402,7 +406,32 @@ Ext.onReady(function(){
                     id: 'bbar',
                     displayMsg: "显示{0}条到{1}条记录，总共{2}条记录",
                     emptyMsg: "没有数据记录",
-                    displayInfo: true
+                    displayInfo: true,
+                    items:[
+                        '-', {
+                            text: 'excel',
+                            iconCls: 'excel',
+                            handler: function(btn, pressed){
+                                if (listView.getStore().data.length == 0) {
+                                    Ext.MessageBox.alert('提示','请先查询数据');
+                                    return;
+                                }
+                                msgTip.show();
+                                infoSearch.getForm().submit({
+                                    url:'/ams/export/powerfailure',
+                                    method:'GET',
+                                    success:function(v,action){
+                                        var re = Ext.decode(action.response.responseText);
+                                        msgTip.hide();
+                                        Ext.MessageBox.alert('提示',"<a target='_blank' href='"+re.msg+"'>下载</a>");
+                                    },
+                                    failure:function(v,action) {
+                                        msgTip.hide();
+                                        Ext.MessageBox.alert('提示','创建失败');
+                                    }
+                                })
+                            }
+                        }]
                 })
             });
     listView.on('cellclick', function (grid, rowIndex, columnIndex, e) {

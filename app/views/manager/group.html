@@ -9,9 +9,20 @@ Ext.onReady(function(){
                   Ext.Ajax.request({
                       url:'/ams/manager/GroupDel',
                       params:{ID:value},
-                      success:function(){
-                          listView.store.removeAll();
-                          listView.store.reload();
+                      success:function(v){
+                          try{
+                              var r = Ext.util.JSON.decode(v.responseText);
+                              if(r.success){
+                                  listView.store.removeAll();
+                                  listView.store.reload();
+                              }
+                              else {
+                                  Ext.MessageBox.alert('提示', r.msg);
+                              }
+                          }
+                          catch (e){
+
+                          }
                       }
                   })
               }
@@ -25,7 +36,7 @@ Ext.onReady(function(){
                 totalProperty: 'total',
                 baseParams: {
                     start: 0,
-                    limit: 5
+                    limit: 20
                 },
                 fields: ['ID','Name','TypeName','Type']
             });
@@ -64,7 +75,7 @@ Ext.onReady(function(){
                         }
                     }],
                 bbar: new Ext.PagingToolbar({
-                    pageSize: 5,
+                    pageSize: 20,
                     store: store,
                     displayMsg: "显示{0}条到{1}条记录，总共{2}条记录",
                     emptyMsg: "没有数据记录",

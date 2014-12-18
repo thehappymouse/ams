@@ -54,20 +54,37 @@ class ExcelImportUtils
         $arrears = Arrears::findByNumber($data["Number"]);
         $customer = Customer::findByNumber($data["Number"]);
 
-        if(!$customer) return;
+        if (!$customer) return;
 
         $b = $data["Balance"];
 
+        //优先收已经字段表明已经预收的，因为可能已经上报
         foreach ($arrears as $a) {
-            if ($a->IsClean == 1) continue;
-
-            if ($a->Money <= $b) {
-                $customer->IsClean = 2;
-                $a->IsClean = 2;
-                $b = $b - $a->Money;
+            if (2 == $a->IsClean) {
+                if ($a->Money <= $b) {
+                    $customer->IsClean = 2;
+                    $a->IsClean = 2;
+                    $b = $b - $a->Money;
+                } else {
+                    $a->IsClean = 0;
+                }
                 $a->save();
             }
         }
+
+        //之后收字段表明已经欠费的， 因为可能预收款还够一条欠费
+        foreach ($arrears as $a) {
+            if (0 == $a->IsClean) {
+                $customer->IsClean = 0; //让客户的状态先初始化为已经欠费
+                if ($a->Money <= $b) {
+                    $customer->IsClean = 2;
+                    $a->IsClean = 2;
+                    $b = $b - $a->Money;
+                }
+                $a->save();
+            }
+        }
+
         $customer->save();
     }
 
@@ -76,7 +93,7 @@ class ExcelImportUtils
      * 2014-11-02 如果抄表段已存在，但抄表员名称不同：新建记录，记录抄表员和抄表段的关系。旧关系不动
      * @param array $row
      */
-    public  static function saveSegment(array $row)
+    public static function saveSegment(array $row)
     {
         $s = Segment::findFirst("Number = '$row[Segment]'");
 
@@ -239,7 +256,7 @@ class ExcelImportUtils
             foreach ($headArr as $key2 => $v) { //表头中含有对应数据索引
                 $j = chr($span);
                 //按照B2,C2,D2的顺序逐个写入单元格数据
-                
+
                 $cell = $objActSheet->getCell($j . $row);
                 $cell->setValueExplicit($rows[$key2], PHPExcel_Cell_DataType::TYPE_STRING);
 

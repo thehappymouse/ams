@@ -44,7 +44,7 @@ Ext.onReady(function () {
                                     callback:function(v){
                                         if (v.length == 0) {
                                             listView.store.removeAll();
-                                            Ext.MessageBox.alert("提示","没有欠费数据！");
+                                            //Ext.MessageBox.alert("提示","没有欠费数据！");
                                         }
                                     },
                                     add: false
@@ -55,7 +55,7 @@ Ext.onReady(function () {
                                     callback:function(v){
                                         if (v.length == 0) {
                                             ArrarsView.store.removeAll();
-                                            Ext.MessageBox.alert("提示","没有历史欠费数据！");
+                                            //Ext.MessageBox.alert("提示","没有历史欠费数据！");
                                         }
                                     },
                                     add: false
@@ -295,12 +295,14 @@ Ext.onReady(function () {
             });
     listView.getStore().on("load",function(p){
         var total = 0;
+        var moneys = 0;
         Ext.each(p.data.items, function(it){
             if (it.data.IsClean == 0) {
                 total++;
+                moneys += parseInt(it.data.Money);
             }
         })
-        var tpl  = '共计：欠费'+total+'笔，'+arrearsMoney+'元';
+        var tpl  = '共计：欠费'+total+'笔，'+moneys+'元';
         Ext.getCmp('htmlID').setText(tpl);
     })
     listView.on('cellclick', function (grid, rowIndex, columnIndex, e) {
@@ -392,21 +394,24 @@ Ext.onReady(function () {
                         sortable: true,
                         align:"center",
                         dataIndex: 'ChargeDate'
-                    }],
+                    }]
+                ,
                 bbar:[{
                     xtype:"label",
-                    id:'htmlID'
+                    id:'htmlID2'
                 }]
             });
     ArrarsView.getStore().on("load",function(p){
         var total = 0;
         var moneys=0;
         Ext.each(p.data.items, function(it){
-            total++;
-            moneys += parseInt(it.data.Money);
+
+                total++;
+                moneys += parseInt(it.data.Money);
+            //}
         })
         var tpl  = '共计：欠费'+total+'笔，'+moneys+'元';
-        Ext.getCmp('htmlID').setText(tpl);
+        Ext.getCmp('htmlID2').setText(tpl);
     })
     ArrarsView.on('cellclick', function (grid, rowIndex, columnIndex, e) {
         var record = grid.getStore().getAt(rowIndex);

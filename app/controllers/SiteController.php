@@ -219,8 +219,8 @@ class SiteController extends ControllerBase
 
 
             if ($udata["Money"]) {
-                $data["Rate"] = number_format((100 * $data["Money"] / $udata["Money"]), 2, ".", "") . "%";
-                $data["CountRate"] = number_format((100 * $data["CustomerCount"] / $udata["Count"]), 2, ".", "") . "%";
+                $data["Rate"] = number_format((100 * ($udata["Money"] -$data["Money"]) / $udata["Money"]), 2, ".", "") . "%";
+                $data["CountRate"] = number_format((100 * ($udata["Count"]-$data["CustomerCount"]) / $udata["Count"]), 2, ".", "") . "%";
             }
 
             $builder = $this->getBuilder("Arrears", $seg);
@@ -230,7 +230,6 @@ class SiteController extends ControllerBase
             $data["Money"] = $result->Money;
             $data["CustomerCount"] = $result->CustomerCount;
             $data["ArrearCount"] = $result->ArrearCount;
-
 
         }
         return $data;
