@@ -1,3 +1,4 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html>
 <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
 <TITLE>欠费信息管理系统</TITLE>

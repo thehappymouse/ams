@@ -579,6 +579,7 @@ submit1Form = new Ext.FormPanel({
                                 freeView.store.reload();
                                 cuifeiView.store.reload();
                                 tingdianView.store.reload();
+                                submit1Form.getForm().reset();
                                 formWin.hide();
                             },
                             failure: function (v, action) {
@@ -678,6 +679,7 @@ submit2Form = new Ext.FormPanel({
                                 freeView.store.reload();
                                 cuifeiView.store.reload();
                                 tingdianView.store.reload();
+                                submit2Form.getForm().reset();
                                 formWin.hide();
 
                                 var store = Ext.StoreMgr.get("cuifeijilvStore");

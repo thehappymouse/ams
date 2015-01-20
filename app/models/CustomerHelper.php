@@ -292,8 +292,6 @@ class CustomerHelper extends HelperBase
                     $param["IsClean"] = $p->IsClean;
                 }
             }
-
-
             //欠费金额
             if ($p->ArrearsValue && $p->ArrearsValue > 0) {
 
@@ -341,7 +339,6 @@ class CustomerHelper extends HelperBase
                 $param["IsRent"] = $p->IsRent;
             }
         }
-
         $conditions_mini = $conditions;
         $conditions .= " limit $p->start, $p->limit";
 
@@ -354,6 +351,7 @@ class CustomerHelper extends HelperBase
         }
 
         $total = Customer::count(array($conditions_mini, "bind" => $param));
+
         return array($total, $data, $conditions_mini, $param);
     }
 } 

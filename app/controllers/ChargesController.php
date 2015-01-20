@@ -206,6 +206,10 @@ class ChargesController extends ControllerBase
         $errorCount = 0;
         foreach ($ars as $a) {
 
+            if(Charge::findFirst("Year=" . $a->YearMonth . " AND CustomerNumber=" . $customer)){
+                $this->ajax->flushError($customer . "在" . $a->YearMonth . "已完成收费，请重新查询");
+            }
+
             $c = new Charge();
             $c->Money = $a->Money;
             $c->YearMonth = $a->YearMonth;

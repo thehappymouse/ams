@@ -89,7 +89,8 @@ Ext.onReady(function(){
                         params: data,
                         callback:function(v,action){
                             if (v.length == 0) {
-                                groupPanel.store.removeAll();
+                                console.log(v)
+                                averagePanel.store.removeAll();
                                 Ext.MessageBox.alert("提示","电费回收率没有数据！");
                             }
                         }
@@ -99,7 +100,7 @@ Ext.onReady(function(){
                         params:data,
                         callback:function(v,action){
                             if (v.length == 0) {
-                                groupPanel.store.removeAll();
+                                hushuoPanel.store.removeAll();
                                 Ext.MessageBox.alert("提示","户数回收率没有数据！");
                             }
                         }
@@ -109,7 +110,7 @@ Ext.onReady(function(){
                         params:data,
                         callback:function(v,action){
                             if (v.length == 0) {
-                                groupPanel.store.removeAll();
+                                store.removeAll();
                                 Ext.MessageBox.alert("提示","欠费金额没有数据！");
                             }
                         }
@@ -119,6 +120,7 @@ Ext.onReady(function(){
                         params:data,
                         callback:function(v,action){
                             if (v.length == 0) {
+
                                 groupPanel.store.removeAll();
                                 Ext.MessageBox.alert("提示","班组没有数据！");
                             }
@@ -128,7 +130,7 @@ Ext.onReady(function(){
                     groupHuPanel.getStore().load({params:data,
                         callback:function(v,action){
                             if (v.length == 0) {
-                                groupPanel.store.removeAll();
+                                groupHuPanel.store.removeAll();
                                 Ext.MessageBox.alert("提示","班组没有数据！");
                             }
                         }
@@ -138,7 +140,7 @@ Ext.onReady(function(){
                         params:data,
                         callback:function(v,action){
                             if (v.length == 0) {
-                                groupPanel.store.removeAll();
+                                grouplinestore.store.removeAll();
                                 Ext.MessageBox.alert("提示","欠费金额没有数据！");
                             }
                         }
@@ -733,7 +735,26 @@ Ext.onReady(function(){
         style: 'margin-top:15px',
         items:[
             averagePanel,hushuoPanel,line
-        ]
+        ],
+        listeners:{
+            tabchange:function(tp,p){
+                if (p.iconCls != undefined) {
+                    return;
+                }
+
+                if ( p.getStore().lastOptions != undefined) {
+                    var type = 0;
+                    if (p.title == "个人-电费回收率排名") {
+                        type = 1;
+                    }
+                    Ext.apply(p.getStore().lastOptions.params, {
+                        'Type' :    type
+                    });
+                    p.getStore().reload();
+                }
+
+            }
+        }
     });
     var groupTab = new Ext.TabPanel({
         activeTab: 0,
@@ -742,7 +763,24 @@ Ext.onReady(function(){
         style: 'margin-top:15px',
         items:[
             groupPanel,groupHuPanel,groupline
-        ]
+        ],
+        listeners:{
+            tabchange:function(tp,p){
+                if (p.iconCls != undefined) {
+                    return;
+                }
+                if ( p.getStore().lastOptions != undefined) {
+                    var type = 0;
+                    if (p.title == "班组-电费回收率排名") {
+                        type = 1;
+                    }
+                    Ext.apply(p.getStore().lastOptions.params, {
+                        'Type' :    type
+                    });
+                    p.getStore().reload();
+                }
+            }
+        }
     })
 
     var allPanel = new Ext.Panel({

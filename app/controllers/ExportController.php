@@ -647,8 +647,10 @@ class ExportController extends ControllerBase
     {
         $params = $this->request->get();
 
+
         $params["start"] = 0;
         $params["limit"] = 100000; //不再需要分页
+
 
         list($total, $data, $countinfo) = CustomerHelper::Customers($params);
 
@@ -661,7 +663,7 @@ class ExportController extends ControllerBase
             $asss[$d["Number"]] = $d["AssetNumber"];
         }
         $customers = "'" . implode("','", $customers) . "'";
-        $cu = Arrears::find("CustomerNumber IN ($customers)");
+        $cu = Arrears::find("CustomerNumber IN ($customers) AND IsClean=0 ORDER BY CustomerNumber");
         $data = array();
         foreach ($cu as $c) {
             $row = $c->dump();
