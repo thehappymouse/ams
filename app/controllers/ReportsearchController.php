@@ -224,6 +224,7 @@ class  ReportsearchController extends ControllerBase
     {
         list($total, $users) = ReportNewHelper::Press($this->request->get());
 
+
         echo json_encode(array("total" => $total, "rows" => $users));
         exit;
 

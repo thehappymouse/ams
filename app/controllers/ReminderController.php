@@ -41,7 +41,7 @@ class ReminderController extends ControllerBase
     {
         $this->view->disable();
         $params = $this->request->get();
-
+        $params["IsClean"] = "0";
 
         list($total, $data, $conditions, $param) = CustomerHelper::ArrearsInfo($params);
 

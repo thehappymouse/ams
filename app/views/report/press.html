@@ -54,7 +54,7 @@ Ext.onReady(function(){
                             plugins:'monthPickerPlugin',
                             name:'FromData',
                             width:82,
-                            value:new Date().format('Ym')-4,
+                            value:new Date().add(Date.MONTH, -4),
                             format: 'Ym'
                         }),{
                             xtype: 'displayfield',

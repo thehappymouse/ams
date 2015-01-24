@@ -196,7 +196,7 @@ class CustomerHelper extends HelperBase
 
         $builder = parent::getBuilder("Customer", $seg);
         $v = $builder->andWhere("IsClean=2")
-                ->columns("Count(*) as Count, SUM(Balance) as Balance")->getQuery()->execute()->getFirst();
+                ->columns("Count(*) as Count, SUM(Money) as Balance")->getQuery()->execute()->getFirst();
         $b = number_format($v->Balance, 2, ".", "");
         $totalInfo = array("Count" => $v->Count, "Money" => $b);
 
@@ -292,6 +292,7 @@ class CustomerHelper extends HelperBase
                     $param["IsClean"] = $p->IsClean;
                 }
             }
+//            var_dump($param); var_dump($conditions);exit;
             //欠费金额
             if ($p->ArrearsValue && $p->ArrearsValue > 0) {
 

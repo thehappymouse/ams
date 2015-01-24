@@ -59,7 +59,7 @@ Ext.onReady(function(){
                         new Ext.form.DateField({
                             plugins:'monthPickerPlugin',
                             name:'FromData',
-                            value:new Date().format('Ym')-4,
+                            value:new Date().add(Date.MONTH, -4),
                             width:82,
                             format: 'Ym'
                         }),{

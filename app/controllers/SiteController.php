@@ -57,10 +57,10 @@ class SiteController extends ControllerBase
         for ($i = 0; $i < 4; $i++) {
             $row = array();
             if (count($seg) == 0) {
-                $builder = $this->getBuilder("Arrears");
+                $builder = $this->getBuilder("Customer");
                 $builder->andWhere("1 > 2");
             } else {
-                $builder = $this->getBuilder("Arrears", $seg);
+                $builder = $this->getBuilder("Customer", $seg);
             }
             $builder->columns("COUNT(*) as Count");
 

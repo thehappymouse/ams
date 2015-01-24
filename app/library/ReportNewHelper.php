@@ -1,5 +1,18 @@
 <?php
 
+function cmp_allrate($a, $b)
+{
+    $a1 = $a["AllData"]["Rate"];
+    $b1 = $b["AllData"]["Rate"];
+    $a1 = str_replace("%", "", $a1);
+    $b1 = str_replace("%", "", $b1);
+    if ($a1 <= $b1) {
+        return 1;
+    } else {
+        return -1;
+    }
+}
+
 /**
  * Created by PhpStorm.
  * User: ww
@@ -277,15 +290,17 @@ class ReportNewHelper extends HelperBase
 
         $mUsers = User::find("TeamID IN($tids) AND Role = " . ROLE_MATER . " limit $pagestart,5");
 
-
+        $sortDatas = array();
         foreach ($mUsers as $mU) {
             $seg = DataUtil::getSegNameArray($mU->ID);
-
             list($uData, $a) = self::getFeeStatementsBySeg($seg, $mU->Name, $start, $end);
-            $data = array("Name" => $mU->Name, "sort" => $index++);
+            $sortDatas[] = $uData;
+        }
+        usort($sortDatas, "cmp_allrate");
 
-            $allmoney = 0;
-            $allcount = 0;
+        foreach($sortDatas as $uData){
+
+            $data = array("Name" => $uData["Name"], "sort" => $index++);
 
             if (isset($uData["Data"])) {
                 foreach ($uData["Data"] as $d) {
@@ -293,7 +308,6 @@ class ReportNewHelper extends HelperBase
                     $data["Value"] = $d["NoPressMoney"];
                     $data["YearMonth"] = $d["YearMonth"];
                     $userdata[] = $data;
-
 
                     $data["Action"] = "未催费户数";
                     $data["Value"] = $d["NoPressCount"];
@@ -304,7 +318,6 @@ class ReportNewHelper extends HelperBase
                     $userdata[] = $data;
                 }
 
-
                 //添加汇总信息
                 $data["YearMonth"] = "汇总";
 
@@ -312,34 +325,16 @@ class ReportNewHelper extends HelperBase
                 $data["Value"] = $uData["AllData"]["NoPressMoney"];
                 $userdata[] = $data;
 
-
                 $data["Action"] = "未催费户数";
                 $data["Value"] = $uData["AllData"]["NoPressCount"];
                 $userdata[] = $data;
 
-
                 $data["Action"] = "催费完成率";
                 $data["Value"] = $uData["AllData"]["Rate"];
+
                 $userdata[] = $data;
-
             }
-//            else {
-//                $data["Action"] = "未催费金额";
-//                $data["Value"] = "";
-//                $data["YearMonth"] = "";
-//                $userdata[] = $data;
-//
-//
-//                $data["Action"] = "未催费户数";
-//                $userdata[] = $data;
-//
-//                $data["Action"] = "催费完成率";
-//                $userdata[] = $data;
-//
-//            }
         }
-
-
         return array(User::count("TeamID IN($tids) AND Role = " . ROLE_MATER), $userdata);
     }
 

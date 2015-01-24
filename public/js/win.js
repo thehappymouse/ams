@@ -157,8 +157,8 @@ arrarsPanel = new Ext.FormPanel({
                             anchor: '95%'
                         },
                         {
-                            fieldLabel: '用电地址',
-                            name: 'Address',
+                            fieldLabel: '欠费原因',
+                            name: 'Cause',
                             anchor: '95%'
                         },
                         new QuietCombox({
@@ -292,15 +292,16 @@ arrarsPanel = new Ext.FormPanel({
                             name: 'ArrearsCount',
                             disabled: true,
                             anchor: '95%'
-                        },
-                        {
-                            fieldLabel: '欠费原因',
-                            name: 'Cause',
-                            anchor: '95%'
                         }
                     ]
                 }
             ]
+        },
+        {
+            fieldLabel: '用电地址',
+            name: 'Address',
+            xtype: 'textfield',
+            anchor: '95%'
         },
         {
             xtype: 'compositefield',
@@ -308,7 +309,7 @@ arrarsPanel = new Ext.FormPanel({
                 new Ext.form.TextArea({
                     name: 'Desc',
                     width: 380,
-                    height: 50,
+                    height: 30,
                     fieldLabel: '备注'
                 }), {
                     width: 90,
