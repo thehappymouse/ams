@@ -35,6 +35,8 @@ var chargesMoneyFields = [
     'ChargeDate',
     'Team',
     'ChargeCount',
+    'PayState',
+    'PayStyle',
     'ControlCount',
     'Phone'
 ];
@@ -46,6 +48,7 @@ var arrarsFreeFields = [
     'UserName',
     'UserName',
     'PressStyle',
+    'CustomerNumber',
     'Phone',
     'SegUser',
     'Photo',
@@ -53,6 +56,8 @@ var arrarsFreeFields = [
     'CutTime',
     'CutStyle',
     'ResetPhone',
+    'PayState',
+    'PayStyle',
     'LandlordPhone',
     'RenterPhone',
     'ResetTime',

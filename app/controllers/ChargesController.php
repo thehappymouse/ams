@@ -226,6 +226,7 @@ class ChargesController extends ControllerBase
             $c->Time = date("Y-m-d H:i:s");
             $c->ChargeTeam = $userTeam->ID;
             $c->ManageTeam = $manager->Team->ID;
+            $c->PayStyle = $this->request->get("PayStyle");
 
             $r = $c->save();
 
@@ -308,6 +309,7 @@ class ChargesController extends ControllerBase
      * 1，将收费记录删除
      * 2，将收费记录对应的欠费记录置为未结清
      * 将用户结清置为未结清
+     * 3, 已解款的，不能取消收费
      */
     public function CancelAction()
     {
@@ -321,9 +323,16 @@ class ChargesController extends ControllerBase
         $customer = $this->request->get("Number");
         $chargs = Charge::find("ID in ($ids)");
 
+        $msg = "";
         $name = "";
         $logd = "";
         foreach ($chargs as $c) {
+            if($c->PayState){
+                $errorCount++;
+                $msg = "已解款项目不能撤销";
+                continue;
+            }
+
             if ($c->delete()) { //删除收费
                 $a = Arrears::findFirst(array(
                         "CustomerNumber=:num:    AND  YearMonth=:YM:",
@@ -349,9 +358,7 @@ class ChargesController extends ControllerBase
         if ($errorCount == 0) {
             $this->ajax->flushOk();
         } else {
-            $this->ajax->flushError($errorCount);
+            $this->ajax->flushError($msg . ":" . $errorCount);
         }
     }
-
-
 }

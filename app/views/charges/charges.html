@@ -283,14 +283,12 @@ Ext.onReady(function () {
                 xtype: 'textfield',
                 id:'MoneyTotalo',
                 readOnly:true,
-                name:'Money',
-                width: 151
+                name:'Money'
             },{
                 fieldLabel:'房东电话',
                 xtype: 'textfield',
                 name:'LandlordPhone',
-                id:'LandlordPhone',
-                width: 151
+                id:'LandlordPhone'
             },new QuietCombox({
                 fieldLabel: '签订费控协议',
                 displayField:'Text',
@@ -299,7 +297,7 @@ Ext.onReady(function () {
                 id:'IsControl',
                 fields:['Text','IsControl'],
                 data   : [['是', '1'],['否', '0']],
-                width: 151
+                width: 120
             }),{
                 style:'margin-left:90px',
                 width:100,
@@ -345,18 +343,31 @@ Ext.onReady(function () {
                 hiddenName:'IsRent',
                 fields:['Text','IsRent'],
                 data   : [['是', '1'],['否', '0']],
-                width: 151
+                width: 120
             }),{
                 fieldLabel:'房客电话',
                 xtype: 'textfield',
                 name:'RenterPhone',
                 id:'RenterPhone',
-                width: 151
+                width: 120
             },{
                 xtype: 'hidden',
                 id:'moneyID',
                 name: 'ID'
             }]
+        }, {
+            columnWidth:.2,
+            layout: 'form',
+            items: [
+                new QuietCombox({
+                    fieldLabel: '结算方式',
+                    displayField:'Text',
+                    valueField:'Value',
+                    hiddenName:'PayStyle',
+                    fields:['Text','Value'],
+                    data   : [['现金', '1'],['POS', '2'], ['支票','3']],
+                    width: 100
+                })]
         }]
     })
 

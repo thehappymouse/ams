@@ -12,6 +12,16 @@ function cmp_allrate($a, $b)
         return -1;
     }
 }
+function cmp_ym($a, $b)
+{
+    $a1 = $a->YearMonth;
+    $b1 = $b->YearMonth;
+    if ($a1 >= $b1) {
+        return 1;
+    } else {
+        return -1;
+    }
+}
 
 /**
  * Created by PhpStorm.
@@ -132,9 +142,7 @@ class ReportNewHelper extends HelperBase
         $m2 = (int)substr($end, 4, 2);
 
         $year = $year2 - $year1;
-        if ($m2 > $m1) {
-            $month = $m2 - $m1;
-        }
+        $month = $m2 - $m1;
 
         $month = $year * 12 + $month;
 
@@ -204,6 +212,16 @@ class ReportNewHelper extends HelperBase
         return array($result);
     }
 
+    private  static function  hasYmData($arr, $v){
+        $f = false;
+        foreach($arr as $d){
+            if($d->YearMonth == $v){
+                $f = true;break;
+            }
+        }
+        return $f;
+    }
+
     public static function getFeeStatementsBySeg($seg, $name, $start = null, $end = null)
     {
         $team = array();
@@ -220,6 +238,28 @@ class ReportNewHelper extends HelperBase
         $results = $builder->columns(array("SUM(Money) as Money", "count(Money) as ArrearCount", "YearMonth"))
             ->groupBy("YearMonth")
             ->getQuery()->execute();
+        $aa = array();
+        foreach($results as $r){
+            $aa[] = $r;
+
+        }
+        $results = $aa;
+
+        $month_arr = self::getMonths($start, $end); //显示的月份
+        $empty_arr = array();
+        if(count($results) != count($month_arr)) {  //没有数据的月份用0补上
+            foreach($month_arr as $ym){
+                if(!self::hasYmData($results, $ym)){
+                    $o = json_decode("{}");
+                    $o->Money = 0;
+                    $o->ArrearCount = 0;
+                    $o->YearMonth = $ym;
+                    $results[] = $o;
+                }
+            }
+        }
+
+        usort($results, "cmp_ym");
 
         foreach ($results as $rs) {
             $data = array("YearMonth" => $rs->YearMonth, "Rate" => 0, "NoPressCount" => $rs->ArrearCount, "NoPressMoney" => $rs->Money);
@@ -289,6 +329,8 @@ class ReportNewHelper extends HelperBase
         $tids = implode(",", $tids);
 
         $mUsers = User::find("TeamID IN($tids) AND Role = " . ROLE_MATER . " limit $pagestart,5");
+
+
 
         $sortDatas = array();
         foreach ($mUsers as $mU) {
