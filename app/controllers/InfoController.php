@@ -57,7 +57,6 @@ class InfoController extends ControllerBase
     {
         $tid = $this->request->get("ID");
 
-
         if ($this->role == ROLE_MATER) { //抄表员 只能查看自己
             $users = User::find("ID=" . $this->loginUser["ID"]);
         } else if ($this->role == ROLE_MATER_LEAD) {    //班长, 添加全部字段

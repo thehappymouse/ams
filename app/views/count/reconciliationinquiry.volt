@@ -59,7 +59,7 @@ Ext.onReady(function(){
         url:'/ams/Charges/SearchFee',
         layout:'column',
         items: [{
-            columnWidth:.35,
+            columnWidth:.40,
             layout: 'form',
             defaults:{
                 xtype: 'textfield'
@@ -87,7 +87,7 @@ Ext.onReady(function(){
                             format: 'Y-m-d H:i',
                             name:'ToData',
                             value:new Date().format('Y-m-d H:i:s'),
-                            width: 140
+                            width: 150
                         }]
                 }]
         },{
@@ -181,6 +181,8 @@ Ext.onReady(function(){
                         header: '收费时间',
                         sortable: true,
                         align:"center",
+
+                        width:110,
                         dataIndex: 'Time'
                     }, {
                         header: '用户编号',
@@ -198,11 +200,13 @@ Ext.onReady(function(){
                     }, {
                         header: '电费年月',
                         sortable: true,
+                        width:60,
                         align:"center",
                         dataIndex: 'YearMonth'
                     }, {
-                        header: '电费金额',
+                        header: '金额',
                         sortable: true,
+                        width:50,
                         align:"center",
                         dataIndex: 'Money'
                     },{
@@ -210,6 +214,18 @@ Ext.onReady(function(){
                         sortable: true,
                         align:"center",
                         dataIndex: 'UserName'
+                    },
+                    {
+                        header: '解款状态',
+                        sortable: true,
+                        align: "center",
+                        width: 70,
+                        dataIndex: 'PayState',
+                        renderer: function (v) {
+                            if (v == 1) return '<span style="color:green;">已解款</span>';
+                            else if(v == 2) return '<span style="color:red;">已二次解款</span>'
+                            else return "-";
+                        }
                     },{
                         header: '交费登记电话',
                         sortable: true,
@@ -224,6 +240,7 @@ Ext.onReady(function(){
                         header: '签订费控',
                         sortable: true,
                         align:"center",
+                        width:50,
                         dataIndex: 'IsControl',
                         renderer:function(v) {
                             if (v == 1) {
@@ -307,6 +324,11 @@ Ext.onReady(function(){
                         align:"center",
                         dataIndex: 'Money'
                     }, {
+                        header: '解款金额',
+                        sortable: true,
+                        align:"center",
+                        dataIndex: 'PayIn'
+                    }, {
                         header: '签订费控数',
                         sortable: true,
                         align:"center",
@@ -324,7 +346,7 @@ Ext.onReady(function(){
                 id: 'tvliststore',
                 url: '/ams/CountSearch/ChargeCount',
                 root: 'data',
-                fields: ['UserName', 'ControlCount', 'Count', 'Money']
+                fields: ['UserName', 'ControlCount', 'Count', 'Money', 'PayIn']
             });
 
     var   sfView = new Ext.grid.GridPanel(
@@ -354,6 +376,11 @@ Ext.onReady(function(){
                         sortable: true,
                         align:"center",
                         dataIndex: 'Money'
+                    }, {
+                        header: '解款金额',
+                        sortable: true,
+                        align:"center",
+                        dataIndex: 'PayIn'
                     }, {
                         header: '签订费控数',
                         sortable: true,

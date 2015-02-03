@@ -424,6 +424,7 @@ class ExportController extends ControllerBase
             "YearMonth" => "电费年月",
             "Money" => "电费金额",
             "UserName" => "收费员",
+            "PayState" => "解款状态",
             "LandlordPhone" => "交费登记电话",
             "IsRent" => "登记租房户信息",
             "IsControl" => "签订费控");
@@ -431,6 +432,9 @@ class ExportController extends ControllerBase
         foreach ($data as $key => $d) {
             $d["IsControl"] = $d["IsControl"] == 1 ? "是" : "否";
             $d["IsRent"] = $d["IsRent"] == 1 ? "是" : "否";
+            if(1 == $d["PayState"]) $d["PayState"] = "已解款";
+            else if(2 == $d["PayState"]) $d["PayState"] = "已二次解款";
+            else $d["PayState"] = "-";
 
             $data[$key] = $d;
         }

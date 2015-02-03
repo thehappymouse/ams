@@ -285,6 +285,7 @@ class CountHelper extends HelperBase
                                                             count(if(LandlordPhone <>\"\" or RenterPhone <> \"\" ,true,null )) as PhoneCount,
                                                             SUM(Money) AS Money,
                                                             SUM(IsControl) AS ControlCount,
+                                                            SUM(IF(PayState=1, Money,0)) as PayIn,
                                                             COUNT(ManageTeam) AS ChargeCount
                                                             FROM Charge WHERE UserID IN( $uid ) AND (Time BETWEEN '$time' and '$end')
                                                             GROUP BY ManageTeam , Year ORDER BY ManageTeam, Year");

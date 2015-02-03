@@ -34,6 +34,7 @@ class CountsearchController extends ControllerBase
 
     /**
      * 对账查询 子表  显示 收费员的收费情况
+     * 增加解款金额
      */
     public function ChargeCountAction()
     {
@@ -58,7 +59,7 @@ class CountsearchController extends ControllerBase
         foreach($users as $user){
 
             $b = $this->getBuilder("Charge");
-            $c = $b->columns(array("UserID", "SUM(Money) AS Money", "count(ID) as Count", "Sum(IsControl) as ControlCount "))
+            $c = $b->columns(array("UserID", "SUM(Money) AS Money", "count(ID) as Count", "SUM(IF(PayState=1, Money,0)) as PayIn", "Sum(IsControl) as ControlCount "))
                 ->andWhere("UserID=$user->ID")
                 ->andWhere("Time BETWEEN :start: AND :end:")
                 ->getQuery()->execute(array("start" => $start, "end" => $end))->getFirst();
@@ -67,6 +68,7 @@ class CountsearchController extends ControllerBase
                 $row["UserName"] = $user->Name;
                 $row["Money"] = (int)$c->Money;
                 $row["Count"] = (int)$c->Count;
+                $row["PayIn"] = (int)$c->PayIn;
                 $row["ControlCount"] = (int)$c->ControlCount;
                 $data[] = $row;
             }

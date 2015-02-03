@@ -38,6 +38,7 @@ var chargesMoneyFields = [
     'PayState',
     'PayStyle',
     'ControlCount',
+    'PayIn',
     'Phone'
 ];
 

@@ -63,7 +63,6 @@ class Elements extends Phalcon\Mvc\User\Component
 //        $auth["Role"] = 7;;
         if ($auth) {
             $moels = $this->getMenuByRole($auth["Role"]);
-
             $headerMenu = $moels;
         } else {
             $headerMenu = array();

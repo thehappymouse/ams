@@ -99,11 +99,28 @@ class Charge extends \Phalcon\Mvc\Model
      */
     public $PayState;
 
+
+    /**
+     * @var integer
+     */
+    public $PayUserID;
+
+
+    /**
+     * @var string
+     */
+    public $PayUserName;
+
+
+    /**
+     * @var string
+     */
+    public $PayinTime;
+
     /**
      * @var integer
      */
     public $ManageTeam;
-
     /**
      * Initialize method for model.
      */
@@ -143,6 +160,9 @@ class Charge extends \Phalcon\Mvc\Model
             'LandlordPhone' => 'LandlordPhone',
             'PayStyle' => 'PayStyle',
             'PayState' => 'PayState',
+            'PayinTime' => 'PayinTime',
+            'PayUserID' => 'PayUserID',
+            'PayUserName' => 'PayUserName',
             'RenterPhone' => 'RenterPhone'
         );
     }
