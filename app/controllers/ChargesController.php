@@ -163,6 +163,7 @@ class ChargesController extends ControllerBase
      * 收费动作。
      * 收费记录与欠费记录应一一对应。 每个月都有记录
      * 重新计算客户的欠费金额和笔数
+     * 已收的账目，不能再收
      */
     public function CreateAction()
     {
