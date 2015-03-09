@@ -79,7 +79,8 @@ var reminderFields = [
     'CustomerName',
     'Address',
     'YearMonth', 'RenterPhone',
-    'Money', 'LandlordPhone',
+    {name:'Money', type:"float"},
+    'LandlordPhone',
     'IsClean', 'IsCut',
     'PressCount', 'CutCount'
 ];
@@ -113,6 +114,7 @@ var  summaryFields = [
     'ChargeCount',
     'Money',
     'Segment',
+    'SegUser',
     'CustomerNumber',
     'CustomerName',
     'Address',

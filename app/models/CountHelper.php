@@ -211,7 +211,7 @@ class CountHelper extends HelperBase
         $condition = " WHERE a.SegUser IN ($ss) AND (Time between :start: AND :end:)";
 
         $query = "SELECT  a.YearMonth, a.Money, a.UserName, a.Time, a.LandlordPhone, a.IsRent,
-                          c.ID, a.CustomerNumber, c.Segment, c.Name, c.Address
+                          c.ID, a.CustomerNumber, c.Segment, c.SegUser, c.Name, c.Address
                           FROM Charge as a inner  join Customer as c on a.CustomerNumber = c.Number";
         $query .= $condition;
 
@@ -269,6 +269,8 @@ class CountHelper extends HelperBase
 
         foreach ($cs as $c) {
             $customer = Customer::findByNumber($c->CustomerNumber);
+
+            $c->Money = sprintf("%.2f", (float)$c->Money);
             $row = $c->dump();
             $row["IsRent"] = $customer->IsRent;
             $row["IsControl"] = $customer->IsControl;
@@ -294,6 +296,7 @@ class CountHelper extends HelperBase
         foreach ($results as $r) {
             $r->Team = Team::findFirst($r->ManageTeam)->Name;
             $r->Phone = "";
+            $r->Money = sprintf("%.2f", (float)$r->Money);
             $total[] = (array)$r;
         }
         return array($data, $total);

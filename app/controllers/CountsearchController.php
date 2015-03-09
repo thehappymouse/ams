@@ -66,7 +66,7 @@ class CountsearchController extends ControllerBase
             if($c){
                 $row = array();
                 $row["UserName"] = $user->Name;
-                $row["Money"] = (int)$c->Money;
+                $row["Money"] = sprintf("%.2f", (float)$c->Money);
                 $row["Count"] = (int)$c->Count;
                 $row["PayIn"] = (int)$c->PayIn;
                 $row["ControlCount"] = (int)$c->ControlCount;

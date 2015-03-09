@@ -21,7 +21,7 @@ class CustomerHelper extends HelperBase
      */
     public static function SyncCustomerInfo($customer)
     {
-        $money = 0;
+        $money = 0.0;
         $count = 0;
         $presscount = 0;
         $first = "";
@@ -32,7 +32,7 @@ class CustomerHelper extends HelperBase
         foreach ($arrears as $e) {
             if ($e->IsClean != 1) {
                 if($e->IsClean == 2) $is_yushou = true;
-                $money += (int)$e->Money;
+                $money += (float)$e->Money;
                 $count++;
                 $presscount += $e->PressCount; //已结清，不计算期催费次数，欠费笔数
 

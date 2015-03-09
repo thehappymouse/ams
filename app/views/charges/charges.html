@@ -244,7 +244,7 @@ Ext.onReady(function () {
             var ids = [];
             Ext.each(listView.store.data.items, function (item) {
 
-                money += parseInt(item.data.Money);
+                money += parseFloat(item.data.Money);
                 ids.push(item.data.ID);
             });
             var idString = ids.join(",");
@@ -255,7 +255,7 @@ Ext.onReady(function () {
             var money = 0;
             var ids = [];
             Ext.each(this.getSelections(),function(item){
-                money += parseInt(item.data.Money);
+                money += parseFloat(item.data.Money);
                 ids.push(item.data.ID);
             })
             var idString = ids.join(",");
