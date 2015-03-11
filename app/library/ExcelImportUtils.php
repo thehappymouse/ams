@@ -44,19 +44,35 @@ class ExcelImportUtils
         }
     }
 
+    private static function rule($money) {
+        if ($money < 5) {
+            return 0;
+        } else if ($money >= 5 and $money < 10) {
+            return 1;
+        } else if ($money >= 10 and $money < 50) {
+            return 2;
+        } else {
+            return 5;
+        }
+    }
     /**
      * 对一个客户进行预收转逾期计算。
      * 如果所有欠费之和小于预存款，将欠费记录和客户状态修改为预收转逾期。否则，不做任何操作
+     * 2015-03-11
+     * 欠费金额在5元-10元，预存电费和欠费的差值在1元内，可以退费。
+     * 欠费金额在10-50元之间，预存电费和欠费的差在2元之内退费。
+     * 欠费金额在50元之上，预存电费和欠费的差在5元之内退费。
      * @param $data
      */
     public static function advancefee($data)
     {
         $arrears = Arrears::findByNumber($data["Number"]);
         $customer = Customer::findByNumber($data["Number"]);
-
+        
         if (!$customer) return;
 
         $b = $data["Balance"];
+        $b = $b + self::rule($b);
 
         //优先收已经字段表明已经预收的，因为可能已经上报
         foreach ($arrears as $a) {
