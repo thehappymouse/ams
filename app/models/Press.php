@@ -76,6 +76,12 @@ class Press extends \Phalcon\Mvc\Model
     public $YearMonth;
 
     /**
+     *
+     * @var string
+     */
+    public $Desc;
+
+    /**
      * @param null $parameters
      * @return Arrears
      */
@@ -115,6 +121,7 @@ class Press extends \Phalcon\Mvc\Model
             'SegUser' => 'SegUser',
             'Segment' => 'Segment',
             'YearMonth' => 'YearMonth',
+            'Desc' => 'Desc',
             'Money' => 'Money',
             'CustomerNumber' => 'CustomerNumber'
         );

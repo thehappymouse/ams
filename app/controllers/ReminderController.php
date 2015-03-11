@@ -252,6 +252,7 @@ class ReminderController extends ControllerBase
             $press->Phone = $pressPhone;
             $press->PhoneType = $this->request->get("PhoneType");
             $press->Photo = $pressPhoto;
+            $press->Desc= $this->request->get("Desc");
             $r = $press->save();
 
             $ll->Press($id, $r, $pressStyle);

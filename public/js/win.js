@@ -24,7 +24,7 @@ var arrarsFreeFields = [
     'CutTime', 'CutStyle', 'SegUser',
     'ResetPhone', 'ResetTime',
     'IsClean', 'IsCut',
-    'CutCount', 'Money',
+    'CutCount', 'Money','Desc',
     'YearMonth', 'Number',
     'PressCount'
 ];
@@ -391,6 +391,14 @@ cuifeiView = new Ext.grid.GridPanel({
                 }
 
             }
+        },
+        {
+            header: '催费详情',
+            sortable: true,
+            dataIndex: 'Desc',
+            renderer: function(v){
+                return '<span title="'+v+'" >'+v+'</span>';
+            }
         }
     ]
 });
@@ -561,6 +569,12 @@ submit1Form = new Ext.FormPanel({
             anchor: '65%'
         },
         {
+            fieldLabel: '催费详情',
+            xtype: 'textarea',
+            name: 'Desc',
+            anchor: '70%'
+        },
+        {
             xtype: 'compositefield',
             items: [
                 {xtype: 'hidden'},
@@ -656,6 +670,12 @@ submit2Form = new Ext.FormPanel({
             anchor: '65%'
         },
         {
+            fieldLabel: '催费详情',
+            xtype: 'textarea',
+            name: 'Desc',
+            anchor: '70%'
+        },
+        {
             xtype: 'hidden',
             id: 'submit2ID',
             name: 'ID'
@@ -719,7 +739,7 @@ freeView.getSelectionModel().on("selectionchange", function (sm) {
 submitTabPanel = new Ext.TabPanel({
     labelWidth: 85,
     activeTab: 0,
-    height: 120,
+    height: 190,
     plain: true,
     defaults: {autoScroll: true},
     items: [
@@ -741,7 +761,8 @@ submitPanel = new Ext.Panel({
 formWin = new Ext.Window({
     layout: 'fit',
     width: 400,
-    height: 200,
+    height: 258,
+    title: '录入催费信息',
     closeAction: 'hide',
     plain: true,
     items: [submitPanel],
