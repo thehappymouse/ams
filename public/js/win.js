@@ -156,11 +156,22 @@ arrarsPanel = new Ext.FormPanel({
 //                            disabled: true,
                             anchor: '95%'
                         },
-                        {
+                        new QuietCombox({
                             fieldLabel: '欠费原因',
-                            name: 'Cause',
+                            displayField: 'Text',
+                            valueField: 'Value',
+                            hiddenName: 'Cause',
+                            fields: ['Text', 'Value'],
+                            data: [
+                                ['无人居住', '无人居住'],
+                                ['出租', '出租'],
+                                ['出差', '出差'],
+                                ['银行余额不足', '银行余额不足'],
+                                ['工作繁忙', '工作繁忙'],
+                                ['恶意欠费', '恶意欠费']
+                            ],
                             anchor: '95%'
-                        },
+                        }),
                         new QuietCombox({
                             fieldLabel: '特殊客户',
                             displayField: 'Text',
