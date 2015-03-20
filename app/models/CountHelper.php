@@ -316,7 +316,8 @@ class CountHelper extends HelperBase
 
         $total = array();
 
-        $condation = " WHERE (Time BETWEEN '$time' and '$end') ";
+        $condation = " WHERE PayState=2  AND (PayinTime BETWEEN '$time' and '$end')";
+
         if($gid != -1){
             $condation .= "AND ChargeTeam = $gid";
         }
@@ -334,7 +335,7 @@ class CountHelper extends HelperBase
         foreach ($results as $r) {
             $r->Team = Team::findFirst($r->ManageTeam)->Name;
             $r->ChargeTeam = Team::findFirst($r->ChargeTeam)->Name;
-
+            $r->Money = Tool::FormatMoney($r->Money);
             $total[] = (array)$r;
         }
         return $total;
