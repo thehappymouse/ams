@@ -345,12 +345,12 @@ Ext.onReady(function () {
                 data   : [['是', '1'],['否', '0']],
                 width: 120
             }),{
-                fieldLabel:'房客电话',
-                xtype: 'textfield',
-                name:'RenterPhone',
-                id:'RenterPhone',
-                width: 120
-            },{
+                    fieldLabel:'房客电话',
+                    xtype: 'textfield',
+                    name:'RenterPhone',
+                    id:'RenterPhone',
+                    width: 120
+                },{
                 xtype: 'hidden',
                 id:'moneyID',
                 name: 'ID'
@@ -365,9 +365,35 @@ Ext.onReady(function () {
                     valueField:'Value',
                     hiddenName:'PayStyle',
                     fields:['Text','Value'],
-                    data   : [['现金', '1'],['POS', '2'], ['支票','3']],
-                    width: 100
-                })]
+                    data   : [['现金', '1'],['POS', '2'], ['支票','3'], ['对账单','4']],
+                    width: 100,
+                    listeners: {
+                        'select': function(field){
+                            var d = field.getValue() < 3;
+
+                            Ext.getCmp("Bank").setDisabled(d);
+                            Ext.getCmp("NoteNumber").setDisabled(d);
+
+                        }
+                    }
+                }),
+                {
+                    fieldLabel:'票据银行',
+                    xtype: 'textfield',
+                    disabled: true,
+                    name:'Bank',
+                    id: 'Bank',
+                    width: 120
+                },
+                {
+                    fieldLabel:'票据号码',
+                    xtype: 'textfield',
+                    name:'NoteNumber',
+                    disabled: true,
+                    id: 'NoteNumber',
+                    width: 120
+                }
+            ]
         }]
     })
 
