@@ -228,6 +228,8 @@ class ChargesController extends ControllerBase
             $c->ChargeTeam = $userTeam->ID;
             $c->ManageTeam = $manager->Team->ID;
             $c->PayStyle = $this->request->get("PayStyle");
+            $c->Bank = $this->request->get("Bank");
+            $c->NoteNumber = $this->request->get("NoteNumber");
 
             $r = $c->save();
 

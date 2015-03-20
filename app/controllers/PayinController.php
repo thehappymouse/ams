@@ -123,8 +123,14 @@ class PayinController extends ControllerBase
         }
 
         if(-1 != $state){
-            $condation .= "AND PayState=:state:";
-            $params["state"] = $state;
+            if(0 == $state){
+                $condation .= "AND (PayState=:state: OR PayState IS NULL)";
+                $params["state"] = $state;
+            }
+            else {
+                $condation .= "AND PayState=:state:";
+                $params["state"] = $state;
+            }
         }
 
         $out = array();
@@ -192,6 +198,7 @@ class PayinController extends ControllerBase
         foreach($charges as $c){
 
             $c->PayState = 2;
+            $c->PayinTime = $this->getDateTime();
             $r = $c->save();
             if(!$r){
                 $errorcount++;

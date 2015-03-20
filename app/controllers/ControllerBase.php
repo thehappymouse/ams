@@ -67,6 +67,8 @@ class ControllerBase extends Controller
         return date("Y-m-d", $time);
     }
 
+
+
     /**
      * 获取日期 2000-01-01
      */

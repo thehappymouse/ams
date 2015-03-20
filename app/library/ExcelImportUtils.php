@@ -68,7 +68,7 @@ class ExcelImportUtils
     {
         $arrears = Arrears::findByNumber($data["Number"]);
         $customer = Customer::findByNumber($data["Number"]);
-        
+
         if (!$customer) return;
 
         $b = $data["Balance"];

@@ -33,6 +33,15 @@ class HelperBase
         return \Phalcon\DI::getDefault()->get("modelsManager");
     }
 
+    /**
+     * 格式化显示金额
+     * @param $money
+     * @return string
+     */
+    public function formatMoney($money)
+    {
+        return sprintf("%.2f", (float)$money);
+    }
 
     /**
      * 将sql语句查询条件后，增加分页条件

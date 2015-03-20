@@ -111,6 +111,16 @@ class Charge extends \Phalcon\Mvc\Model
      */
     public $PayUserName;
 
+    /**
+     * @var string
+     */
+    public $NoteNumber;
+
+    /**
+     * @var string
+     */
+    public $Bank;
+
 
     /**
      * @var string
@@ -163,6 +173,8 @@ class Charge extends \Phalcon\Mvc\Model
             'PayinTime' => 'PayinTime',
             'PayUserID' => 'PayUserID',
             'PayUserName' => 'PayUserName',
+            'Bank' => 'Bank',
+            'NoteNumber' => 'NoteNumber',
             'RenterPhone' => 'RenterPhone'
         );
     }
