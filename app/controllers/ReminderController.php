@@ -231,9 +231,9 @@ class ReminderController extends ControllerBase
 
         $ll = new LogHelper($this->ajax->logData);
 
-        foreach ($ids as $id) {
+        //foreach ($ids as $id) {
             $press = new Press();
-            $press->Arrear = $id;
+            $press->Arrear = $ids[0];
             if (!$press->Arrear) {
                 $this->ajax->flushError("没有传入数据ID");
             }
@@ -255,7 +255,7 @@ class ReminderController extends ControllerBase
             $press->Desc= $this->request->get("Desc");
             $r = $press->save();
 
-            $ll->Press($id, $r, $pressStyle);
+            $ll->Press($ids[0], $r, $pressStyle);
 
             if ($r) {
                 $ar->PressCount = (int)$ar->PressCount + 1;
@@ -265,7 +265,7 @@ class ReminderController extends ControllerBase
             }
 
             CustomerHelper::SyncCustomerInfo($ar->Customer);
-        }
+      //  }
 
 
         $this->ajax->flushOk();
